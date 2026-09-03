@@ -1,6 +1,6 @@
 "use client";
 /**
- * The ball in "why it exists": a glossy sphere with a thin orbital ring, lit by
+ * The ball in "why it exists": a glossy sphere, lit by
  * an HDR room environment. Its colour is exactly the emotion's assigned colour
  * (lib/theme.ts); it eases to the next colour when tapped, squashes on the tap,
  * and drifts with the pointer.
@@ -30,7 +30,7 @@ export default function Sphere3D({ tapSignal }: { tapSignal: React.MutableRefObj
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     const camera = new THREE.PerspectiveCamera(30, el.clientWidth / el.clientHeight, 0.1, 30);
-    camera.position.set(0, 0.2, 7.4);
+    camera.position.set(0, 0.2, 6.6);
 
     let pal = currentPalette();
     const key = new THREE.DirectionalLight(new THREE.Color(pal.accent2).lerp(new THREE.Color(0xffffff), 0.6), 1.9); key.position.set(2.5, 3, 3); scene.add(key);
@@ -40,8 +40,6 @@ export default function Sphere3D({ tapSignal }: { tapSignal: React.MutableRefObj
     const root = new THREE.Group(); root.position.y = 0.2; scene.add(root);
     const mat = new THREE.MeshPhysicalMaterial({ color: pal.accent, metalness: 0.15, roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.08, sheen: 0.4, sheenColor: new THREE.Color(pal.accent2), envMapIntensity: 1.1 });
     const ball = new THREE.Mesh(new THREE.SphereGeometry(1.3, 96, 96), mat); root.add(ball);
-    const ringMat = new THREE.MeshPhysicalMaterial({ color: 0xcfd8de, metalness: 1, roughness: 0.22, envMapIntensity: 1.4 });
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(2.05, 0.03, 24, 200), ringMat); ring.rotation.x = Math.PI / 2.3; root.add(ring);
     const satMat = new THREE.MeshPhysicalMaterial({ color: pal.cool, metalness: 0.2, roughness: 0.15, clearcoat: 1, emissive: new THREE.Color(pal.cool).multiplyScalar(0.25), emissiveIntensity: 0.6 });
     const sat = new THREE.Mesh(new THREE.SphereGeometry(0.12, 32, 32), satMat); root.add(sat);
     const shadow = new THREE.Mesh(new THREE.CircleGeometry(1.25, 48), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35 }));
@@ -77,7 +75,6 @@ export default function Sphere3D({ tapSignal }: { tapSignal: React.MutableRefObj
       root.position.y = 0.2 + (reduced ? 0 : Math.sin(t * 0.7) * 0.06);
       root.rotation.y = pointer.x * 0.35 + (reduced ? 0 : t * 0.1);
       root.rotation.x = -pointer.y * 0.2;
-      ring.rotation.z = reduced ? 0 : t * 0.15;
       const a = t * 0.5; sat.position.set(Math.cos(a) * 2.05, Math.sin(a * 0.8) * 0.3, Math.sin(a) * 2.05);
       renderer.render(scene, camera);
       raf = requestAnimationFrame(frame);

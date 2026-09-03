@@ -336,3 +336,32 @@ body:has(> .world) { background: var(--bg, #07080b); }
 .world select.clay-input option { background: #14161c; }
 .world .accent-clay-coral { accent-color: var(--coral); }
 @media (max-width: 720px) { .world .presence { right: -30%; top: -10%; width: 90vw; opacity: .8; } }
+
+/* Mood tiles: description line, instant-go state; note row with arrow ------- */
+.world .mood small { display: block; color: var(--ink-3); font-size: .74rem; line-height: 1.45; margin-top: 8px; font-weight: 300; }
+.world .moods.busy .mood:not([aria-pressed="true"]) { opacity: .45; }
+.world .mood:disabled { cursor: default; }
+.world .note-row { position: relative; margin-top: 18px; }
+.world .note-row .field { padding-right: 64px; }
+.world .note-row .go { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 999px; border: 0; display: grid; place-items: center; cursor: pointer; color: #1a0d09; background: linear-gradient(135deg, var(--coral-2), var(--accent-mid) 60%, var(--accent-deep)); box-shadow: 0 10px 30px -10px rgba(var(--accent-rgb),.7); transition: transform .4s var(--ease), opacity .3s; }
+.world .note-row .go:hover { transform: translateY(-50%) translateX(2px); }
+.world .note-row .go:disabled { opacity: .35; cursor: default; transform: translateY(-50%); }
+.world .note-row .go:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* Techniques panel --------------------------------------------------------- */
+.world .techniques { position: relative; z-index: 2; margin: 8px 0 6px; padding: 18px 18px 16px; border-radius: 22px; border: 1px solid var(--line-2); background: color-mix(in srgb, var(--bg-2) 80%, transparent); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: 0 30px 60px -30px rgba(0,0,0,.9); animation: rise .5s var(--ease) both; }
+.world .t-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.world .t-sub { font-size: .85rem; margin: 4px 0 0; font-weight: 300; max-width: 34rem; }
+.world .t-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.world .t-tab { padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink-2); font-size: .8rem; cursor: pointer; transition: background .3s, color .3s, border-color .3s; }
+.world .t-tab.on, .world .t-tab:hover { background: var(--glass-2); color: var(--ink); border-color: var(--line-2); }
+.world .t-breathe { display: grid; grid-template-columns: 150px 1fr; gap: 20px; align-items: center; margin-top: 16px; }
+.world .t-ring { width: 150px; height: 150px; border-radius: 50%; display: grid; place-items: center; text-align: center; transition-property: transform; transition-timing-function: ease-in-out; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), rgba(255,255,255,0) 38%), radial-gradient(circle, rgba(var(--accent-rgb),.55), rgba(var(--accent-rgb),.12) 60%, transparent 72%); box-shadow: 0 0 60px rgba(var(--accent-rgb),.35), inset 0 0 40px rgba(var(--accent-rgb),.25); border: 1px solid rgba(var(--accent2-rgb),.35); }
+.world .t-ring span { font-size: .95rem; font-weight: 500; }
+.world .t-ring small { position: absolute; margin-top: 44px; font-size: .75rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.world .t-controls { display: grid; gap: 10px; justify-items: start; }
+.world .t-round { font-size: .82rem; }
+.world .t-list { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; }
+.world .t-list li { display: grid; grid-template-columns: 36px 1fr; gap: 10px; align-items: center; font-size: .92rem; }
+.world .t-list b { width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center; background: var(--glass-2); border: 1px solid var(--line-2); font-family: var(--font-display), serif; font-weight: 400; font-size: 1.1rem; color: var(--coral-2); }
+@media (max-width: 720px) { .world .t-breathe { grid-template-columns: 1fr; justify-items: center; text-align: center; } .world .t-controls { justify-items: center; } .world .mood small { display: none; } }

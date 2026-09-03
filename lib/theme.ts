@@ -3,27 +3,14 @@
  * written as CSS variables on every .world root and persisted in localStorage,
  * so the whole site - home, login, mood, chat, and the WebGL sphere - follows.
  */
-/** Expression parameters for the 3D character, all -1..1 or 0..1. */
-export interface Face {
-  /** -1 frown .. 1 smile */
-  smile: number;
-  /** brow tilt: positive = inner ends down (anger), negative = inner ends up (worry/sadness) */
-  brow: number;
-  /** 0 shut .. 1 wide */
-  eyeOpen: number;
-  /** breathing / movement energy, 0..1 */
-  energy: number;
-  /** body tilt forward/down, -1..1 */
-  droop: number;
-  /** jitter, 0..1 */
-  tremor: number;
-}
-
 export interface Palette {
+  /** Same ids as the arrival moods in lib/moods.ts. */
   id: string;
-  /** The emotion this palette belongs to. Shown under the character. */
   label: string;
-  face: Face;
+  /** Short hint, on the tile. */
+  hint: string;
+  /** One sentence on what Ori does with this mood. Under the ball and on the tile. */
+  description: string;
   accent: string;   // primary
   accent2: string;  // highlight / italic
   mid: string;      // button gradient middle
@@ -36,12 +23,14 @@ export interface Palette {
 const hexToRgb = (h: string) => { const n = parseInt(h.slice(1), 16); return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`; };
 
 export const PALETTES: Palette[] = [
-  { id: "ember", label: "Calm", face: { smile: 0.35, brow: 0, eyeOpen: 0.8, energy: 0.3, droop: 0, tremor: 0 }, accent: "#f0876a", accent2: "#ffb59a", mid: "#ef7a5a", deep: "#d9634a", cool: "#7fd0e0", bg: "#07080b", bg2: "#0d0f15" },
-  { id: "crimson", label: "Anger", face: { smile: -0.45, brow: 0.9, eyeOpen: 0.7, energy: 0.9, droop: 0.15, tremor: 0.25 }, accent: "#e0332e", accent2: "#ff6b63", mid: "#c9221f", deep: "#8a1512", cool: "#ff9a8a", bg: "#040404", bg2: "#0c0708" },
-  { id: "ocean", label: "Sadness", face: { smile: -0.6, brow: -0.7, eyeOpen: 0.55, energy: 0.12, droop: 0.6, tremor: 0 }, accent: "#3fa7d6", accent2: "#8fd3ff", mid: "#2f8fc0", deep: "#1f5f86", cool: "#7fe0d0", bg: "#05080d", bg2: "#0a1018" },
-  { id: "violet", label: "Anxiety", face: { smile: -0.15, brow: -0.5, eyeOpen: 1, energy: 0.7, droop: 0.1, tremor: 0.7 }, accent: "#9b6bff", accent2: "#c9b3ff", mid: "#8557f0", deep: "#5a36b8", cool: "#ff8fd8", bg: "#07060d", bg2: "#0e0b18" },
-  { id: "gold", label: "Joy", face: { smile: 1, brow: -0.15, eyeOpen: 0.45, energy: 0.8, droop: -0.2, tremor: 0 }, accent: "#e2a63a", accent2: "#ffd27a", mid: "#cf9230", deep: "#8f6320", cool: "#9fd6ff", bg: "#080704", bg2: "#12100a" },
-  { id: "forest", label: "Hope", face: { smile: 0.6, brow: -0.2, eyeOpen: 0.9, energy: 0.45, droop: -0.3, tremor: 0 }, accent: "#4fb37f", accent2: "#a3ecc2", mid: "#3f9c6c", deep: "#2a6a49", cool: "#ffd08a", bg: "#050806", bg2: "#0a120d" },
+  { id: "okay", label: "Okay", hint: "fine, actually — just here", description: "Ori keeps it light and follows whatever has your attention.", accent: "#f0876a", accent2: "#ffb59a", mid: "#ef7a5a", deep: "#d9634a", cool: "#7fd0e0", bg: "#07080b", bg2: "#0d0f15" },
+  { id: "hopeful", label: "Hopeful", hint: "something's lifting", description: "Ori asks what shifted and helps you keep hold of it.", accent: "#4fb37f", accent2: "#a3ecc2", mid: "#3f9c6c", deep: "#2a6a49", cool: "#ffd08a", bg: "#050806", bg2: "#0a120d" },
+  { id: "heavy", label: "Heavy", hint: "low, flat, hard to move", description: "Ori slows down, stays close, and asks about the next hour instead of the next month.", accent: "#3fa7d6", accent2: "#8fd3ff", mid: "#2f8fc0", deep: "#1f5f86", cool: "#7fe0d0", bg: "#05080d", bg2: "#0a1018" },
+  { id: "lonely", label: "Lonely", hint: "nobody to tell", description: "Ori listens, then points you back toward a real person by name.", accent: "#4fc3d6", accent2: "#a9eef5", mid: "#3aa9bd", deep: "#22707e", cool: "#ffb59a", bg: "#04090a", bg2: "#091416" },
+  { id: "anxious", label: "Anxious", hint: "wired, braced, can't settle", description: "Ori helps you slow the breath first, then look at the evidence together.", accent: "#9b6bff", accent2: "#c9b3ff", mid: "#8557f0", deep: "#5a36b8", cool: "#ff8fd8", bg: "#07060d", bg2: "#0e0b18" },
+  { id: "angry", label: "Angry", hint: "at someone, or everything", description: "Ori takes the anger seriously, and offers a way to bring the heat down when you want it.", accent: "#e0332e", accent2: "#ff6b63", mid: "#c9221f", deep: "#8a1512", cool: "#ff9a8a", bg: "#040404", bg2: "#0c0708" },
+  { id: "restless", label: "Restless", hint: "need to do something, unsure what", description: "Ori helps you find the nearest small thing you've been avoiding.", accent: "#e2a63a", accent2: "#ffd27a", mid: "#cf9230", deep: "#8f6320", cool: "#9fd6ff", bg: "#080704", bg2: "#12100a" },
+  { id: "numb", label: "Numb", hint: "not much of anything", description: "Ori doesn't push for feeling; it asks about the body, the day, and what's near.", accent: "#9aa0ad", accent2: "#d5d9e2", mid: "#7f8694", deep: "#4c515c", cool: "#9fd6ff", bg: "#060708", bg2: "#0e1013" },
 ];
 
 export const THEME_KEY = "mindease.theme";
@@ -76,9 +65,4 @@ export function nextPalette(from: Palette): Palette {
   return PALETTES[(i + 1) % PALETTES.length];
 }
 
-/** Which emotion palette an arrival mood belongs to (null = leave the theme as it is). */
-export const MOOD_PALETTE: Record<string, string | null> = {
-  heavy: "ocean", anxious: "violet", lonely: "ocean", numb: null,
-  angry: "crimson", restless: "gold", okay: "ember", hopeful: "forest",
-};
 export const paletteById = (id: string | null | undefined): Palette | null => PALETTES.find((p) => p.id === id) ?? null;

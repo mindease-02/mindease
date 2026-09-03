@@ -166,6 +166,10 @@ function arrivalBlock(a: NonNullable<PromptContext["arrival"]>): string {
     `${ago < 2 ? "Just now" : `${ago} minutes ago`}, before opening the chat, they picked: **${a.label}** (${a.hint}).${a.note ? ` They added: "${a.note}".` : ""}`,
     "",
     "Start from there. Don't ask how they are - they told you. Don't repeat the word back like a form field; respond to it like a friend who just read it. If the first message contradicts it, trust the message and let it go.",
+    ...(a.label === "Angry" || a.label === "Anxious" || a.label === "Restless" ? [
+      "",
+      `They arrived ${a.label.toLowerCase()}. The app has a Techniques panel on screen (box breathing, the physiological sigh - two short breaths in, one long out - 5-4-3-2-1 grounding, and for anger: shake out the arms, cold water on the wrists, a ten-minute walk). Let them say the thing first. When there's a pause, offer ONE of these, in one sentence, as something to try right now - not as advice, not as a list. If they wave it off, drop it.`,
+    ] : []),
   ].join("\n");
 }
 

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Orb from "../Orb";
 import CrisisCard from "./CrisisCard";
 import MirrorPanel from "./MirrorPanel";
+import Techniques from "./Techniques";
 import { useTypingMetrics } from "../hooks/useTypingMetrics";
 import { useVoiceFeatures } from "../hooks/useVoiceFeatures";
 import { useFaceAffect } from "../hooks/useFaceAffect";
@@ -41,6 +42,8 @@ export default function ChatApp({ name }: { name: string }) {
   const [sending, setSending] = useState(false);
   const [mirror, setMirror] = useState<UserView | null>(null);
   const [showMirror, setShowMirror] = useState(false);
+  const [arrivalMood, setArrivalMood] = useState<string | null>(null);
+  const [showTech, setShowTech] = useState(false);
   const [crisis, setCrisis] = useState<{ helplines: Helpline[]; emergency: string } | null>(null);
   const [tint, setTint] = useState<{ warm: number; cool: number; dim: number }>({ warm: 0.5, cool: 0.3, dim: 0 });
   const [speak, setSpeak] = useState(false);
@@ -81,7 +84,8 @@ export default function ChatApp({ name }: { name: string }) {
   useEffect(() => {
     (async () => {
       const j = await refresh(true);
-      const a = j?.arrival as { label: string; note?: string } | null;
+      const a = j?.arrival as { mood?: string; label: string; note?: string } | null;
+      if (a?.mood) { setArrivalMood(a.mood); if (a.mood === "angry") setShowTech(true); }
       if (j?.messages?.length) { setMessages(j.messages); scroll(); }
       else setMessages([{ role: "assistant", content: greeting(name, a), at: Date.now() }]);
     })();
@@ -194,6 +198,7 @@ export default function ChatApp({ name }: { name: string }) {
           <div className="text-[11px] text-clay-muted">software &middot; here for {name} &middot; <a href="/mood" className="underline decoration-dotted">change mood</a></div>
         </div>
         <div className="ml-auto flex items-center gap-2">
+          <button onClick={() => setShowTech((t) => !t)} className={`clay-btn px-3 py-2 text-xs ${showTech ? "bg-clay-peach" : ""}`} title="Breathing and grounding techniques">Techniques</button>
           <button onClick={() => setSpeak((s) => !s)} className={`clay-btn px-3 py-2 text-xs ${speak ? "bg-clay-peach" : ""}`} title="Read replies aloud">{speak ? "voice on" : "voice off"}</button>
           <button onClick={() => setShowMirror(true)} className="clay-btn px-3 py-2 text-xs">Mirror</button>
         </div>
@@ -214,6 +219,7 @@ export default function ChatApp({ name }: { name: string }) {
         </div>
       </div>
 
+      {showTech && <div className="px-4 sm:px-6"><div className="mx-auto max-w-2xl"><Techniques mood={arrivalMood} onClose={() => setShowTech(false)} /></div></div>}
       <footer className="px-4 pb-4 pt-2 sm:px-6">
         <form className="composer glass mx-auto flex max-w-2xl items-end gap-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
           <button type="button" onClick={toggleVoice} disabled={busy} aria-label={voice.recording ? "stop recording" : "record a voice message"}

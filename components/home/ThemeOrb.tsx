@@ -26,9 +26,9 @@ export default function ThemeOrb() {
         {webgl ? <Sphere3D tapSignal={tap} /> : <span className="orb fallback-face" />}
       </button>
       <div className="label">
-        <span className="eyebrow">Tap Ori to see the emotions</span>
+        <span className="eyebrow">Tap the ball to see the moods</span>
         <b key={p.id} className="emotion display">{p.label}</b>
-        <span className="hint">each emotion is a colour, and the colour becomes the place</span>
+        <span key={p.id + "d"} className="hint">{p.description}</span>
       </div>
       <div className="swatches" aria-hidden>
         {PALETTES.map((x) => <i key={x.id} className={x.id === p.id ? "on" : ""} style={{ background: x.accent }} title={x.label} />)}
