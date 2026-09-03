@@ -173,6 +173,16 @@ body:has(> .world) { background: var(--bg, #07080b); }
 .world .story .frame > .orb { position: absolute; left: 50%; top: 52%; width: 46%; aspect-ratio: 1; transform: translate(-50%,-50%); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, rgba(255,255,255,0) 36%), linear-gradient(145deg, var(--coral-2), var(--accent-mid) 55%, var(--accent-deep)); box-shadow: 0 50px 100px -30px rgba(var(--accent-rgb),.6), inset -24px -34px 70px rgba(0,0,0,.45); }
 .world .story .frame .reflect { position: absolute; left: 50%; top: 78%; width: 46%; aspect-ratio: 1; transform: translate(-50%, 0) scaleY(-.5); border-radius: 50%; background: linear-gradient(145deg, var(--coral-2), var(--accent-mid) 55%, var(--accent-deep)); opacity: .18; filter: blur(8px); mask-image: linear-gradient(rgba(0,0,0,.7), transparent 60%); -webkit-mask-image: linear-gradient(rgba(0,0,0,.7), transparent 60%); }
 .world .theme-frame { cursor: default; }
+.world .theme-frame .char-btn { position: absolute; inset: 0 0 26% 0; border: 0; background: none; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.world .theme-frame .char-btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: -8px; border-radius: 24px; }
+.world .theme-frame .char-btn > div { position: absolute; inset: 0; }
+.world .theme-frame .label { left: 22px; right: 22px; bottom: 20px; display: grid; gap: 4px; text-transform: none; letter-spacing: 0; }
+.world .theme-frame .label .emotion { font-size: clamp(1.8rem, 3.2vw, 2.6rem); color: var(--coral-2); line-height: 1; animation: rise .5s var(--ease) both; }
+.world .theme-frame .label .hint { font-size: .78rem; color: var(--ink-2); font-weight: 300; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.world .fallback-face { position: absolute; left: 50%; top: 42%; width: 46%; aspect-ratio: 1; transform: translate(-50%,-50%); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, rgba(255,255,255,0) 36%), linear-gradient(145deg, var(--coral-2), var(--accent-mid) 55%, var(--accent-deep)); box-shadow: 0 50px 100px -30px rgba(var(--accent-rgb),.6), inset -24px -34px 70px rgba(0,0,0,.45); }
+.world .fallback-face i { position: absolute; top: 40%; width: 12%; aspect-ratio: 1; border-radius: 50%; background: #f6f3ee; box-shadow: inset -3px -3px 0 4px #14131a; }
+.world .fallback-face i:first-child { left: 30%; } .world .fallback-face i:last-child { right: 30%; }
 .world .theme-frame .orb-btn { position: absolute; left: 50%; top: 52%; width: 46%; aspect-ratio: 1; transform: translate(-50%,-50%); border: 0; background: none; padding: 0; cursor: pointer; border-radius: 50%; -webkit-tap-highlight-color: transparent; }
 .world .theme-frame .orb-btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 8px; }
 .world .theme-frame .orb-btn .orb { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, rgba(255,255,255,0) 36%), linear-gradient(145deg, var(--coral-2), var(--accent-mid) 55%, var(--accent-deep)); box-shadow: 0 50px 100px -30px rgba(var(--accent-rgb),.6), inset -24px -34px 70px rgba(0,0,0,.45); transition: transform .8s var(--ease), background .6s, box-shadow .6s; animation: breathe-p 7s ease-in-out infinite; }
@@ -180,7 +190,7 @@ body:has(> .world) { background: var(--bg, #07080b); }
 .world .theme-frame .orb-btn:active .orb { transform: scale(.97); }
 .world .theme-frame .orb-btn .ring { position: absolute; inset: -18%; border-radius: 50%; border: 1px solid rgba(var(--cool-rgb),.45); transform: rotateX(70deg); box-shadow: 0 0 40px rgba(var(--cool-rgb),.18); animation: spin 22s linear infinite; }
 @keyframes spin { to { transform: rotateX(70deg) rotateZ(360deg); } }
-.world .theme-frame .swatches { position: absolute; right: 22px; bottom: 22px; display: flex; gap: 6px; }
+.world .theme-frame .swatches { position: absolute; right: 22px; top: 22px; display: flex; gap: 6px; }
 .world .theme-frame .swatches i { width: 8px; height: 8px; border-radius: 50%; opacity: .35; transition: opacity .3s, transform .3s; }
 .world .theme-frame .swatches i.on { opacity: 1; transform: scale(1.4); box-shadow: 0 0 10px currentColor; }
 .world .story .frame .label { position: absolute; left: 22px; bottom: 22px; font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-2); }
