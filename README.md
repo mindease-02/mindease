@@ -45,7 +45,7 @@ source .venv/bin/activate && python training/train_text_heads.py   # retrain the
 1. Push this repo to GitHub, then **Import** it at vercel.com/new.
 2. In *Environment Variables* add `GROQ_API_KEY`, `SESSION_SECRET` (any long random string), `CRON_SECRET` (same), and — for proactive check-ins to work when nobody has the tab open — `KV_REST_API_URL` + `KV_REST_API_TOKEN` from the Upstash integration (Marketplace → Upstash → Redis).
 3. Optional hardening: `DATA_ENCRYPTION_KEY` (`openssl rand -hex 32`) and `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` (`npx web-push generate-vapid-keys`) for push.
-4. `vercel.json` schedules `/api/checkin/sweep` hourly. On the Hobby plan Vercel runs crons once a day at most; the in-app scheduler covers the rest while the tab is open.
+4. `vercel.json` schedules `/api/checkin/sweep` daily at 09:00 UTC (the Hobby plan allows one run per day; change it to `0 * * * *` on Pro). The in-app scheduler evaluates every 10 minutes while the tab is open.
 
 ## Safety notes
 
