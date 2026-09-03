@@ -40,7 +40,15 @@ body:has(> .world) { background: #07080b; }
     radial-gradient(40% 40% at 15% 75%, rgba(127, 208, 224, 0.10), transparent 70%),
     linear-gradient(180deg, #0a0b10 0%, #07080b 40%, #05060a 100%);
 }
-.world .grain { position: fixed; inset: -50%; width: 200%; height: 200%; pointer-events: none; z-index: 60; opacity: 0.06; mix-blend-mode: overlay;
+/* Film frame: letterbox that opens on load, a vignette, a warm/teal grade. */
+.world .bars { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
+.world .bars span { position: absolute; left: 0; right: 0; height: 12vh; background: #000; animation: bars 1.6s var(--ease) .35s both; }
+.world .bars span:first-child { top: 0; transform-origin: top; }
+.world .bars span:last-child { bottom: 0; transform-origin: bottom; }
+@keyframes bars { from { transform: scaleY(1); } to { transform: scaleY(0); } }
+.world .vignette { position: fixed; inset: 0; z-index: 55; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0,0,0,.55) 100%); }
+.world .atmos::after { content: ""; position: absolute; inset: 0; mix-blend-mode: soft-light; background: linear-gradient(125deg, rgba(240,135,106,.35), transparent 45%, rgba(56,140,160,.35)); }
+.world .grain { position: fixed; inset: -50%; width: 200%; height: 200%; pointer-events: none; z-index: 60; opacity: 0.085; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   animation: grain 8s steps(10) infinite; }
 @keyframes grain { 0%,100% { transform: translate(0,0); } 10% { transform: translate(-5%,-10%); } 30% { transform: translate(3%,-15%); } 50% { transform: translate(12%,9%); } 70% { transform: translate(9%,4%); } 90% { transform: translate(-1%,7%); } }
@@ -63,7 +71,19 @@ body:has(> .world) { background: #07080b; }
 .world .in .word > span, .world .word.in > span { transform: none; }
 
 /* Hero ---------------------------------------------------------------------- */
-.world .hero { position: relative; z-index: 1; padding: clamp(96px, 14vh, 150px) 0 clamp(48px, 8vh, 96px); min-height: 92svh; display: grid; align-items: center; }
+.world .hero { position: relative; z-index: 1; padding: clamp(96px, 14vh, 150px) 0 clamp(48px, 8vh, 96px); min-height: 92svh; display: grid; align-items: center; overflow: hidden; }
+.world .hero .copy { transform: translateY(calc(var(--sc, 0) * -60px)); opacity: calc(1 - var(--sc, 0) * 1.1); will-change: transform, opacity; }
+.world .hero .stage { transform: translateY(calc(var(--sc, 0) * 90px)) scale(calc(1 - var(--sc, 0) * 0.12)); will-change: transform; }
+.world .rays { position: absolute; inset: -20% -10% auto auto; width: 70%; height: 120%; pointer-events: none; opacity: .55; filter: blur(28px);
+  background: conic-gradient(from 200deg at 85% 0%, transparent 0deg, rgba(255,181,154,.18) 8deg, transparent 14deg, transparent 22deg, rgba(255,181,154,.10) 28deg, transparent 36deg, transparent 48deg, rgba(127,208,224,.10) 54deg, transparent 62deg);
+  animation: rays 18s ease-in-out infinite alternate; }
+@keyframes rays { from { transform: rotate(-2deg) translateX(0); } to { transform: rotate(2deg) translateX(-3%); } }
+.world .scene-mask { -webkit-mask-image: radial-gradient(70% 62% at 50% 50%, #000 55%, transparent 100%); mask-image: radial-gradient(70% 62% at 50% 50%, #000 55%, transparent 100%); }
+/* Anamorphic flare pinned to the sphere's key highlight. */
+.world .flare { position: absolute; left: 50%; top: 42%; width: 0; height: 0; pointer-events: none; mix-blend-mode: screen; transform: translate3d(calc(var(--px, 0) * -18px), calc(var(--py, 0) * -12px), 0); }
+.world .flare i { position: absolute; left: -46%; top: -1px; width: 92%; min-width: 420px; height: 2px; transform: translateX(-50%); background: linear-gradient(90deg, transparent, rgba(255,205,185,.0) 10%, rgba(255,215,195,.85) 50%, rgba(255,205,185,0) 90%, transparent); filter: blur(1.2px); animation: flare 7s ease-in-out infinite; }
+.world .flare b { position: absolute; left: -90px; top: -90px; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle, rgba(255,225,210,.55), rgba(255,181,154,.18) 35%, transparent 70%); filter: blur(6px); animation: flare 7s ease-in-out infinite; }
+@keyframes flare { 0%,100% { opacity: .55; } 50% { opacity: .95; } }
 .world .hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 32px; align-items: center; }
 .world .hero h1 { font-size: clamp(3.2rem, 8.2vw, 7.4rem); margin: 18px 0 0; }
 .world .hero h1 em { font-style: italic; color: var(--coral-2); }
@@ -211,6 +231,7 @@ body:has(> .world) { background: #07080b; }
   .world .cards { grid-template-columns: 1fr; }
   .world .card { min-height: 220px; }
   .world .stage { height: 300px; }
+  .world .flare i { min-width: 220px; }
   .world .float-card { display: none; }
   .world .float-card.keep { display: block; left: 4% !important; top: auto !important; bottom: -6px !important; }
   .world .eyebrow { font-size: .62rem; letter-spacing: .16em; }
@@ -224,4 +245,6 @@ body:has(> .world) { background: #07080b; }
   .world *, .world *::before, .world *::after { animation: none !important; transition-duration: .01ms !important; }
   .world [data-reveal] { opacity: 1; transform: none; }
   .world .word > span { transform: none; }
+  .world .bars { display: none; }
+  .world .hero .copy, .world .hero .stage { transform: none; opacity: 1; }
 }

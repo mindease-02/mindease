@@ -34,13 +34,22 @@ export default function Hero({ chatHref }: { chatHref: string }) {
       }
     };
     window.addEventListener("pointermove", move, { passive: true });
-    return () => { clearTimeout(t); window.removeEventListener("pointermove", move); };
+    // Camera pull on scroll: the stage recedes and the copy drifts up, at different rates.
+    const sec = stage.current?.closest(".hero") as HTMLElement | null;
+    const onScroll = () => {
+      if (!sec || reduced) return;
+      const y = Math.min(window.scrollY, window.innerHeight);
+      sec.style.setProperty("--sc", String(y / window.innerHeight));
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { clearTimeout(t); window.removeEventListener("pointermove", move); window.removeEventListener("scroll", onScroll); };
   }, []);
 
   return (
     <section className={`hero ${ready ? "in" : ""}`} aria-labelledby="hero-title">
+      <div className="rays" aria-hidden />
       <div className="container hero-grid">
-        <div>
+        <div className="copy">
           <div className="eyebrow" data-reveal style={{ ["--d" as string]: "0ms" }}>An AI companion · not a therapist · says so</div>
           <h1 id="hero-title" className="display">
             <Words text="Someone who" start={80} /> <br />
@@ -58,6 +67,7 @@ export default function Hero({ chatHref }: { chatHref: string }) {
         <div ref={stage} className="stage" data-reveal style={{ ["--d" as string]: "200ms" }}>
           {mode === "webgl" && <Scene3D pointer={pointer} />}
           {mode === "css" && <div className="fallback-orb" aria-hidden />}
+          <div className="flare" aria-hidden><i /><b /></div>
           <div className="particles" aria-hidden>
             {Array.from({ length: 18 }).map((_, i) => (
               <i key={i} style={{ left: `${(i * 53) % 100}%`, top: `${20 + ((i * 37) % 70)}%`, ["--t" as string]: `${10 + (i % 5) * 3}s`, ["--fd" as string]: `${(i % 7) * 1.1}s` }} />

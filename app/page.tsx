@@ -10,7 +10,7 @@ export default async function Home() {
   const chatHref = session ? "/mood" : "/login";
   return (
     <div className={`world ${display.variable} ${body.variable}`}>
-      <div className="atmos" aria-hidden /><div className="grain" aria-hidden />
+      <div className="atmos" aria-hidden /><div className="vignette" aria-hidden /><div className="grain" aria-hidden /><div className="bars" aria-hidden><span /><span /></div>
       <Nav chatHref={chatHref} signedIn={!!session} />
       <main>
         <Hero chatHref={chatHref} />

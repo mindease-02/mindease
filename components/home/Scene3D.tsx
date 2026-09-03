@@ -12,6 +12,10 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 
 export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{ x: number; y: number }> }) {
   const host = useRef<HTMLDivElement>(null);
@@ -21,8 +25,8 @@ export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{
     if (!el) return;
     let raf = 0, running = true;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.6));
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(el.clientWidth, el.clientHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -32,11 +36,24 @@ export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{
     el.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
+    // Opaque, graded ground so bloom has something to composite onto; the canvas
+    // edges are masked in CSS so the frame dissolves into the page's atmosphere.
+    scene.background = new THREE.Color(0x090a0f);
+    scene.fog = new THREE.FogExp2(0x090a0f, 0.035);
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
     const camera = new THREE.PerspectiveCamera(32, el.clientWidth / el.clientHeight, 0.1, 50);
-    camera.position.set(0, 0.35, 7.2);
+    const DOLLY_FROM = 10.5, DOLLY_TO = 7.2, DOLLY_MS = 2600;
+    camera.position.set(0, 0.35, DOLLY_FROM);
+
+    // Post: a restrained bloom so the clearcoat highlight and the ring's rim read
+    // as light, not as texture. Threshold high enough that the body stays matte.
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const bloom = new UnrealBloomPass(new THREE.Vector2(el.clientWidth, el.clientHeight), 0.42, 0.65, 0.82);
+    composer.addPass(bloom);
+    composer.addPass(new OutputPass());
 
     // Lighting: warm key, cool rim, soft fill. The environment does the reflections.
     const key = new THREE.DirectionalLight(0xffd7c2, 2.2);
@@ -81,6 +98,8 @@ export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const target = { x: 0, y: 0 }; const cur = { x: 0, y: 0 };
     const clock = new THREE.Clock();
+    const started = performance.now();
+    const easeOut = (p: number) => 1 - Math.pow(1 - p, 3);
 
     const frame = () => {
       if (!running) return;
@@ -96,15 +115,19 @@ export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{
         s.position.set(Math.cos(a) * 2.25, Math.sin(a * 0.7) * 0.5, Math.sin(a) * 2.25);
       });
       particles.rotation.y = t * 0.02;
+      // Opening dolly: the camera settles into the shot over the first seconds.
+      const dolly = reduced ? 1 : easeOut(Math.min(1, (performance.now() - started) / DOLLY_MS));
+      const z = DOLLY_FROM + (DOLLY_TO - DOLLY_FROM) * dolly;
       camera.position.x += (cur.x * 0.6 - camera.position.x) * 0.04;
       camera.position.y += (0.35 + cur.y * 0.35 - camera.position.y) * 0.04;
+      camera.position.z = z + (reduced ? 0 : Math.sin(t * 0.25) * 0.08);
       camera.lookAt(0, 0, 0);
-      renderer.render(scene, camera);
+      composer.render();
       raf = requestAnimationFrame(frame);
     };
     frame();
 
-    const onResize = () => { renderer.setSize(el.clientWidth, el.clientHeight); camera.aspect = el.clientWidth / el.clientHeight; camera.updateProjectionMatrix(); };
+    const onResize = () => { renderer.setSize(el.clientWidth, el.clientHeight); composer.setSize(el.clientWidth, el.clientHeight); camera.aspect = el.clientWidth / el.clientHeight; camera.updateProjectionMatrix(); };
     const ro = new ResizeObserver(onResize); ro.observe(el);
     const io = new IntersectionObserver(([e]) => { running = e.isIntersecting && !document.hidden; if (running) { clock.start(); frame(); } });
     io.observe(el);
@@ -114,11 +137,11 @@ export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{
     return () => {
       running = false; cancelAnimationFrame(raf); ro.disconnect(); io.disconnect();
       document.removeEventListener("visibilitychange", onVis);
-      pmrem.dispose(); renderer.dispose(); el.removeChild(renderer.domElement);
+      pmrem.dispose(); composer.dispose(); renderer.dispose(); el.removeChild(renderer.domElement);
       [core, ring, ...sats, floor].forEach((m) => { m.geometry.dispose(); (m.material as THREE.Material).dispose(); });
       pGeo.dispose();
     };
   }, [pointer]);
 
-  return <div ref={host} className="absolute inset-0" aria-hidden />;
+  return <div ref={host} className="absolute inset-0 scene-mask" aria-hidden />;
 }
