@@ -21,12 +21,12 @@ const DEPRESSION = [
   { who: "ori" as const, text: "Monday. Would you text Sam one line today? I'll ask how that went, not how this went." },
 ];
 
-export function Hero() {
+export function Hero({ chatHref = "/login" }: { chatHref?: string }) {
   return (
-    <section className="relative overflow-hidden px-6 pb-16 pt-20 sm:pt-28">
+    <section className="relative overflow-hidden px-6 pb-16 pt-16 sm:pt-24">
       <div className="fog animate-drift" />
       <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
-        <div className="animate-rise">
+        <div className="clay animate-rise p-8 sm:p-10">
           <div className="clay-chip mb-6">not therapy &middot; not a replacement for people &middot; honest about being software</div>
           <h1 className="font-serif text-5xl leading-[1.05] tracking-tight text-clay-ink sm:text-6xl">
             Someone who <em className="not-italic text-clay-coral">notices.</em>
@@ -35,8 +35,16 @@ export function Hero() {
             Ori is a companion that pays attention to how you're doing - what you say, how you say it, and how that changes across days - and checks in when it matters. It remembers. It's warm. And it's built to need you less over time, not more.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/login" className="clay-btn-primary">Start talking</Link>
+            <Link href={chatHref} className="clay-btn-primary text-base">Chat with Ori</Link>
             <a href="#how" className="clay-btn">How it works</a>
+          </div>
+          <div className="mt-8 grid grid-cols-3 gap-3">
+            {[["text + voice", "reads words, tone and rhythm"], ["remembers", "your people, plans and past"], ["checks in", "when it matters, never at night"]].map(([t, d]) => (
+              <div key={t} className="clay-in p-3">
+                <div className="text-xs font-medium">{t}</div>
+                <div className="mt-0.5 text-[11px] leading-snug text-clay-muted">{d}</div>
+              </div>
+            ))}
           </div>
         </div>
         <div className="flex justify-center lg:justify-end">
@@ -47,14 +55,14 @@ export function Hero() {
   );
 }
 
-function Feature({ title, kicker, body, chat, flip = false, tone }: { title: string; kicker: string; body: React.ReactNode; chat: React.ReactNode; flip?: boolean; tone: string }) {
+function Feature({ title, kicker, body, chat, flip = false, tone, card }: { title: string; kicker: string; body: React.ReactNode; chat: React.ReactNode; flip?: boolean; tone: string; card: string }) {
   return (
-    <section className="px-6 py-14">
+    <section className="px-6 py-10">
       <div className={`mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 ${flip ? "lg:[&>*:first-child]:order-2" : ""}`}>
-        <div>
-          <div className={`mb-3 inline-block rounded-full px-3 py-1 text-xs font-medium ${tone}`}>{kicker}</div>
+        <div className={`${card} p-8 sm:p-10`}>
+          <div className={`mb-3 inline-block rounded-full px-3 py-1 text-xs font-medium shadow-clay-sm ${tone}`}>{kicker}</div>
           <h2 className="font-serif text-3xl tracking-tight sm:text-4xl">{title}</h2>
-          <div className="mt-4 space-y-3 text-[15.5px] leading-relaxed text-clay-muted">{body}</div>
+          <div className="mt-4 space-y-3 text-[15.5px] leading-relaxed text-clay-ink/75">{body}</div>
         </div>
         <div className="flex justify-center">{chat}</div>
       </div>
@@ -66,7 +74,7 @@ export function Features() {
   return (
     <>
       <Feature
-        kicker="Stress" tone="bg-clay-amber/60 text-clay-ink"
+        kicker="Stress" tone="bg-clay-surface text-clay-ink" card="clay-amber"
         title="When everything is due at once"
         body={<>
           <p>Stress is usually a sequencing problem wearing a catastrophe costume. Ori helps you find the first thing, and notices when basics - food, sleep, daylight - have quietly dropped off the list.</p>
@@ -75,7 +83,7 @@ export function Features() {
         chat={<MockChat tilt={1} lines={STRESS} caption="Concrete over profound. One question at a time." />}
       />
       <Feature flip
-        kicker="Anxiety" tone="bg-clay-haze text-clay-ink"
+        kicker="Anxiety" tone="bg-clay-surface text-clay-ink" card="clay-haze"
         title="When 'fine' isn't"
         body={<>
           <p>Ori reads the gap between what you write and what you're showing - words, tone of voice, how you type - and asks about it, once, without insisting it knows better than you.</p>
@@ -84,7 +92,7 @@ export function Features() {
         chat={<MockChat tilt={-1} lines={ANXIETY} caption="Incongruence between the words and the rest gets named, gently." />}
       />
       <Feature
-        kicker="Depression" tone="bg-clay-sage text-clay-ink"
+        kicker="Depression" tone="bg-clay-surface text-clay-ink" card="clay-sage"
         title="When you've gone quiet"
         body={<>
           <p>Low mood hides in the pattern, not the message: shorter replies, later nights, fewer people mentioned. Ori tracks that across days and reaches out when the trend is real - not because a timer went off.</p>
@@ -140,12 +148,14 @@ export function Safety() {
   );
 }
 
-export function Cta() {
+export function Cta({ chatHref = "/login" }: { chatHref?: string }) {
   return (
-    <section className="px-6 pb-24 pt-8 text-center">
-      <h2 className="font-serif text-3xl tracking-tight">Start with a name. That's all it needs.</h2>
-      <p className="mx-auto mt-3 max-w-md text-clay-muted">No password, no account. Whatever you type becomes your key.</p>
-      <Link href="/login" className="clay-btn-primary mt-8">Talk to Ori</Link>
+    <section className="px-6 pb-24 pt-8">
+      <div className="clay-peach mx-auto max-w-3xl p-10 text-center sm:p-14">
+        <h2 className="font-serif text-3xl tracking-tight">Start with a name. That's all it needs.</h2>
+        <p className="mx-auto mt-3 max-w-md text-clay-ink/70">No password, no account. Whatever you type becomes your key, and the chat opens straight away.</p>
+        <Link href={chatHref} className="clay-btn-dark mt-8 text-base">Chat with Ori</Link>
+      </div>
     </section>
   );
 }
