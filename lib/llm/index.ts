@@ -2,7 +2,7 @@
  * LLM client. OpenAI-compatible chat completions, so the same code talks to
  * Groq (default) or OpenRouter. No SDK - one fetch per call.
  *
- * Two model tiers:
+ * Two model tiers (defaults are current Groq models; override with LLM_CHAT_MODEL / LLM_FAST_MODEL):
  *   chat - the voice of the companion. Quality matters more than latency.
  *   fast - structured JSON jobs (affect analysis, memory extraction). Called on
  *          every turn, so it should be cheap and quick.
@@ -38,8 +38,8 @@ export function llmConfig(): LlmConfig | null {
       provider: "groq",
       baseUrl: "https://api.groq.com/openai/v1",
       apiKey: groq,
-      chatModel: process.env.LLM_CHAT_MODEL ?? "llama-3.3-70b-versatile",
-      fastModel: process.env.LLM_FAST_MODEL ?? "llama-3.1-8b-instant",
+      chatModel: process.env.LLM_CHAT_MODEL ?? "openai/gpt-oss-120b",
+      fastModel: process.env.LLM_FAST_MODEL ?? "openai/gpt-oss-20b",
     };
   }
   return null;
@@ -62,9 +62,12 @@ export async function complete(messages: ChatMessage[], opts: CompletionOptions 
     model,
     messages,
     temperature: opts.temperature ?? (opts.tier === "fast" ? 0.2 : 0.7),
-    max_tokens: opts.maxTokens ?? (opts.tier === "fast" ? 600 : 500),
+    max_tokens: opts.maxTokens ?? (opts.tier === "fast" ? 900 : 800),
   };
   if (opts.json) body.response_format = { type: "json_object" };
+  // gpt-oss models reason before answering; keep that short so it neither eats
+  // the token budget nor adds seconds of latency to a two-line reply.
+  if (/gpt-oss/.test(model)) body.reasoning_effort = "low";
 
   const res = await fetch(`${cfg.baseUrl}/chat/completions`, {
     method: "POST",

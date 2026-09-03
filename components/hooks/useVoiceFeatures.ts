@@ -8,7 +8,7 @@
  * The audio clip goes to Whisper for words; only the ~10 aggregate numbers go
  * to the prosody channel. No voice embedding is ever computed.
  */
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { ProsodyFeatures } from "@/lib/affect/prosody";
 
 interface Frame { t: number; rms: number; f0: number | null; centroid: number }
@@ -141,5 +141,5 @@ export function useVoiceFeatures() {
     });
   }, []);
 
-  return { recording, level, start, stop };
+  return useMemo(() => ({ recording, level, start, stop }), [recording, level, start, stop]);
 }

@@ -5,7 +5,7 @@
  * "was this a backspace". Nothing leaves the device unless the user has turned
  * typing signals on, and even then only the ~8 numbers below.
  */
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import type { TypingFeatures } from "@/lib/affect/typing";
 
 export function useTypingMetrics() {
@@ -53,5 +53,6 @@ export function useTypingMetrics() {
     return out;
   }, []);
 
-  return { onKeyDown, finish, onPromptShown };
+  // Stable identity: consumers put this in effect deps.
+  return useMemo(() => ({ onKeyDown, finish, onPromptShown }), [onKeyDown, finish, onPromptShown]);
 }
