@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --clay-bg: #efe6dc;
+  --clay-ink: #2b2622;
+}
+
+html, body { height: 100%; }
+body {
+  @apply bg-clay-bg text-clay-ink font-sans antialiased;
+  background-image:
+    radial-gradient(1200px 600px at 10% -10%, rgba(244, 198, 173, 0.35), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(126, 200, 216, 0.14), transparent 60%),
+    radial-gradient(700px 500px at 50% 120%, rgba(233, 185, 106, 0.18), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Claymorphism primitives ------------------------------------------------- */
+@layer components {
+  .clay {
+    @apply bg-clay-surface rounded-clay shadow-clay;
+  }
+  .clay-sm {
+    @apply bg-clay-surface rounded-[20px] shadow-clay-sm;
+  }
+  .clay-in {
+    @apply bg-clay-bg-deep rounded-[22px] shadow-clay-in;
+  }
+  .clay-peach { @apply bg-clay-peach rounded-clay shadow-clay; }
+  .clay-sage  { @apply bg-clay-sage rounded-clay shadow-clay; }
+  .clay-haze  { @apply bg-clay-haze rounded-clay shadow-clay; }
+  .clay-amber { @apply bg-clay-amber rounded-clay shadow-clay; }
+  .clay-dark  { @apply bg-clay-slate text-clay-surface rounded-clay shadow-clay-dark; }
+
+  .clay-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium
+           bg-clay-surface shadow-clay-sm transition-transform duration-150
+           active:translate-y-[1px] active:shadow-clay-in disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .clay-btn-primary {
+    @apply clay-btn bg-clay-coral text-white;
+    box-shadow: 4px 4px 10px rgba(89,70,55,.22), -3px -3px 8px rgba(255,255,255,.55),
+                inset 1px 1px 2px rgba(255,255,255,.35), inset -2px -2px 4px rgba(120,50,30,.25);
+  }
+  .clay-btn-dark {
+    @apply clay-btn bg-clay-slate text-clay-surface;
+    box-shadow: 4px 4px 10px rgba(0,0,0,.3), -3px -3px 8px rgba(255,255,255,.25),
+                inset 1px 1px 2px rgba(255,255,255,.1), inset -2px -2px 4px rgba(0,0,0,.35);
+  }
+  .clay-input {
+    @apply w-full rounded-[20px] bg-clay-bg-deep px-5 py-3 text-clay-ink placeholder:text-clay-muted
+           outline-none shadow-clay-in focus:ring-2 focus:ring-clay-coral/40;
+  }
+  .clay-chip {
+    @apply inline-flex items-center rounded-full bg-clay-surface px-3 py-1 text-xs text-clay-muted shadow-clay-sm;
+  }
+}
+
+/* Chat bubbles ------------------------------------------------------------ */
+.bubble-user {
+  @apply rounded-[22px] rounded-br-[8px] bg-clay-slate text-clay-surface px-4 py-3 shadow-clay-dark;
+}
+.bubble-ai {
+  @apply rounded-[22px] rounded-bl-[8px] bg-clay-surface text-clay-ink px-4 py-3 shadow-clay-sm;
+}
+.bubble-proactive {
+  @apply rounded-[22px] rounded-bl-[8px] bg-clay-peach text-clay-ink px-4 py-3 shadow-clay-sm;
+}
+
+/* The presence orb: Ori's only "face". Deliberately non-human. ------------ */
+.orb {
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255,255,255,.9), rgba(255,255,255,0) 40%),
+    radial-gradient(circle at 60% 70%, rgba(126,200,216,.55), rgba(126,200,216,0) 55%),
+    linear-gradient(145deg, #f4c6ad, #e8917a);
+  box-shadow: 8px 8px 18px rgba(89,70,55,.22), -6px -6px 14px rgba(255,255,255,.75),
+              inset 2px 2px 6px rgba(255,255,255,.7), inset -4px -4px 8px rgba(120,50,30,.22);
+}
+
+/* Scrollbars in the chat pane */
+.thin-scroll::-webkit-scrollbar { width: 8px; }
+.thin-scroll::-webkit-scrollbar-thumb { background: #d9cdbf; border-radius: 8px; }
+
+/* Voice level meter */
+.meter { transition: transform 80ms linear; transform-origin: bottom; }
+
+/* Fog layer for the landing page */
+.fog {
+  position: absolute; inset: -10%;
+  background:
+    radial-gradient(40% 35% at 30% 40%, rgba(201,210,214,.55), transparent 70%),
+    radial-gradient(35% 30% at 70% 60%, rgba(244,198,173,.45), transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+}
