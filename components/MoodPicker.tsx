@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Magnetic from "./home/Magnetic";
 import { MOODS, type MoodId } from "@/lib/moods";
+import { applyPalette, MOOD_PALETTE, paletteById } from "@/lib/theme";
 
 
 export default function MoodPicker({ name }: { name: string }) {
@@ -30,7 +31,7 @@ export default function MoodPicker({ name }: { name: string }) {
       <p className="muted" data-reveal style={{ fontWeight: 300, marginTop: 14, maxWidth: "34rem", lineHeight: 1.6, ["--d" as string]: "120ms" }}>One word is enough. It gives Ori a sense of what to hold, and you can be wrong about it.</p>
       <div className="moods" role="group" aria-label="Mood" data-reveal style={{ ["--d" as string]: "180ms" }}>
         {MOODS.map((m) => (
-          <button key={m.id} type="button" className="mood" aria-pressed={mood === m.id} onClick={() => setMood(m.id)} style={{ ["--c" as string]: m.c }}>
+          <button key={m.id} type="button" className="mood" aria-pressed={mood === m.id} onClick={() => { setMood(m.id); const pal = paletteById(MOOD_PALETTE[m.id]); if (pal) applyPalette(pal); }} style={{ ["--c" as string]: m.c }}>
             <span className="dot" aria-hidden /><b>{m.label}</b><span>{m.hint}</span>
           </button>
         ))}

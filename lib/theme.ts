@@ -75,3 +75,10 @@ export function nextPalette(from: Palette): Palette {
   const i = PALETTES.findIndex((p) => p.id === from.id);
   return PALETTES[(i + 1) % PALETTES.length];
 }
+
+/** Which emotion palette an arrival mood belongs to (null = leave the theme as it is). */
+export const MOOD_PALETTE: Record<string, string | null> = {
+  heavy: "ocean", anxious: "violet", lonely: "ocean", numb: null,
+  angry: "crimson", restless: "gold", okay: "ember", hopeful: "forest",
+};
+export const paletteById = (id: string | null | undefined): Palette | null => PALETTES.find((p) => p.id === id) ?? null;

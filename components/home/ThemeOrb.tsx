@@ -3,11 +3,11 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { applyPalette, currentPalette, nextPalette, PALETTES, type Palette } from "@/lib/theme";
 
-const Character3D = dynamic(() => import("./Character3D"), { ssr: false, loading: () => null });
+const Sphere3D = dynamic(() => import("./Sphere3D"), { ssr: false, loading: () => null });
 
 /**
- * Ori, in "why it exists". Tap it to see the emotions: each one is a different
- * expression and a different colour, and the colour becomes the site's theme.
+ * The ball in "why it exists". Tap it to see the emotions: each one has an
+ * assigned colour, the ball takes that colour, and so does the whole site.
  */
 export default function ThemeOrb() {
   const [p, setP] = useState<Palette>(PALETTES[0]);
@@ -23,7 +23,7 @@ export default function ThemeOrb() {
     <div className="frame glass theme-frame" data-reveal style={{ ["--d" as string]: "160ms" }}>
       <div className="glow" />
       <button type="button" className="char-btn" onClick={cycle} aria-label={`Tap to see the next emotion (now: ${p.label})`}>
-        {webgl ? <Character3D tapSignal={tap} /> : <span className="orb fallback-face"><i /><i /></span>}
+        {webgl ? <Sphere3D tapSignal={tap} /> : <span className="orb fallback-face" />}
       </button>
       <div className="label">
         <span className="eyebrow">Tap Ori to see the emotions</span>
