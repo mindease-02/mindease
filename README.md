@@ -16,7 +16,8 @@ Samantha's warmth, 2049's atmosphere, and a design that refuses to be Joi: Ori i
 | Response generation | `lib/prompt/` | Cognitive empathy over affective mimicry; register templates keyed to **intensity band** (low/moderate/high/acute) so the reply mirrors weight and pace without catching distress; validation patterns that separate feeling from conclusion. |
 | Safety | `lib/safety/` | Deterministic crisis triage runs before the model on every turn, cannot be suppressed, is over-sensitive on purpose. Helplines are **hard-coded** (988, Samaritans, Tele-MANAS…) and rendered by the UI — the model never recites a number. |
 | Anti-dependency | `lib/dependency/` | Reliance index = contact rising while references to other people fall. Tiers apply countermeasures: shorter replies, name the dynamic, point outward, decline the primary role. |
-| Transparency | `components/chat/MirrorPanel.tsx` | Every inference, every check-in gate, every memory, every consent switch, the safety log, the mismatch-detector calibration, export and delete. |
+| Transparency | `components/chat/MirrorPanel.tsx`, `lib/pipeline/userView.ts` | The person sees a minimal Mirror: how they seem, memories, switches, export and delete. The full analytics (detector scores, gate verdicts, reliance, bandit, safety log, calibration) are stored and reachable only via `/api/admin/user?id=` and the JSONL training export `/api/admin/dataset`, both gated by `ADMIN_SECRET`. |
+| Theme | `lib/theme.ts`, `components/home/ThemeOrb.tsx` | Tapping the orb in "why it exists" cycles six palettes; the choice persists across pages and re-colours the WebGL sphere. |
 | Face channel | `lib/affect/face.ts`, `components/hooks/useFaceAffect.ts` | Opt-in. MediaPipe Face Landmarker runs in the browser and reduces blendshapes to two numbers per message. Lowest-weighted channel; no image leaves the device. |
 | Safety second opinion | `lib/safety/secondOpinion.ts` | The fast model reviews messages the regex found clean and may **raise** the tier (never lower). Every serious-tier turn is written to an audit log. |
 | Web Push | `lib/push.ts`, `public/sw.js`, `app/api/push/` | Second-consent OS notifications for unprompted messages when the tab is closed (VAPID). |
@@ -49,4 +50,4 @@ source .venv/bin/activate && python training/train_text_heads.py   # retrain the
 
 ## Safety notes
 
-Not therapy. Not a person. If you deploy this for real people, verify the helpline numbers in `lib/safety/resources.ts` against current sources first.
+Not therapy. Not a person. Helplines default to India (Tele-MANAS 14416, Kiran 1800-599-0019, Vandrevala, AASRA, iCall; emergency 112) with per-user region override. Verify the numbers in `lib/safety/resources.ts` against current sources before serving real people.

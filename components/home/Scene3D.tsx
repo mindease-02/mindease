@@ -16,8 +16,11 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
+import { THEME_EVENT, currentPalette, type Palette } from "@/lib/theme";
 
-export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{ x: number; y: number }> }) {
+export interface Drag { active: boolean; vx: number; vy: number }
+
+export default function Scene3D({ pointer, drag, lite = false }: { pointer: React.MutableRefObject<{ x: number; y: number }>; drag: React.MutableRefObject<Drag>; lite?: boolean }) {
   const host = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,20 +29,21 @@ export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{
     let raf = 0, running = true;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, lite ? 1.25 : 1.5));
     renderer.setSize(el.clientWidth, el.clientHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
-    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.enabled = !lite;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     el.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
     // Opaque, graded ground so bloom has something to composite onto; the canvas
     // edges are masked in CSS so the frame dissolves into the page's atmosphere.
-    scene.background = new THREE.Color(0x090a0f);
-    scene.fog = new THREE.FogExp2(0x090a0f, 0.035);
+    const pal0 = currentPalette();
+    scene.background = new THREE.Color(pal0.bg2);
+    scene.fog = new THREE.FogExp2(pal0.bg2, 0.035);
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
@@ -51,23 +55,22 @@ export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{
     // as light, not as texture. Threshold high enough that the body stays matte.
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    const bloom = new UnrealBloomPass(new THREE.Vector2(el.clientWidth, el.clientHeight), 0.42, 0.65, 0.82);
-    composer.addPass(bloom);
+    if (!lite) composer.addPass(new UnrealBloomPass(new THREE.Vector2(el.clientWidth, el.clientHeight), 0.42, 0.65, 0.82));
     composer.addPass(new OutputPass());
 
     // Lighting: warm key, cool rim, soft fill. The environment does the reflections.
-    const key = new THREE.DirectionalLight(0xffd7c2, 2.2);
+    const key = new THREE.DirectionalLight(new THREE.Color(pal0.accent2).lerp(new THREE.Color(0xffffff), 0.6), 2.2);
     key.position.set(3, 4, 3); key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024); key.shadow.radius = 6; key.shadow.bias = -0.0005;
     scene.add(key);
-    const rim = new THREE.DirectionalLight(0x7fd0e0, 1.6); rim.position.set(-4, 1.5, -3); scene.add(rim);
+    const rim = new THREE.DirectionalLight(pal0.cool, 1.6); rim.position.set(-4, 1.5, -3); scene.add(rim);
     scene.add(new THREE.AmbientLight(0x1b1e2a, 1.2));
 
     const group = new THREE.Group(); scene.add(group);
 
     const coral = new THREE.MeshPhysicalMaterial({
-      color: 0xf0876a, metalness: 0.15, roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.08,
-      sheen: 0.4, sheenColor: new THREE.Color(0xffb59a), envMapIntensity: 1.1,
+      color: pal0.accent, metalness: 0.15, roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.08,
+      sheen: 0.4, sheenColor: new THREE.Color(pal0.accent2), envMapIntensity: 1.1,
     });
     const core = new THREE.Mesh(new THREE.SphereGeometry(1.35, 96, 96), coral);
     core.castShadow = true; group.add(core);
@@ -76,7 +79,17 @@ export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{
     const ring = new THREE.Mesh(new THREE.TorusGeometry(2.25, 0.035, 24, 220), ringMat);
     ring.rotation.x = Math.PI / 2.35; ring.castShadow = true; group.add(ring);
 
-    const satMat = new THREE.MeshPhysicalMaterial({ color: 0x7fd0e0, metalness: 0.2, roughness: 0.15, clearcoat: 1, emissive: 0x0e2a30, emissiveIntensity: 0.6 });
+    const satMat = new THREE.MeshPhysicalMaterial({ color: pal0.cool, metalness: 0.2, roughness: 0.15, clearcoat: 1, emissive: new THREE.Color(pal0.cool).multiplyScalar(0.25), emissiveIntensity: 0.6 });
+
+    // Follow the site palette when the orb in "why it exists" changes it.
+    const onTheme = (e: Event) => {
+      const pal = (e as CustomEvent<Palette>).detail;
+      coral.color.set(pal.accent); coral.sheenColor.set(pal.accent2);
+      satMat.color.set(pal.cool); satMat.emissive.set(pal.cool).multiplyScalar(0.25);
+      rim.color.set(pal.cool); key.color.set(pal.accent2).lerp(new THREE.Color(0xffffff), 0.6);
+      (scene.background as THREE.Color).set(pal.bg2); (scene.fog as THREE.FogExp2).color.set(pal.bg2);
+    };
+    window.addEventListener(THEME_EVENT, onTheme);
     const sats: THREE.Mesh[] = [];
     for (let i = 0; i < 3; i++) {
       const s = new THREE.Mesh(new THREE.SphereGeometry(0.11 + i * 0.03, 32, 32), satMat);
@@ -88,7 +101,7 @@ export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{
     floor.rotation.x = -Math.PI / 2; floor.position.y = -2.15; floor.receiveShadow = true; scene.add(floor);
 
     // Ambient particles.
-    const N = 220;
+    const N = lite ? 120 : 220;
     const pos = new Float32Array(N * 3);
     for (let i = 0; i < N; i++) { pos[i * 3] = (Math.random() - 0.5) * 12; pos[i * 3 + 1] = (Math.random() - 0.5) * 8; pos[i * 3 + 2] = (Math.random() - 0.5) * 6 - 1; }
     const pGeo = new THREE.BufferGeometry(); pGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
@@ -97,6 +110,7 @@ export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const target = { x: 0, y: 0 }; const cur = { x: 0, y: 0 };
+    let spinY = 0, spinX = 0; // drag-driven rotation with inertia
     const clock = new THREE.Clock();
     const started = performance.now();
     const easeOut = (p: number) => 1 - Math.pow(1 - p, 3);
@@ -106,8 +120,12 @@ export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{
       const t = clock.getElapsedTime();
       target.x = pointer.current.x; target.y = pointer.current.y;
       cur.x += (target.x - cur.x) * 0.05; cur.y += (target.y - cur.y) * 0.05;
-      group.rotation.y = cur.x * 0.45 + (reduced ? 0 : t * 0.08);
-      group.rotation.x = -cur.y * 0.3;
+      // Drag: while touching, velocity feeds the spin directly; on release it decays.
+      const d = drag.current;
+      if (d.active) { spinY += d.vx * 0.012; spinX += d.vy * 0.008; d.vx *= 0.6; d.vy *= 0.6; }
+      else { spinY *= 0.985; spinX *= 0.985; }
+      group.rotation.y = cur.x * 0.45 + (reduced ? 0 : t * 0.08) + spinY;
+      group.rotation.x = Math.max(-0.9, Math.min(0.9, -cur.y * 0.3 + spinX));
       group.position.y = reduced ? 0 : Math.sin(t * 0.6) * 0.12;
       ring.rotation.z = reduced ? 0 : t * 0.12;
       sats.forEach((s, i) => {
@@ -137,11 +155,12 @@ export default function Scene3D({ pointer }: { pointer: React.MutableRefObject<{
     return () => {
       running = false; cancelAnimationFrame(raf); ro.disconnect(); io.disconnect();
       document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener(THEME_EVENT, onTheme);
       pmrem.dispose(); composer.dispose(); renderer.dispose(); el.removeChild(renderer.domElement);
       [core, ring, ...sats, floor].forEach((m) => { m.geometry.dispose(); (m.material as THREE.Material).dispose(); });
       pGeo.dispose();
     };
-  }, [pointer]);
+  }, [pointer, drag, lite]);
 
   return <div ref={host} className="absolute inset-0 scene-mask" aria-hidden />;
 }

@@ -26,8 +26,11 @@ export const HELPLINES: Helpline[] = [
   { region: "GB", name: "Samaritans", contact: "Call 116 123", url: "https://www.samaritans.org", note: "24/7, free" },
   { region: "GB", name: "Shout", contact: "Text SHOUT to 85258", url: "https://giveusashout.org" },
   { region: "IE", name: "Samaritans Ireland", contact: "Call 116 123", url: "https://www.samaritans.org/ireland" },
-  { region: "IN", name: "Tele-MANAS", contact: "Call 14416 or 1-800-891-4416", url: "https://telemanas.mohfw.gov.in", note: "24/7, multiple languages" },
+  { region: "IN", name: "Tele-MANAS (Govt. of India)", contact: "Call 14416 or 1800-891-4416", url: "https://telemanas.mohfw.gov.in", note: "24/7, free, 20+ languages" },
+  { region: "IN", name: "Kiran Mental Health Helpline", contact: "Call 1800-599-0019", note: "24/7, free" },
+  { region: "IN", name: "Vandrevala Foundation", contact: "Call or WhatsApp +91 9999 666 555", url: "https://www.vandrevalafoundation.com", note: "24/7" },
   { region: "IN", name: "AASRA", contact: "Call +91 9820466726", url: "http://www.aasra.info", note: "24/7" },
+  { region: "IN", name: "iCall (TISS)", contact: "Call +91 9152987821", url: "https://icallhelpline.org", note: "Mon-Sat, 10am-8pm" },
   { region: "AU", name: "Lifeline Australia", contact: "Call 13 11 14", url: "https://www.lifeline.org.au" },
   { region: "CA", name: "9-8-8 Suicide Crisis Helpline", contact: "Call or text 988", url: "https://988.ca" },
   { region: "NZ", name: "1737 Need to talk?", contact: "Call or text 1737", url: "https://1737.org.nz" },
@@ -42,15 +45,18 @@ export const EMERGENCY_NUMBERS: Record<string, string> = {
   NZ: "111", DE: "112", FR: "112", ZA: "10111", EU: "112",
 };
 
+/** Default region when none is known. This deployment serves India first. */
+export const DEFAULT_REGION = "IN";
+
 export function helplinesFor(region?: string): Helpline[] {
-  const code = (region ?? "").toUpperCase();
+  const code = (region || DEFAULT_REGION).toUpperCase();
   const local = HELPLINES.filter((h) => h.region === code);
   const global = HELPLINES.filter((h) => h.region === "*");
   return [...local, ...global];
 }
 
 export function emergencyFor(region?: string): string {
-  return EMERGENCY_NUMBERS[(region ?? "").toUpperCase()] ?? "your local emergency number";
+  return EMERGENCY_NUMBERS[(region || DEFAULT_REGION).toUpperCase()] ?? "your local emergency number";
 }
 
 /**

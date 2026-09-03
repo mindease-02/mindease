@@ -13,6 +13,7 @@ import { emptyBandit } from "../proactive/bandit";
 import { DEFAULT_CONSENT } from "../proactive/policy";
 import { emptyCusum } from "../trend/cusum";
 import { emptyEwma } from "../trend/ewma";
+import { DEFAULT_REGION } from "../safety/resources";
 import { MemoryStore } from "./memory";
 import { UpstashStore } from "./upstash";
 import type { Store, UserState } from "./types";
@@ -56,7 +57,7 @@ export function newUserState(
     displayName,
     createdAt: Date.now(),
     timeZone,
-    region,
+    region: region || DEFAULT_REGION,
     consent: {
       ...DEFAULT_CONSENT,
       enabled: proactive,

@@ -17,7 +17,11 @@ export default function Reveal({ children, as: Tag = "div", className = "", ...r
       for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
     }, { rootMargin: "0px 0px -10% 0px", threshold: 0.1 });
     targets.filter((t) => !t.classList.contains("in")).forEach((t) => io.observe(t));
-    return () => io.disconnect();
+    // Belt and braces for browsers that throttle observers (older mobile Safari,
+    // low-power mode): a scroll listener reveals anything that has entered view.
+    const onScroll = () => { for (const t of targets) if (!t.classList.contains("in") && t.getBoundingClientRect().top < window.innerHeight * 0.92) t.classList.add("in"); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { io.disconnect(); window.removeEventListener("scroll", onScroll); };
   }, []);
   const T = Tag as unknown as React.ElementType;
   return <T ref={ref} className={className} {...rest}>{children}</T>;

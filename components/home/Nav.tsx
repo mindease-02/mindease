@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Magnetic from "./Magnetic";
 
-const LINKS = [["#features", "What it does"], ["#showcase", "How it thinks"], ["#story", "Why"], ["#start", "Start"]];
+const LINKS = [["#features", "What it does"], ["#story", "Why"], ["#start", "Start"]];
 
 export default function Nav({ chatHref, signedIn }: { chatHref: string; signedIn: boolean }) {
   const [scrolled, setScrolled] = useState(false);

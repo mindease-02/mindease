@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { currentSession } from "@/lib/auth";
 import { getStore, migrate } from "@/lib/store";
-import { mirrorView } from "@/lib/pipeline/mirror";
+import { userView } from "@/lib/pipeline/userView";
 import { loadOrCreate } from "@/lib/pipeline/turn";
 
 export const runtime = "nodejs";
@@ -15,7 +15,7 @@ export async function GET(req: Request) {
   const store = getStore();
   const state = migrate(await loadOrCreate(session.userId, session.name, tz));
   const outbox = await store.drainOutbox(session.userId);
-  const mirror = url.searchParams.get("mirror") === "1" ? mirrorView(state) : null;
+  const mirror = url.searchParams.get("mirror") === "1" ? userView(state) : null;
   const arrival = state.arrival && Date.now() - state.arrival.at < 6 * 3600_000 ? state.arrival : null;
   return NextResponse.json({ name: state.displayName, outbox, mirror, arrival, messages: state.consent.storeTranscript ? state.messages.slice(-60) : [] });
 }

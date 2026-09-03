@@ -1,14 +1,13 @@
 "use client";
 import { useState } from "react";
-import type { MirrorView } from "@/lib/pipeline/mirror";
+import type { UserView } from "@/lib/pipeline/userView";
 import AxisWheel from "./AxisWheel";
 import Sparkline from "./Sparkline";
 
 interface Props {
-  mirror: MirrorView | null;
+  mirror: UserView | null;
   onClose: () => void;
   onSettings: (body: Record<string, unknown>) => Promise<void>;
-  onPreview: (kind: string) => Promise<void>;
   onLogout: () => void;
   busy: boolean;
   push: { supported: boolean; enabled: boolean; subscribed: boolean; subscribe: () => Promise<string | null>; unsubscribe: () => Promise<void> };
@@ -37,125 +36,64 @@ function Toggle({ label, hint, value, onChange }: { label: string; hint?: string
   );
 }
 
-export default function MirrorPanel({ mirror, onClose, onSettings, onPreview, onLogout, busy, push, onToast }: Props) {
-  const [tab, setTab] = useState<"read" | "checkins" | "memory" | "settings">("read");
+/**
+ * The Mirror, kept small on purpose: how you seem, what Ori remembers, and the
+ * switches. The detector maths, gate verdicts and safety log exist but are not
+ * a thing a person needs in front of them while talking.
+ */
+export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, busy, push, onToast }: Props) {
+  const [tab, setTab] = useState<"you" | "memory" | "settings">("you");
   if (!mirror) return null;
   const m = mirror;
   const c = m.consent;
 
   return (
-    <aside className="fixed inset-y-0 right-0 z-30 flex w-full max-w-md flex-col bg-clay-bg shadow-[-12px_0_30px_rgba(89,70,55,.18)]">
+    <aside className="fixed inset-y-0 right-0 z-30 flex w-full max-w-md flex-col bg-clay-bg shadow-[-12px_0_30px_rgba(0,0,0,.5)]">
       <header className="flex items-center justify-between px-5 pb-3 pt-5">
         <div>
-          <h2 className="font-serif text-xl">The Mirror</h2>
-          <p className="text-xs text-clay-muted">Everything Ori currently believes about you. Yours to read and delete.</p>
+          <h2 className="display text-xl">The Mirror</h2>
+          <p className="text-xs text-clay-muted">What Ori has of you. Yours to read, change and delete.</p>
         </div>
         <button className="clay-btn px-3 py-2" onClick={onClose} aria-label="close">✕</button>
       </header>
       <nav className="flex gap-1 px-5 pb-3">
-        {(["read", "checkins", "memory", "settings"] as const).map((t) => (
+        {(["you", "memory", "settings"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`rounded-full px-3 py-1.5 text-xs capitalize ${tab === t ? "bg-clay-slate text-clay-surface shadow-clay-sm" : "text-clay-muted"}`}>
-            {t === "checkins" ? "check-ins" : t}
+            {t === "memory" ? "memories" : t}
           </button>
         ))}
       </nav>
 
       <div className="thin-scroll flex-1 space-y-3 overflow-y-auto px-5 pb-8">
-        {tab === "read" && (
+        {tab === "you" && (
           <>
-            <Section title="Mood over recent turns" hint="Valence, -1 to +1. Dots fade with low confidence.">
-              <Sparkline points={m.mood.points} />
-              <div className="mt-2 flex flex-wrap gap-2 text-xs text-clay-muted">
-                <span className="clay-chip">now {m.mood.now ?? "–"}</span>
-                <span className="clay-chip">baseline {m.mood.baseline ?? "–"}</span>
-                <span className="clay-chip">momentum {m.mood.momentum}</span>
-              </div>
+            <Section title="How you seem right now" hint="A guess, not a verdict. Correct it in the chat.">
+              <p className="text-sm">{m.seem.sentence}</p>
+              {m.seem.states.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{m.seem.states.map((s) => <span key={s} className="clay-chip">{s}</span>)}</div>}
+              {m.seem.why && <p className="mt-2 text-xs text-clay-muted">{m.seem.why}</p>}
             </Section>
-            <Section title="Eight axes" hint="Coral: today. Blue: your recent climate.">
-              {m.octant ? (
-                <>
-                  <AxisWheel weather={m.octant.weather} climate={m.octant.climate} />
-                  <p className="mt-2 text-xs text-clay-muted">{m.octant.summary}</p>
-                  {m.octant.shift.length > 0 && <p className="mt-1 text-xs text-clay-muted">Moved today: {m.octant.shift.map((s) => `${s.axis} ${s.delta > 0 ? "↑" : "↓"}`).join(", ")}</p>}
-                </>
-              ) : <p className="text-xs text-clay-muted">Say something first.</p>}
+            {m.octant && (
+              <Section title="Your shape today" hint="Brighter: today. Softer: the last few days.">
+                <AxisWheel weather={m.octant.weather} climate={m.octant.climate} />
+              </Section>
+            )}
+            <Section title="Mood across recent conversations">
+              <Sparkline points={m.mood} />
             </Section>
-            <Section title="Last read" hint="Model-based. A hypothesis, not a verdict - correct it in the chat.">
-              {m.analysis ? (
-                <div className="space-y-2 text-sm">
-                  {m.analysis.states.length > 0 && <div className="flex flex-wrap gap-1.5">{m.analysis.states.map((s) => <span key={s.name} className="clay-chip">{s.name} {(s.intensity * 100).toFixed(0)}%</span>)}</div>}
-                  {m.analysis.why && <p className="text-clay-muted"><span className="text-clay-ink">Why, from your side:</span> {m.analysis.why}</p>}
-                  <p className="text-xs text-clay-muted">
-                    Surface {m.analysis.expressed.valence.toFixed(2)} · underneath {m.analysis.feeling.valence.toFixed(2)} · masking {(m.analysis.masking * 100).toFixed(0)}%
-                    {m.analysis.maskingNote && <> — {m.analysis.maskingNote}</>}
-                  </p>
-                  <p className="text-xs text-clay-muted">Seems to want: {m.analysis.need} · intensity {(m.analysis.intensity * 100).toFixed(0)}% · source: {m.analysis.source}</p>
-                </div>
-              ) : <p className="text-xs text-clay-muted">Nothing yet.</p>}
-            </Section>
-            <Section title="Trend" hint={`${m.trend.historyPoints} points tracked. Needs 12+ over 5+ days before it says anything.`}>
-              {m.trend.sufficient ? (
-                <>
-                  <p className="text-sm">Signal {m.trend.score.toFixed(2)} · {m.trend.agreement}/4 detectors agree</p>
-                  <ul className="mt-1 list-disc pl-4 text-xs text-clay-muted">{m.trend.evidence.map((e, i) => <li key={i}>{e}</li>)}{!m.trend.evidence.length && <li>nothing notable</li>}</ul>
-                </>
-              ) : <p className="text-xs text-clay-muted">Not enough history yet - and it won&apos;t guess.</p>}
-            </Section>
-            <Section title="Reliance" hint="Goes up when you're here more and mentioning people less. Ori pulls back when it climbs.">
-              <p className="text-sm capitalize">{m.dependency.tier} <span className="text-xs text-clay-muted">({m.dependency.index})</span></p>
-              <ul className="mt-1 list-disc pl-4 text-xs text-clay-muted">{m.dependency.reasons.map((r, i) => <li key={i}>{r}</li>)}</ul>
-            </Section>
-            <Section title="Mismatch detector" hint="When your words and the rest disagree. Ori only mentions it after two turns in a row, and logs whether you agreed.">
-              <p className="text-sm">Current streak: {m.incongruence.streak}{m.incongruence.accuracy !== null && <span className="text-xs text-clay-muted"> · you agreed {(m.incongruence.accuracy * 100).toFixed(0)}% of the times it was raised</span>}</p>
-              {m.incongruence.recent.length > 0 && <ul className="mt-1 text-xs text-clay-muted">{m.incongruence.recent.map((e) => <li key={e.at}>{new Date(e.at).toLocaleString()} · gap {e.gap} · masking {e.masking}{e.mentioned ? " · raised" : ""}{e.confirmed === true ? " · you agreed" : e.confirmed === false ? " · you disagreed" : ""}</li>)}</ul>}
-            </Section>
-            <Section title="Safety log" hint="Every message that reached the serious tiers, and whether the deterministic filter or the model's second opinion caught it.">
-              {m.riskLog.length ? (
-                <ul className="text-xs text-clay-muted">{m.riskLog.map((r) => <li key={r.at} className="py-0.5">{new Date(r.at).toLocaleString()} · <span className="text-clay-coral">{r.tier}</span> · {r.source}{r.raised ? " (raised by model)" : ""} · {r.matched.slice(0, 3).join(", ")}</li>)}</ul>
-              ) : <p className="text-xs text-clay-muted">Nothing logged.</p>}
-            </Section>
-          </>
-        )}
-
-        {tab === "checkins" && (
-          <>
-            <Section title="Would Ori reach out right now?" hint="Every gate, in order. One 'no' is enough.">
-              <p className="text-sm">{m.checkin.wouldSend ? `Yes - a "${m.checkin.kind}" message` : `No${m.checkin.blockedBy ? ` - stopped by: ${m.checkin.blockedBy.replace(/_/g, " ")}` : ""}`}</p>
-              <ul className="mt-2 space-y-1">
-                {m.checkin.gates.map((g) => (
-                  <li key={g.name} className="flex gap-2 text-xs">
-                    <span className={g.passed ? "text-clay-sage-shade" : "text-clay-coral"}>{g.passed ? "●" : "○"}</span>
-                    <span><span className="text-clay-ink">{g.name.replace(/_/g, " ")}</span> <span className="text-clay-muted">— {g.detail}</span></span>
-                  </li>
-                ))}
-              </ul>
-            </Section>
-            <Section title="Preview a check-in" hint="Sends one now, without touching your budget. So you can see what each kind sounds like.">
-              <div className="flex flex-wrap gap-1.5">
-                {["morning", "evening", "inactivity", "observation", "callback", "light_touch", "bridge"].map((k) => (
-                  <button key={k} disabled={busy} onClick={() => onPreview(k)} className="clay-btn px-3 py-1.5 text-xs">{k.replace("_", " ")}</button>
-                ))}
-              </div>
-            </Section>
-            <Section title="What has landed" hint="Which kinds of check-in have helped you, learned over time. Reward is mood trajectory, never engagement.">
-              <ul className="text-xs text-clay-muted">{m.bandit.map((b) => <li key={b.kind} className="flex justify-between py-0.5"><span>{b.kind.replace("_", " ")}</span><span>{(b.mean * 100).toFixed(0)}% · {b.pulls} sent</span></li>)}</ul>
-            </Section>
-            <Section title="Recent unprompted messages">
-              {m.outreach.length ? (
-                <ul className="text-xs text-clay-muted">{m.outreach.map((o) => <li key={o.at} className="py-0.5">{new Date(o.at).toLocaleString()} · {o.kind.replace("_", " ")}{o.engaged === true ? " · answered" : o.engaged === false ? " · ignored" : ""}{o.rejected ? " · marked unhelpful" : ""}</li>)}</ul>
-              ) : <p className="text-xs text-clay-muted">None yet.</p>}
+            <Section title="Would Ori write to you first today?">
+              <p className="text-sm">{m.checkin.wouldSend ? "Yes" : "Not right now"} <span className="text-xs text-clay-muted">— {m.checkin.reason}</span></p>
             </Section>
           </>
         )}
 
         {tab === "memory" && (
-          <Section title={`What Ori remembers (${m.memories.length})`} hint="Short facts, extracted from what you said. Delete any of them.">
+          <Section title={`What Ori remembers (${m.memories.length})`} hint="Short facts from what you've said. Delete any of them.">
             {m.memories.length ? (
               <ul className="space-y-2">
                 {m.memories.map((mem) => (
-                  <li key={mem.id} className="flex items-start gap-2 rounded-2xl bg-clay-bg-deep p-3 shadow-clay-in">
+                  <li key={mem.id} className="flex items-start gap-2 rounded-2xl bg-clay-bg-deep p-3">
                     <div className="flex-1 text-sm">
-                      <div className="text-[10px] uppercase tracking-wider text-clay-muted">{mem.kind}{mem.era ? ` · ${mem.era}` : ""} · {new Date(mem.at).toLocaleDateString()}{mem.recallCount ? ` · recalled ${mem.recallCount}×` : ""}</div>
+                      <div className="text-[10px] uppercase tracking-wider text-clay-muted">{mem.kind}{mem.era ? ` · ${mem.era}` : ""} · {new Date(mem.at).toLocaleDateString()}</div>
                       {mem.text}
                     </div>
                     <button disabled={busy} onClick={() => onSettings({ forgetMemoryId: mem.id })} className="text-xs text-clay-muted hover:text-clay-coral" aria-label="forget">forget</button>
@@ -168,22 +106,11 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onPreview, on
 
         {tab === "settings" && (
           <>
-            <Section title="Unprompted check-ins">
-              <Toggle label="Let Ori reach out first" value={c.enabled} onChange={(v) => onSettings({ consent: { enabled: v } })} />
-              <Toggle label="Mornings" hint="One short opener between 08:00 and 11:00, if you haven't written yet." value={c.cadence.morning} onChange={(v) => onSettings({ consent: { cadence: { morning: v } } })} />
-              <Toggle label="Isolated evenings" hint="Between 18:00 and 21:30, only when the day read as isolated." value={c.cadence.evening} onChange={(v) => onSettings({ consent: { cadence: { evening: v } } })} />
-              <div className="flex items-center justify-between py-1.5 text-sm">
-                <span>After silence<span className="block text-xs text-clay-muted">Hours before one nudge. 0 = never.</span></span>
-                <input type="number" min={0} max={240} className="clay-input w-20 py-1.5 text-center" defaultValue={c.cadence.inactivityHours} onBlur={(e) => onSettings({ consent: { cadence: { inactivityHours: Number(e.target.value) } } })} />
-              </div>
-              <div className="flex items-center justify-between py-1.5 text-sm">
-                <span>Max per day</span>
-                <input type="number" min={0} max={6} className="clay-input w-20 py-1.5 text-center" defaultValue={c.dailyMax} onBlur={(e) => onSettings({ consent: { dailyMax: Number(e.target.value) } })} />
-              </div>
-              <div className="flex items-center justify-between py-1.5 text-sm">
-                <span>Max per week</span>
-                <input type="number" min={0} max={21} className="clay-input w-20 py-1.5 text-center" defaultValue={c.weeklyBudget} onBlur={(e) => onSettings({ consent: { weeklyBudget: Number(e.target.value) } })} />
-              </div>
+            <Section title="Check-ins">
+              <Toggle label="Let Ori write to me first" value={c.enabled} onChange={(v) => onSettings({ consent: { enabled: v } })} />
+              <Toggle label="Mornings" value={c.cadence.morning} onChange={(v) => onSettings({ consent: { cadence: { morning: v } } })} />
+              <Toggle label="Quiet evenings" hint="Only when the day looked isolated." value={c.cadence.evening} onChange={(v) => onSettings({ consent: { cadence: { evening: v } } })} />
+              <Toggle label="After a long silence" value={c.cadence.inactivityHours > 0} onChange={(v) => onSettings({ consent: { cadence: { inactivityHours: v ? 36 : 0 } } })} />
               <div className="flex items-center justify-between gap-2 py-1.5 text-sm">
                 <span>Quiet hours<span className="block text-xs text-clay-muted">{c.timeZone}</span></span>
                 <div className="flex items-center gap-1">
@@ -192,33 +119,28 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onPreview, on
                   <input type="number" min={0} max={23.5} step={0.5} className="clay-input w-16 py-1.5 text-center" defaultValue={c.quietTo} onBlur={(e) => onSettings({ consent: { quietTo: Number(e.target.value) } })} />
                 </div>
               </div>
-              <Toggle label="Notify me when the tab is closed" hint={!push.supported ? "Not supported in this browser." : !push.enabled ? "Not configured on the server (VAPID keys)." : `Unprompted messages arrive as OS notifications. ${m.pushDevices} device${m.pushDevices === 1 ? "" : "s"} registered.`}
+              <Toggle label="Notify me when the tab is closed" hint={!push.supported ? "Not supported in this browser." : !push.enabled ? "Not set up on the server yet." : `${m.pushDevices} device${m.pushDevices === 1 ? "" : "s"} registered.`}
                 value={push.subscribed} onChange={async (v) => { if (v) { const err = await push.subscribe(); if (err) onToast(err); } else await push.unsubscribe(); await onSettings({}); }} />
               <div className="mt-2 flex flex-wrap gap-2">
-                <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: 3 })}>Pause for 3 days</button>
-                {m.pausedUntil && m.pausedUntil > Date.now() && <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: null })}>Unpause (paused until {new Date(m.pausedUntil).toLocaleDateString()})</button>}
+                <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: 3 })}>Give me 3 days of space</button>
+                {m.pausedUntil && m.pausedUntil > Date.now() && <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: null })}>Unpause</button>}
               </div>
             </Section>
-            <Section title="Signals" hint="Each is off until you turn it on. Raw audio and keystrokes never leave your device - only ~10 aggregate numbers do.">
-              <Toggle label="Voice tone" hint="Pitch range, pace, pauses, loudness - relative to your own baseline." value={c.voiceSignals} onChange={(v) => onSettings({ consent: { voiceSignals: v } })} />
-              <Toggle label="Typing rhythm" hint="Speed, hesitation, deleting-and-rewriting. Never which keys." value={c.typingSignals} onChange={(v) => onSettings({ consent: { typingSignals: v } })} />
-              <Toggle label="Expression (camera)" hint="Runs a face model in your browser while you type; sends two numbers per message. No image ever leaves your device. Weakest signal, weighted lowest." value={c.faceSignals} onChange={(v) => onSettings({ consent: { faceSignals: v } })} />
-              <Toggle label="Let Ori mention them" hint="Whether it may say 'you sound flatter than usual' out loud." value={c.allowBehaviouralSignals} onChange={(v) => onSettings({ consent: { allowBehaviouralSignals: v } })} />
-              <Toggle label="Keep conversation history" hint="Off = only mood points are kept; Ori forgets the words between sessions." value={c.storeTranscript} onChange={(v) => onSettings({ consent: { storeTranscript: v } })} />
-              <div className="flex items-center justify-between py-1.5 text-sm">
-                <span>Keep messages for<span className="block text-xs text-clay-muted">days · older text is deleted automatically</span></span>
-                <input type="number" min={1} max={365} className="clay-input w-20 py-1.5 text-center" defaultValue={c.retentionDays} onBlur={(e) => onSettings({ consent: { retentionDays: Number(e.target.value) } })} />
-              </div>
+            <Section title="What Ori may read" hint="Off until you turn it on. Raw audio, keystrokes and camera frames never leave your device.">
+              <Toggle label="Tone of voice" value={c.voiceSignals} onChange={(v) => onSettings({ consent: { voiceSignals: v } })} />
+              <Toggle label="Typing rhythm" value={c.typingSignals} onChange={(v) => onSettings({ consent: { typingSignals: v } })} />
+              <Toggle label="Expression (camera)" value={c.faceSignals} onChange={(v) => onSettings({ consent: { faceSignals: v } })} />
+              <Toggle label="Let it mention them" hint="Whether Ori may say 'you sound flatter than usual'." value={c.allowBehaviouralSignals} onChange={(v) => onSettings({ consent: { allowBehaviouralSignals: v } })} />
+              <Toggle label="Keep conversation history" hint="Off = Ori forgets the words between sessions." value={c.storeTranscript} onChange={(v) => onSettings({ consent: { storeTranscript: v } })} />
             </Section>
             <Section title="Crisis lines shown for">
-              <select className="clay-input" defaultValue={m.helplines[0]?.region === "*" ? "" : m.helplines[0]?.region} onChange={(e) => onSettings({ region: e.target.value })}>
-                <option value="">Not set (global list)</option>
-                {["US", "GB", "IE", "IN", "AU", "CA", "NZ", "DE", "FR", "ZA"].map((r) => <option key={r} value={r}>{r}</option>)}
+              <select className="clay-input" defaultValue={m.region ?? "IN"} onChange={(e) => onSettings({ region: e.target.value })}>
+                {["IN", "US", "GB", "IE", "AU", "CA", "NZ", "DE", "FR", "ZA"].map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
             </Section>
             <Section title="Your data">
               <div className="flex flex-wrap gap-2">
-                <a href="/api/export" className="clay-btn px-3 py-1.5 text-xs">Export everything (JSON)</a>
+                <a href="/api/export" className="clay-btn px-3 py-1.5 text-xs">Download everything</a>
                 <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => { if (confirm("Delete all history, memories and messages? This can't be undone.")) onSettings({ clearAll: true }); }}>Delete everything</button>
                 <button className="clay-btn px-3 py-1.5 text-xs" onClick={onLogout}>Sign out</button>
               </div>

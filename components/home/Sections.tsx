@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Reveal from "./Reveal";
 import Magnetic from "./Magnetic";
+import ThemeOrb from "./ThemeOrb";
 
 /* ---------------------------------------------------------------- Features */
 const FEATURES = [
@@ -44,63 +45,6 @@ export function Features() {
   );
 }
 
-/* ---------------------------------------------------------------- Showcase */
-export function Showcase() {
-  const vis = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = vis.current; if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const r = el.getBoundingClientRect();
-        const p = Math.max(-1, Math.min(1, (window.innerHeight / 2 - (r.top + r.height / 2)) / window.innerHeight));
-        el.style.setProperty("--sy", String(p * 0.6));
-        el.style.setProperty("--spin", `${p * 40}deg`);
-        el.querySelectorAll<HTMLElement>(".msg").forEach((m, i) => { m.style.transform = `translateZ(${40 + i * 25}px) translateY(${-p * (18 + i * 10)}px)`; });
-      });
-    };
-    const onMove = (e: MouseEvent) => { const r = el.getBoundingClientRect(); el.style.setProperty("--sx", String((e.clientX - r.left) / r.width - 0.5)); };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true }); el.addEventListener("mousemove", onMove);
-    return () => { window.removeEventListener("scroll", onScroll); el.removeEventListener("mousemove", onMove); cancelAnimationFrame(raf); };
-  }, []);
-
-  return (
-    <Reveal as="section" id="showcase" className="block">
-      <div className="container">
-        <div className="sec-head">
-          <div className="eyebrow" data-reveal>How it thinks</div>
-          <h2 className="display" data-reveal style={{ ["--d" as string]: "80ms" }}>Every reply has a reason you can read.</h2>
-          <p data-reveal style={{ ["--d" as string]: "160ms" }}>The same steps run on every message. Open the Mirror panel in the app and you'll see them for real.</p>
-        </div>
-        <div className="show">
-          <div ref={vis} className="show-visual" data-reveal>
-            <div className="plate">
-              <div className="ring" /><div className="core" />
-              <div className="msg you" style={{ top: "10%" }}>i'm fine. just can't sleep. keep thinking about the meeting</div>
-              <div className="msg ori" style={{ top: "40%" }}><span className="k">read · masking 0.6 · anxiety 0.7</span>You've said “fine” and then described a night of not sleeping. Which half should I believe?</div>
-              <div className="msg you" style={{ bottom: "20%" }}>ok not fine</div>
-              <div className="msg ori" style={{ bottom: "2%" }}><span className="k">move · validate the feeling, not the conclusion</span>Makes sense you're braced for it. What's the actual evidence, either way?</div>
-            </div>
-          </div>
-          <div className="steps">
-            {[
-              ["Read", "Intensity, eight axes, nuanced states, and what you seem to need — to vent, to solve, or company."],
-              ["Check the gap", "When the words don't match the rest, Ori lowers its confidence and asks. It never overrides you."],
-              ["Remember", "Retrieves the people and plans you've mentioned, so it can be specific."],
-              ["Choose the move", "One register, one move. Never a list of tips, never two questions at once."],
-            ].map(([t, d], i) => (
-              <div className="step" key={t} data-reveal style={{ ["--d" as string]: `${i * 100}ms` }}><i>{i + 1}</i><div><h4>{t}</h4><p>{d}</p></div></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </Reveal>
-  );
-}
-
 /* ------------------------------------------------------------------- Story */
 export function Story() {
   return (
@@ -115,10 +59,7 @@ export function Story() {
             Ori measures how much you lean on it. When that climbs, it gets shorter, says so, and points you back toward people. It is software and never pretends otherwise. It won't tell you it's waiting — it isn't running. Success is this mattering less over time.
           </p>
         </div>
-        <div className="frame glass" data-reveal style={{ ["--d" as string]: "160ms" }}>
-          <div className="glow" /><div className="orb" /><div className="reflect" />
-          <div className="label">a bridge, not a destination</div>
-        </div>
+        <ThemeOrb />
       </div>
     </Reveal>
   );
@@ -192,10 +133,10 @@ export function Footer() {
         <div className="foot">
           <div>
             <div className="display" style={{ fontSize: "1.6rem" }}>MindEase</div>
-            <p className="muted" style={{ maxWidth: "24rem", fontWeight: 300, lineHeight: 1.6, marginTop: 10 }}>Ori is software, and says so. If you're in crisis, use a helpline — the app shows real ones automatically.</p>
+            <p className="muted" style={{ maxWidth: "24rem", fontWeight: 300, lineHeight: 1.6, marginTop: 10 }}>Ori is software, and says so. If you're in crisis, call a helpline — the app shows real Indian lines automatically, and never invents a number.</p>
           </div>
-          <div><h5>Product</h5><a href="#features">What it does</a><a href="#showcase">How it thinks</a><a href="#story">Why</a></div>
-          <div><h5>Crisis lines</h5><a href="https://988lifeline.org" target="_blank" rel="noreferrer">US · 988</a><a href="https://www.samaritans.org" target="_blank" rel="noreferrer">UK · 116 123</a><a href="https://findahelpline.com" target="_blank" rel="noreferrer">Everywhere · findahelpline.com</a></div>
+          <div><h5>Product</h5><a href="#features">What it does</a><a href="#story">Why</a><a href="#start">Start</a></div>
+          <div><h5>Crisis lines · India</h5><a href="https://telemanas.mohfw.gov.in" target="_blank" rel="noreferrer">Tele-MANAS · 14416</a><a href="tel:18005990019">Kiran · 1800-599-0019</a><a href="https://www.vandrevalafoundation.com" target="_blank" rel="noreferrer">Vandrevala · +91 9999 666 555</a><a href="tel:112">Emergency · 112</a></div>
           <div><h5>Source</h5><a href="https://github.com/mindease-02/mindease" target="_blank" rel="noreferrer">GitHub</a><Link href="/login">Sign in</Link></div>
         </div>
         <div className="foot-bottom"><span>© {new Date().getFullYear()} MindEase</span><span>Not therapy · Not a person · Not private from you</span></div>

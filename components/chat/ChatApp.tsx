@@ -8,7 +8,7 @@ import { useTypingMetrics } from "../hooks/useTypingMetrics";
 import { useVoiceFeatures } from "../hooks/useVoiceFeatures";
 import { useFaceAffect } from "../hooks/useFaceAffect";
 import { usePush } from "../hooks/usePush";
-import type { MirrorView } from "@/lib/pipeline/mirror";
+import type { UserView } from "@/lib/pipeline/userView";
 import type { TurnResult } from "@/lib/pipeline/turn";
 import type { ProsodyFeatures } from "@/lib/affect/prosody";
 import type { Helpline } from "@/lib/safety/resources";
@@ -39,7 +39,7 @@ export default function ChatApp({ name }: { name: string }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
-  const [mirror, setMirror] = useState<MirrorView | null>(null);
+  const [mirror, setMirror] = useState<UserView | null>(null);
   const [showMirror, setShowMirror] = useState(false);
   const [crisis, setCrisis] = useState<{ helplines: Helpline[]; emergency: string } | null>(null);
   const [tint, setTint] = useState<{ warm: number; cool: number; dim: number }>({ warm: 0.5, cool: 0.3, dim: 0 });
@@ -175,14 +175,6 @@ export default function ChatApp({ name }: { name: string }) {
     try { await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); await refresh(true); }
     finally { setBusy(false); }
   }
-  async function preview(kind: string) {
-    setBusy(true);
-    try {
-      await fetch("/api/checkin/evaluate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ force: kind }) });
-      await refresh(true);
-      setShowMirror(false);
-    } finally { setBusy(false); }
-  }
   async function notUseful(m: Msg) {
     await fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ at: m.at, kind: m.kind }) });
     setToast("Noted. That kind of check-in will come less.");
@@ -238,7 +230,7 @@ export default function ChatApp({ name }: { name: string }) {
         </p>
       </footer>
 
-      {showMirror && <MirrorPanel mirror={mirror} onClose={() => setShowMirror(false)} onSettings={settings} onPreview={preview} onLogout={logout} busy={busy} push={push} onToast={setToast} />}
+      {showMirror && <MirrorPanel mirror={mirror} onClose={() => setShowMirror(false)} onSettings={settings} onLogout={logout} busy={busy} push={push} onToast={setToast} />}
       {toast && <div className="clay-dark fixed bottom-24 left-1/2 z-40 -translate-x-1/2 px-4 py-2 text-sm">{toast}</div>}
     </div>
   );

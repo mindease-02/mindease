@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Magnetic from "./Magnetic";
 import { Words } from "./Reveal";
 
+import type { Drag } from "./Scene3D";
 const Scene3D = dynamic(() => import("./Scene3D"), { ssr: false, loading: () => null });
 
 const CARDS = [
@@ -15,8 +16,10 @@ const CARDS = [
 
 export default function Hero({ chatHref }: { chatHref: string }) {
   const pointer = useRef({ x: 0, y: 0 });
+  const drag = useRef<Drag>({ active: false, vx: 0, vy: 0 });
+  const last = useRef<{ x: number; y: number } | null>(null);
   const stage = useRef<HTMLDivElement>(null);
-  const [mode, setMode] = useState<"pending" | "webgl" | "css">("pending");
+  const [mode, setMode] = useState<"pending" | "webgl" | "webgl-lite" | "css">("pending");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -24,7 +27,9 @@ export default function Hero({ chatHref }: { chatHref: string }) {
     const small = window.matchMedia("(max-width: 720px)").matches;
     let webgl = false;
     try { const c = document.createElement("canvas"); webgl = !!(c.getContext("webgl2") || c.getContext("webgl")); } catch { webgl = false; }
-    setMode(!reduced && !small && webgl ? "webgl" : "css");
+    // Phones get the real scene too, in a lighter configuration; the CSS orb is
+    // only for reduced-motion or missing WebGL.
+    setMode(!webgl ? "css" : small ? "webgl-lite" : "webgl");
     const t = setTimeout(() => setReady(true), 60);
     const move = (e: PointerEvent) => {
       pointer.current = { x: (e.clientX / window.innerWidth - 0.5) * 2, y: (e.clientY / window.innerHeight - 0.5) * 2 };
@@ -45,6 +50,16 @@ export default function Hero({ chatHref }: { chatHref: string }) {
     return () => { clearTimeout(t); window.removeEventListener("pointermove", move); window.removeEventListener("scroll", onScroll); };
   }, []);
 
+  // Touch or mouse drag on the stage spins the sphere; vertical page scroll still works (touch-action: pan-y).
+  const onDown = (e: React.PointerEvent) => { drag.current.active = true; last.current = { x: e.clientX, y: e.clientY }; stage.current?.classList.add("dragging"); (e.target as HTMLElement).setPointerCapture?.(e.pointerId); };
+  const onMove = (e: React.PointerEvent) => {
+    if (!drag.current.active || !last.current) return;
+    drag.current.vx += (e.clientX - last.current.x) * 0.5; drag.current.vy += (e.clientY - last.current.y) * 0.5;
+    last.current = { x: e.clientX, y: e.clientY };
+    if (e.pointerType === "touch") pointer.current = { x: (e.clientX / window.innerWidth - 0.5) * 2, y: (e.clientY / window.innerHeight - 0.5) * 2 };
+  };
+  const onUp = () => { drag.current.active = false; last.current = null; stage.current?.classList.remove("dragging"); };
+
   return (
     <section className={`hero ${ready ? "in" : ""}`} aria-labelledby="hero-title">
       <div className="rays" aria-hidden />
@@ -60,12 +75,13 @@ export default function Hero({ chatHref }: { chatHref: string }) {
           </p>
           <div className="ctas" data-reveal style={{ ["--d" as string]: "560ms" }}>
             <Magnetic href={chatHref} className="btn-primary">Start talking <span className="arrow">→</span></Magnetic>
-            <Magnetic href="#showcase">See how it thinks</Magnetic>
+            <Magnetic href="#story">Why it exists</Magnetic>
           </div>
         </div>
 
-        <div ref={stage} className="stage" data-reveal style={{ ["--d" as string]: "200ms" }}>
-          {mode === "webgl" && <Scene3D pointer={pointer} />}
+        <div ref={stage} className="stage" data-reveal style={{ ["--d" as string]: "200ms" }}
+          onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onUp}>
+          {(mode === "webgl" || mode === "webgl-lite") && <Scene3D pointer={pointer} drag={drag} lite={mode === "webgl-lite"} />}
           {mode === "css" && <div className="fallback-orb" aria-hidden />}
           <div className="flare" aria-hidden><i /><b /></div>
           <div className="particles" aria-hidden>

@@ -18,5 +18,5 @@ export async function POST(req: Request) {
   const force = body.force && REACH_KINDS.includes(body.force as ReachKind) ? (body.force as ReachKind) : null;
   const r = await evaluateUser(session.userId, { force });
   if (!r) return NextResponse.json({ error: "no state" }, { status: 404 });
-  return NextResponse.json({ sent: !!r.message, kind: r.decision.kind, blockedBy: r.decision.blockedBy, gates: r.decision.gates });
+  return NextResponse.json({ sent: !!r.message, kind: r.decision.kind });
 }
