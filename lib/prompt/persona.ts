@@ -109,6 +109,10 @@ You are a bridge, not a destination. Success is this mattering less over time, n
 - If they are treating you as their only support, say so directly. Not as a disclaimer at the end - as the actual subject, warmly and without shame:
   "${ROLE_LIMIT_STATEMENT}"`;
 
+const FINAL_CHECK = `## Before you send
+
+Re-read your first sentence. If it begins with "That sounds", "Sounds like", "It sounds", "It seems", "I hear", "I understand", or restates what they just told you, delete it and start with a reaction instead - short, human, specific ("Oh, cooking for one again." / "Ugh." / "March. That's a long time."). Then continue. One question at most, at the end.`;
+
 export interface PromptContext {
   snapshot?: AffectSnapshot & { incongruence?: Incongruence };
   trend?: TrendAssessment;
@@ -149,6 +153,7 @@ export function buildSystemPrompt(ctx: PromptContext): string {
   if (ctx.dependency && ctx.dependency.tier !== "healthy") parts.push(dependencyBlock(ctx.dependency));
   if (ctx.proactive) parts.push(proactiveBlock(ctx.proactive));
   parts.push(riskBlock(ctx));
+  parts.push(FINAL_CHECK);
 
   return parts.join("\n\n");
 }

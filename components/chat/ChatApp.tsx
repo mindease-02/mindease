@@ -193,11 +193,12 @@ export default function ChatApp({ name }: { name: string }) {
   useEffect(() => { if ("Notification" in window && Notification.permission === "default") Notification.requestPermission().catch(() => {}); }, []);
 
   return (
-    <div className="flex h-screen flex-col">
-      <header className="flex items-center gap-3 px-4 py-3 sm:px-6">
+    <div className="chat relative z-[1] flex h-screen flex-col" style={{ ["--warm" as string]: tint.warm, ["--cool" as string]: tint.cool, ["--dim" as string]: tint.dim }}>
+      <div className="presence" aria-hidden><i /><b /></div>
+      <header className="chat-head flex items-center gap-3 px-4 py-3 sm:px-6">
         <Orb size={40} tint={tint} />
         <div className="leading-tight">
-          <div className="font-serif text-lg">Ori</div>
+          <div className="display text-lg">Ori</div>
           <div className="text-[11px] text-clay-muted">software &middot; here for {name} &middot; <a href="/mood" className="underline decoration-dotted">change mood</a></div>
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -222,7 +223,7 @@ export default function ChatApp({ name }: { name: string }) {
       </div>
 
       <footer className="px-4 pb-4 pt-2 sm:px-6">
-        <form className="mx-auto flex max-w-2xl items-end gap-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
+        <form className="composer glass mx-auto flex max-w-2xl items-end gap-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
           <button type="button" onClick={toggleVoice} disabled={busy} aria-label={voice.recording ? "stop recording" : "record a voice message"}
             className={`clay-btn relative h-12 w-12 shrink-0 overflow-hidden rounded-full p-0 ${voice.recording ? "bg-clay-coral text-white" : ""}`}>
             {voice.recording && <span className="meter absolute inset-x-0 bottom-0 bg-white/30" style={{ transform: `scaleY(${voice.level})`, height: "100%" }} />}

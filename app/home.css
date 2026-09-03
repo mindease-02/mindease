@@ -248,3 +248,59 @@ body:has(> .world) { background: #07080b; }
   .world .bars { display: none; }
   .world .hero .copy, .world .hero .stage { transform: none; opacity: 1; }
 }
+
+/* Chat in the film world ------------------------------------------------------
+   The chat components keep their clay class names; inside .world they resolve to
+   glass, so behaviour and markup are untouched. */
+.world.chat-world { height: 100svh; overflow: hidden; }
+.world .chat { color: var(--ink); }
+.world .chat-head { position: relative; z-index: 2; background: linear-gradient(rgba(7,8,11,.7), rgba(7,8,11,0)); }
+.world .presence { position: absolute; right: -8%; top: -14%; width: min(58vw, 720px); aspect-ratio: 1; pointer-events: none; z-index: 0; }
+.world .presence i { position: absolute; inset: 0; border-radius: 50%; filter: blur(2px);
+  background:
+    radial-gradient(circle at 34% 30%, rgba(255,255,255,.85), rgba(255,255,255,0) 32%),
+    radial-gradient(circle at 62% 70%, rgba(127,208,224, calc(.25 + var(--cool, .3) * .5)), rgba(127,208,224,0) 55%),
+    linear-gradient(145deg, rgba(255,181,154, calc(1 - var(--dim, 0) * .5)), rgba(239,122,90, calc(.85 - var(--dim, 0) * .4)) 55%, #4a1d16);
+  box-shadow: 0 60px 160px -30px rgba(240,135,106, calc(.35 + var(--warm, .5) * .3)), inset -60px -80px 140px rgba(0,0,0,.55);
+  animation: breathe-p 9s ease-in-out infinite; opacity: .55; }
+.world .presence b { position: absolute; left: -10%; right: -10%; top: 46%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,215,195,.7), transparent); filter: blur(1.5px); mix-blend-mode: screen; animation: flare 8s ease-in-out infinite; }
+@keyframes breathe-p { 0%,100% { transform: scale(1); } 50% { transform: scale(1.035); } }
+.world .orb { box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 14px 40px -10px rgba(240,135,106,.75), 0 0 60px -10px rgba(240,135,106,.45); }
+.world .bubble-user { background: #eeece7; color: #1c1a17; border-radius: 20px 20px 6px 20px; padding: 12px 16px; box-shadow: 0 30px 60px -30px rgba(0,0,0,.9); }
+.world .bubble-ai { background: rgba(18,20,28,.72); color: var(--ink); border: 1px solid var(--line-2); border-radius: 20px 20px 20px 6px; padding: 12px 16px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 30px 60px -30px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.06); }
+.world .bubble-proactive { background: linear-gradient(160deg, rgba(240,135,106,.28), rgba(240,135,106,.10)); color: var(--ink); border: 1px solid rgba(240,135,106,.35); border-radius: 20px 20px 20px 6px; padding: 12px 16px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 30px 60px -30px rgba(240,135,106,.5); }
+.world .composer { padding: 8px; border-radius: 999px; }
+.world .composer .clay-input { background: transparent; box-shadow: none; border: 0; color: var(--ink); padding: 12px 10px; }
+.world .composer .clay-input::placeholder { color: var(--ink-3); }
+.world .composer .clay-input:focus { box-shadow: none; }
+.world .clay-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 999px; padding: 10px 16px; font-size: .85rem; font-weight: 500; color: var(--ink); background: var(--glass); border: 1px solid var(--line-2); box-shadow: none; transition: background .3s, border-color .3s, transform .4s var(--ease); }
+.world .clay-btn:hover { background: var(--glass-2); border-color: rgba(255,255,255,.28); }
+.world .clay-btn:active { transform: scale(.98); }
+.world .clay-btn.bg-clay-peach, .world .clay-btn.bg-clay-coral { background: linear-gradient(135deg, #ff9d7d, #ef7a5a 60%, #d9634a); color: #1a0d09; border-color: transparent; }
+.world .clay-btn-primary { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 10px 20px; font-weight: 500; color: #1a0d09; background: linear-gradient(135deg, #ff9d7d, #ef7a5a 60%, #d9634a); border: 0; box-shadow: 0 10px 40px -10px rgba(240,135,106,.6), inset 0 1px 0 rgba(255,255,255,.35); transition: box-shadow .4s, transform .4s var(--ease), opacity .3s; }
+.world .clay-btn-primary:hover { box-shadow: 0 16px 50px -10px rgba(240,135,106,.75), inset 0 1px 0 rgba(255,255,255,.4); }
+.world .clay-btn-primary:disabled { opacity: .45; }
+.world .clay-input { background: rgba(255,255,255,.05); border: 1px solid var(--line-2); color: var(--ink); box-shadow: none; border-radius: 14px; }
+.world .clay-input:focus { border-color: var(--coral); box-shadow: none; --tw-ring-color: transparent; }
+.world .clay-chip { background: var(--glass); border: 1px solid var(--line); color: var(--ink-2); box-shadow: none; }
+.world .clay, .world .clay-sm { background: var(--glass); border: 1px solid var(--line); box-shadow: none; border-radius: 18px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.world .clay-dark { background: rgba(12,13,18,.92); border: 1px solid var(--line-2); color: var(--ink); box-shadow: 0 40px 80px -30px rgba(0,0,0,.9); border-radius: 22px; }
+.world .bg-clay-bg { background: rgba(9,10,15,.92); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+.world .bg-clay-bg-deep { background: rgba(255,255,255,.05); }
+.world .bg-clay-surface { background: var(--glass); }
+.world .bg-clay-slate { background: var(--ink); }
+.world .bg-clay-coral { background: var(--coral); }
+.world .bg-clay-peach { background: rgba(240,135,106,.25); }
+.world .bg-clay-muted { background: var(--ink-2); }
+.world .text-clay-ink, .world .text-clay-ink\/80 { color: var(--ink); }
+.world .text-clay-muted, .world .text-clay-muted\/70, .world .text-clay-muted\/80 { color: var(--ink-2); }
+.world .text-clay-surface { color: var(--bg); }
+.world .text-clay-haze, .world .text-clay-haze\/80, .world .text-clay-haze\/70 { color: var(--ink-2); }
+.world .text-clay-coral { color: var(--coral-2); }
+.world .text-clay-sage-shade { color: #9fb59a; }
+.world .border-clay-line\/60 { border-color: var(--line); }
+.world .shadow-clay, .world .shadow-clay-sm, .world .shadow-clay-in, .world .shadow-clay-dark { box-shadow: none; }
+.world .thin-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.14); }
+.world select.clay-input option { background: #14161c; }
+.world .accent-clay-coral { accent-color: var(--coral); }
+@media (max-width: 720px) { .world .presence { right: -30%; top: -10%; width: 90vw; opacity: .8; } }
