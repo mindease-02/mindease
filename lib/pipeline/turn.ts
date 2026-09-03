@@ -13,6 +13,8 @@ import { loadTextModels } from "../affect/models";
 import { buildSnapshot } from "../affect/fuse";
 import { prosodyReading, type ProsodyFeatures } from "../affect/prosody";
 import { typingReading, type TypingFeatures } from "../affect/typing";
+import { faceReading, type FaceFeatures } from "../affect/face";
+import { secondOpinion, assessmentForTier } from "../safety/secondOpinion";
 import { octantFromVAD, updateOctant } from "../affect/octant";
 import type { ChannelReading, VAD } from "../affect/types";
 import { updateBaseline } from "../util/stats";
@@ -29,7 +31,7 @@ import { extractMemories } from "../memory/extract";
 import { pickReminiscence } from "../memory/reminiscence";
 import { buildSystemPrompt, AGENT_NAME } from "../prompt/persona";
 import { getStore, migrate, newUserState } from "../store";
-import { HISTORY_LIMIT, MESSAGE_LIMIT, MEMORY_LIMIT, type StoredMessage, type UserState } from "../store/types";
+import { HISTORY_LIMIT, MESSAGE_LIMIT, MEMORY_LIMIT, RISK_LOG_LIMIT, INCONGRUENCE_LOG_LIMIT, RATE_LIMIT, type StoredMessage, type UserState } from "../store/types";
 import { DAY, HOUR } from "../util/time";
 
 export interface TurnInput {
@@ -40,6 +42,7 @@ export interface TurnInput {
   region?: string;
   prosody?: ProsodyFeatures;
   typing?: TypingFeatures;
+  face?: FaceFeatures;
   /** Messages the client is holding but the server may not (no transcript storage). */
   clientContext?: { role: "user" | "assistant"; content: string }[];
 }
@@ -59,6 +62,12 @@ export interface TurnResult {
   memoriesUsed: { id: string; text: string }[];
   newMemories: { id: string; text: string; kind: string }[];
   llmConfigured: boolean;
+  /** Set when the model second opinion raised the tier above the regex. */
+  riskRaised?: boolean;
+}
+
+export class RateLimitError extends Error {
+  constructor(public retryAfterMs: number) { super("Slow down a little - that's a lot of messages in ten minutes."); }
 }
 
 export async function loadOrCreate(userId: string, displayName: string, timeZone?: string, region?: string): Promise<UserState> {
@@ -68,6 +77,9 @@ export async function loadOrCreate(userId: string, displayName: string, timeZone
     const s = migrate(existing);
     if (timeZone && s.timeZone !== timeZone) { s.timeZone = timeZone; s.consent.timeZone = timeZone; }
     if (displayName && s.displayName !== displayName) s.displayName = displayName;
+    // Transcript retention: drop message text older than the person's setting.
+    const keepFrom = Date.now() - (s.consent.retentionDays || 30) * DAY;
+    if (s.messages.some((m) => m.at < keepFrom)) s.messages = s.messages.filter((m) => m.at >= keepFrom);
     return s;
   }
   const fresh = newUserState(userId, displayName, timeZone ?? "UTC", region);
@@ -81,8 +93,21 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   const state = await loadOrCreate(input.userId, input.displayName, input.timeZone, input.region);
   const text = input.text.trim();
 
-  // 1. Risk. Deterministic, first, unsuppressable.
-  const risk = assessRisk(text);
+  // 0. Rate limit, per person.
+  if (now - state.rate.windowStart > RATE_LIMIT.windowMs) state.rate = { windowStart: now, count: 0 };
+  state.rate.count++;
+  if (state.rate.count > RATE_LIMIT.max) {
+    await store.put(state);
+    throw new RateLimitError(state.rate.windowStart + RATE_LIMIT.windowMs - now);
+  }
+
+  // 1. Risk. Deterministic, first, unsuppressable. The model may only raise it.
+  let risk = assessRisk(text);
+  const second = await secondOpinion(text, risk);
+  if (second.raised) risk = assessmentForTier(second.tier, risk, second.reason);
+  if (atLeast(risk.tier, "active")) {
+    state.riskLog = [...state.riskLog, { at: now, tier: risk.tier, source: (second.raised ? "model" : "regex") as "model" | "regex", matched: risk.matched, raised: second.raised }].slice(-RISK_LOG_LIMIT);
+  }
   if (atLeast(risk.tier, "passive") && (risk.tier !== state.risk.tier || now - state.risk.at > 2 * DAY)) {
     state.risk = { tier: risk.tier, at: now };
   } else if (atLeast(risk.tier, state.risk.tier) && risk.tier !== "none") {
@@ -116,6 +141,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
       };
     }
   }
+  if (input.face && state.consent.faceSignals) readings.push(faceReading(input.face, now));
   const snapshot = buildSnapshot(readings, ta.emotions, ta.markers, now);
 
   // 3. Model analysis (wider vocabulary, ESCAPE split, theory of mind), with the
@@ -136,6 +162,19 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   };
   const confidence = Math.max(snapshot.confidence, analysis.source === "model" ? Math.min(0.85, 0.45 + ta.reading.coverage * 0.5) : 0);
   const incongruent = snapshot.incongruence.present || analysis.masking > 0.6;
+
+  // Incongruence calibration: was last turn's flag confirmed or denied? Then the
+  // streak - the prompt only gets to mention a mismatch once it has held for two turns.
+  const lastInc = state.incongruence.log[state.incongruence.log.length - 1];
+  if (lastInc && lastInc.mentioned && lastInc.confirmed === undefined && now - lastInc.at < 2 * HOUR) {
+    if (/\b(you'?re right|yeah|yes|true|fair|i guess so|not really fine|not fine)\b/i.test(text)) lastInc.confirmed = true;
+    else if (/\b(no|i'?m fine|i am fine|really fine|actually fine|wrong|nope)\b/i.test(text)) lastInc.confirmed = false;
+  }
+  state.incongruence.streak = incongruent ? state.incongruence.streak + 1 : 0;
+  const surfaceIncongruence = incongruent && state.incongruence.streak >= 2;
+  if (incongruent) {
+    state.incongruence.log = [...state.incongruence.log, { at: now, gap: Number(snapshot.incongruence.magnitude.toFixed(2)), masking: Number(analysis.masking.toFixed(2)), mentioned: surfaceIncongruence }].slice(-INCONGRUENCE_LOG_LIMIT);
+  }
 
   // 4. State update.
   const point: MoodPoint = {
@@ -183,6 +222,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     allowBehaviouralSignals: state.consent.allowBehaviouralSignals,
     analysis, octant: state.octant, memories: memoriesUsed, reminiscence,
     displayName: state.displayName, localTime: localTimeString(now, state.timeZone),
+    surfaceIncongruence,
   });
   const history = context.slice(-16).map((m) => ({ role: m.role, content: m.content }));
   let reply: string;
@@ -218,6 +258,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     memoriesUsed: memoriesUsed.map((m) => ({ id: m.id, text: m.text })),
     newMemories: extracted.map((m) => ({ id: m.id, text: m.text, kind: m.kind })),
     llmConfigured: configured,
+    riskRaised: second.raised || undefined,
   };
 }
 

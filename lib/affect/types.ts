@@ -23,7 +23,7 @@ export interface Precision {
   dominance: number;
 }
 
-export type Channel = "text" | "prosody" | "typing" | "rhythm" | "self_report";
+export type Channel = "text" | "prosody" | "typing" | "face" | "rhythm" | "self_report";
 
 export interface ChannelReading {
   channel: Channel;

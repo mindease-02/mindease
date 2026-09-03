@@ -16,7 +16,12 @@ Samantha's warmth, 2049's atmosphere, and a design that refuses to be Joi: Ori i
 | Response generation | `lib/prompt/` | Cognitive empathy over affective mimicry; register templates keyed to **intensity band** (low/moderate/high/acute) so the reply mirrors weight and pace without catching distress; validation patterns that separate feeling from conclusion. |
 | Safety | `lib/safety/` | Deterministic crisis triage runs before the model on every turn, cannot be suppressed, is over-sensitive on purpose. Helplines are **hard-coded** (988, Samaritans, Tele-MANAS…) and rendered by the UI — the model never recites a number. |
 | Anti-dependency | `lib/dependency/` | Reliance index = contact rising while references to other people fall. Tiers apply countermeasures: shorter replies, name the dynamic, point outward, decline the primary role. |
-| Transparency | `components/chat/MirrorPanel.tsx` | Every inference, every check-in gate, every memory, every consent switch. |
+| Transparency | `components/chat/MirrorPanel.tsx` | Every inference, every check-in gate, every memory, every consent switch, the safety log, the mismatch-detector calibration, export and delete. |
+| Face channel | `lib/affect/face.ts`, `components/hooks/useFaceAffect.ts` | Opt-in. MediaPipe Face Landmarker runs in the browser and reduces blendshapes to two numbers per message. Lowest-weighted channel; no image leaves the device. |
+| Safety second opinion | `lib/safety/secondOpinion.ts` | The fast model reviews messages the regex found clean and may **raise** the tier (never lower). Every serious-tier turn is written to an audit log. |
+| Web Push | `lib/push.ts`, `public/sw.js`, `app/api/push/` | Second-consent OS notifications for unprompted messages when the tab is closed (VAPID). |
+| Hardening | `lib/store/crypto.ts`, `app/api/export/` | AES-256-GCM at rest (`DATA_ENCRYPTION_KEY`), JSON export, transcript retention, per-user rate limiting. |
+| Training | `training/` | Parity-checked hashing, GoEmotions trainer → `models/emotion.model.json`, DPO/LoRA skeleton, empathy judge + preference-pair builder in `scripts/`. |
 
 ## Stack
 
@@ -30,14 +35,17 @@ Next.js 15 (App Router) · Groq (gpt-oss-120b chat, gpt-oss-20b analysis, Whispe
 cp .env.example .env.local   # then paste your GROQ_API_KEY
 npm install
 npm run dev                  # http://localhost:3000
-npm test                     # crisis, policy, memory, octant tests
+npm test                     # crisis, safety-eval, trajectory, policy, memory, octant, parity
+npx tsx scripts/judge-empathy.ts          # rubric-score live replies (needs the Groq key)
+source .venv/bin/activate && python training/train_text_heads.py   # retrain the text head
 ```
 
 ## Deploy to Vercel
 
 1. Push this repo to GitHub, then **Import** it at vercel.com/new.
 2. In *Environment Variables* add `GROQ_API_KEY`, `SESSION_SECRET` (any long random string), `CRON_SECRET` (same), and — for proactive check-ins to work when nobody has the tab open — `KV_REST_API_URL` + `KV_REST_API_TOKEN` from the Upstash integration (Marketplace → Upstash → Redis).
-3. `vercel.json` schedules `/api/checkin/sweep` hourly. On the Hobby plan Vercel runs crons once a day at most; the in-app scheduler covers the rest while the tab is open.
+3. Optional hardening: `DATA_ENCRYPTION_KEY` (`openssl rand -hex 32`) and `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` (`npx web-push generate-vapid-keys`) for push.
+4. `vercel.json` schedules `/api/checkin/sweep` hourly. On the Hobby plan Vercel runs crons once a day at most; the in-app scheduler covers the rest while the tab is open.
 
 ## Safety notes
 

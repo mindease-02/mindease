@@ -6,6 +6,8 @@ import CrisisCard from "./CrisisCard";
 import MirrorPanel from "./MirrorPanel";
 import { useTypingMetrics } from "../hooks/useTypingMetrics";
 import { useVoiceFeatures } from "../hooks/useVoiceFeatures";
+import { useFaceAffect } from "../hooks/useFaceAffect";
+import { usePush } from "../hooks/usePush";
 import type { MirrorView } from "@/lib/pipeline/mirror";
 import type { TurnResult } from "@/lib/pipeline/turn";
 import type { ProsodyFeatures } from "@/lib/affect/prosody";
@@ -33,6 +35,8 @@ export default function ChatApp({ name }: { name: string }) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const typing = useTypingMetrics();
   const voice = useVoiceFeatures();
+  const face = useFaceAffect();
+  const push = usePush();
   const tz = useRef(Intl.DateTimeFormat().resolvedOptions().timeZone);
 
   const scroll = useCallback(() => { requestAnimationFrame(() => listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" })); }, []);
@@ -74,6 +78,15 @@ export default function ChatApp({ name }: { name: string }) {
 
   useEffect(() => { if (showMirror) refresh(true); }, [showMirror, refresh]);
 
+  // Camera follows the consent switch; the model is only downloaded once it is on.
+  const faceConsent = mirror?.consent.faceSignals ?? false;
+  useEffect(() => {
+    if (faceConsent && !face.active) face.start();
+    if (!faceConsent && face.active) face.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [faceConsent]);
+  useEffect(() => { if (face.error) setToast(`Camera: ${face.error}`); }, [face.error]);
+
   async function say(text: string) {
     try {
       const r = await fetch("/api/voice/speak", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
@@ -91,6 +104,7 @@ export default function ChatApp({ name }: { name: string }) {
     const text = (textOverride ?? input).trim();
     if (!text || sending) return;
     const typingFeatures = typing.finish(text.length);
+    const faceFeatures = face.active ? face.collect() : undefined;
     setInput("");
     setVoiceNote(null);
     const at = Date.now();
@@ -100,7 +114,7 @@ export default function ChatApp({ name }: { name: string }) {
       const clientContext = messages.slice(-10).map((m) => ({ role: m.role, content: m.content }));
       const r = await fetch("/api/chat", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, timeZone: tz.current, prosody: prosody ?? voiceNote ?? undefined, typing: typingFeatures, clientContext }),
+        body: JSON.stringify({ text, timeZone: tz.current, prosody: prosody ?? voiceNote ?? undefined, typing: typingFeatures, face: faceFeatures, clientContext }),
       });
       if (r.status === 401) { router.push("/login"); return; }
       const j = (await r.json()) as TurnResult & { error?: string };
@@ -202,11 +216,11 @@ export default function ChatApp({ name }: { name: string }) {
           <button type="submit" disabled={sending || !input.trim()} className="clay-btn-primary h-12 shrink-0 rounded-full px-5">Send</button>
         </form>
         <p className="mx-auto mt-2 max-w-2xl text-center text-[10px] text-clay-muted">
-          {voiceNote ? "voice tone captured for this message · " : ""}Ori is software, not a therapist. In crisis, use a helpline.
+          {voiceNote ? "voice tone captured · " : ""}{face.active ? "expression on · " : ""}Ori is software, not a therapist. In crisis, use a helpline.
         </p>
       </footer>
 
-      {showMirror && <MirrorPanel mirror={mirror} onClose={() => setShowMirror(false)} onSettings={settings} onPreview={preview} onLogout={logout} busy={busy} />}
+      {showMirror && <MirrorPanel mirror={mirror} onClose={() => setShowMirror(false)} onSettings={settings} onPreview={preview} onLogout={logout} busy={busy} push={push} onToast={setToast} />}
       {toast && <div className="clay-dark fixed bottom-24 left-1/2 z-40 -translate-x-1/2 px-4 py-2 text-sm">{toast}</div>}
     </div>
   );

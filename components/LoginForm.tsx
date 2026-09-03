@@ -6,6 +6,7 @@ export default function LoginForm() {
   const router = useRouter();
   const [identifier, setIdentifier] = useState("");
   const [proactive, setProactive] = useState(true);
+  const [adult, setAdult] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,8 +46,18 @@ export default function LoginForm() {
         </span>
       </label>
 
+      <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-[20px] bg-clay-bg-deep p-4 shadow-clay-in">
+        <input type="checkbox" className="mt-1 accent-clay-coral" checked={adult} onChange={(e) => setAdult(e.target.checked)} />
+        <span className="text-sm">
+          <span className="font-medium">I&apos;m 18 or over, and I understand what this is.</span>
+          <span className="mt-1 block text-xs leading-relaxed text-clay-muted">
+            Ori is software, not a therapist or a crisis service, and can&apos;t diagnose or treat anything. It keeps short memories and mood estimates about you, which you can read, export and delete at any time.
+          </span>
+        </span>
+      </label>
+
       {error && <p className="mt-4 text-sm text-clay-coral">{error}</p>}
-      <button className="clay-btn-primary mt-6 w-full" disabled={busy || !identifier.trim()}>{busy ? "Opening…" : "Continue"}</button>
+      <button className="clay-btn-primary mt-6 w-full" disabled={busy || !identifier.trim() || !adult}>{busy ? "Opening…" : "Continue"}</button>
       <p className="mt-4 text-center text-[11px] leading-relaxed text-clay-muted">
         Ori is software, not a therapist. If you're in crisis, use a helpline - the app shows them automatically.
       </p>

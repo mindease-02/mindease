@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Orb from "@/components/Orb";
-import { Cta, Features, Hero, HowItWorks, Safety } from "@/components/landing/Sections";
+import { Cta, Features, Hero, HowItDecides, Safety } from "@/components/landing/Sections";
 import { currentSession } from "@/lib/auth";
 
 export default async function Home() {
@@ -15,14 +15,14 @@ export default async function Home() {
             <span className="font-serif text-xl tracking-tight">MindEase</span>
           </Link>
           <nav className="flex items-center gap-2">
-            <a href="#how" className="clay-btn hidden sm:inline-flex">How it works</a>
+            <a href="#how" className="clay-btn hidden sm:inline-flex">How it decides</a>
             <Link href={chatHref} className="clay-btn-primary">{session ? `Chat as ${session.name}` : "Chat"}</Link>
           </nav>
         </div>
       </header>
       <Hero chatHref={chatHref} />
+      <HowItDecides />
       <Features />
-      <HowItWorks />
       <Safety />
       <Cta chatHref={chatHref} />
       <footer className="px-6 pb-10 text-center text-xs text-clay-muted">

@@ -46,6 +46,13 @@ export function mirrorView(state: UserState, now = Date.now()) {
     bandit: armSummary(state.bandit),
     memories: state.memories.slice().sort((a, b) => b.at - a.at).map((m) => ({ id: m.id, kind: m.kind, text: m.text, at: m.at, importance: m.importance, recallCount: m.recallCount, era: m.era ?? null })),
     risk: state.risk,
+    riskLog: state.riskLog.slice(-10).reverse(),
+    incongruence: {
+      streak: state.incongruence.streak,
+      recent: state.incongruence.log.slice(-8).reverse(),
+      accuracy: (() => { const j = state.incongruence.log.filter((e) => e.confirmed !== undefined); return j.length ? j.filter((e) => e.confirmed).length / j.length : null; })(),
+    },
+    pushDevices: state.push.length,
     helplines: helplinesFor(state.region),
     emergency: emergencyFor(state.region),
     messages: state.consent.storeTranscript ? state.messages.slice(-60) : [],

@@ -114,6 +114,8 @@ export interface PromptContext {
   reminiscence?: ReminiscenceMove | null;
   displayName?: string;
   localTime?: string;
+  /** Only true once incongruence has held for two consecutive turns. */
+  surfaceIncongruence?: boolean;
 }
 
 export function buildSystemPrompt(ctx: PromptContext): string {
@@ -124,7 +126,7 @@ export function buildSystemPrompt(ctx: PromptContext): string {
   }
   if (ctx.memories?.length) parts.push(memoryBlock(ctx.memories));
   if (ctx.snapshot) parts.push(affectBlock(ctx));
-  if (ctx.analysis) parts.push(analysisBlock(ctx.analysis, ctx.octant));
+  if (ctx.analysis) parts.push(analysisBlock(ctx.analysis, ctx.octant, ctx.surfaceIncongruence ?? false));
   if (ctx.analysis) parts.push(registerBlock(ctx.analysis.intensity, ctx.analysis.need));
   if (ctx.reminiscence) parts.push(reminiscenceBlock(ctx.reminiscence));
   if (ctx.trend?.sufficient) parts.push(trendBlock(ctx.trend));
@@ -145,7 +147,7 @@ function memoryBlock(memories: MemoryItem[]): string {
   ].join("\n");
 }
 
-function analysisBlock(a: AffectAnalysis, octant?: OctantState): string {
+function analysisBlock(a: AffectAnalysis, octant?: OctantState, surface = false): string {
   const lines = [
     "## Reading this turn (model-based; inference, not fact)",
     "",
@@ -159,7 +161,9 @@ function analysisBlock(a: AffectAnalysis, octant?: OctantState): string {
   const gap = a.feeling.valence - a.expressed.valence;
   if (a.masking > 0.4) {
     lines.push(`- What the words show vs what they seem to feel: surface ${fmtV(a.expressed.valence)}, underneath ${fmtV(a.feeling.valence)} (masking ${a.masking.toFixed(2)}).${a.maskingNote ? " " + a.maskingNote : ""}`);
-    lines.push("  Hold both. You may gently name the gap once, as a question, and accept their answer.");
+    lines.push(surface
+      ? "  Hold both. You may gently name the gap once, as a question, and accept their answer."
+      : "  Hold both, but do not name the gap yet - it is the first turn it has appeared. Let it shape your pace, not your words.");
   } else if (Math.abs(gap) > 0.3) {
     lines.push(`- Slight gap between presented and felt tone (${gap > 0 ? "feeling better than they let on" : "putting a braver face on it"}).`);
   }
@@ -215,7 +219,7 @@ function affectBlock(ctx: PromptContext): string {
     lines.push("", "Confidence is low. Do not act on this reading - ask, plainly, rather than inferring at them.");
   }
 
-  if (s.incongruence?.present && ctx.allowBehaviouralSignals) {
+  if (s.incongruence?.present && ctx.allowBehaviouralSignals && ctx.surfaceIncongruence) {
     lines.push(
       "",
       `**Mismatch detected.** ${s.incongruence.description}`,
@@ -224,6 +228,8 @@ function affectBlock(ctx: PromptContext): string {
       "\"You're saying you're alright, and you might be. You also sound flatter than you usually do. Which one is more true today?\" " +
       "If they say they are fine, accept it and move on. Insisting you know better than they do is not care, it is surveillance with a warm voice.",
     );
+  } else if (s.incongruence?.present && ctx.allowBehaviouralSignals) {
+    lines.push("", "A mismatch was detected this turn but it is the first time. Do not mention it yet - wait to see if it holds.");
   } else if (s.incongruence?.present) {
     lines.push("", "A mismatch was detected but they have not consented to behavioural signals being used. Do not reference it.");
   }

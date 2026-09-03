@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { currentSession } from "@/lib/auth";
-import { runTurn } from "@/lib/pipeline/turn";
+import { runTurn, RateLimitError } from "@/lib/pipeline/turn";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -12,6 +12,7 @@ export async function POST(req: Request) {
     text?: string; timeZone?: string; region?: string;
     prosody?: Parameters<typeof runTurn>[0]["prosody"];
     typing?: Parameters<typeof runTurn>[0]["typing"];
+    face?: Parameters<typeof runTurn>[0]["face"];
     clientContext?: { role: "user" | "assistant"; content: string }[];
   };
   const text = body?.text?.trim() ?? "";
@@ -21,11 +22,14 @@ export async function POST(req: Request) {
   try {
     const result = await runTurn({
       userId: session.userId, displayName: session.name, text,
-      timeZone: body?.timeZone, region: body?.region, prosody: body?.prosody, typing: body?.typing,
+      timeZone: body?.timeZone, region: body?.region, prosody: body?.prosody, typing: body?.typing, face: body?.face,
       clientContext: body?.clientContext,
     });
     return NextResponse.json(result);
   } catch (err) {
+    if (err instanceof RateLimitError) {
+      return NextResponse.json({ error: err.message }, { status: 429, headers: { "Retry-After": String(Math.ceil(err.retryAfterMs / 1000)) } });
+    }
     console.error("[api/chat]", err);
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }

@@ -17,6 +17,7 @@ import type { StoredMessage, UserState } from "../store/types";
 import { DAY, HOUR } from "../util/time";
 import { localTimeString } from "./turn";
 import { mean } from "../util/stats";
+import { sendPush } from "../push";
 
 export interface CheckinResult {
   decision: ProactiveDecision;
@@ -82,6 +83,11 @@ export async function evaluateUser(userId: string, opts: { now?: number; force?:
   }
   if (state.consent.storeTranscript) state.messages = [...state.messages, message].slice(-120);
   await store.pushOutbox(userId, message);
+  // Second consent: OS notification only if they turned it on and the tab is likely closed.
+  if (state.consent.pushNotifications && state.push.length && now - state.lastUserMessageAt > 20 * 60_000) {
+    const { dead } = await sendPush(state.push, { title: "Ori", body: message.content.slice(0, 140), url: "/chat" });
+    if (dead.length) state.push = state.push.filter((p) => !dead.includes(p.endpoint));
+  }
   await store.put(state);
   return { decision: { ...decision, kind }, message };
 }

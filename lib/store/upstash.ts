@@ -8,6 +8,7 @@
  *   me:outbox:{id}  LIST of JSON StoredMessage, drained by the client
  */
 import type { Store, StoredMessage, UserState } from "./types";
+import { open, seal } from "./crypto";
 
 type RedisValue = string | number | null | RedisValue[];
 
@@ -29,11 +30,11 @@ export class UpstashStore implements Store {
 
   async get(userId: string): Promise<UserState | null> {
     const raw = await this.cmd<string | null>("GET", `me:user:${userId}`);
-    return raw ? (JSON.parse(raw) as UserState) : null;
+    return raw ? (JSON.parse(open(raw)) as UserState) : null;
   }
 
   async put(state: UserState): Promise<void> {
-    await this.cmd("SET", `me:user:${state.userId}`, JSON.stringify(state));
+    await this.cmd("SET", `me:user:${state.userId}`, seal(JSON.stringify(state)));
     await this.cmd("ZADD", "me:active", state.lastUserMessageAt || state.createdAt, state.userId);
   }
 
@@ -43,7 +44,7 @@ export class UpstashStore implements Store {
   }
 
   async pushOutbox(userId: string, message: StoredMessage): Promise<void> {
-    await this.cmd("RPUSH", `me:outbox:${userId}`, JSON.stringify(message));
+    await this.cmd("RPUSH", `me:outbox:${userId}`, seal(JSON.stringify(message)));
     await this.cmd("EXPIRE", `me:outbox:${userId}`, 7 * 86400);
   }
 
@@ -52,6 +53,6 @@ export class UpstashStore implements Store {
     const items = await this.cmd<string[]>("LRANGE", key, 0, -1);
     if (!items || items.length === 0) return [];
     await this.cmd("LTRIM", key, items.length, -1);
-    return items.map((s) => JSON.parse(s) as StoredMessage);
+    return items.map((s) => JSON.parse(open(s)) as StoredMessage);
   }
 }

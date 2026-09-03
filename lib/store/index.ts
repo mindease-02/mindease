@@ -67,6 +67,9 @@ export function newUserState(
       storeTranscript: true,
       voiceSignals: false,
       typingSignals: false,
+      faceSignals: false,
+      pushNotifications: false,
+      retentionDays: 30,
     },
     history: [],
     messages: [],
@@ -81,6 +84,10 @@ export function newUserState(
     lastUserMessageAt: 0,
     memories: [],
     cadenceLog: {},
+    riskLog: [],
+    incongruence: { streak: 0, log: [] },
+    push: [],
+    rate: { windowStart: 0, count: 0 },
   };
 }
 
@@ -92,9 +99,13 @@ export function migrate(s: UserState): UserState {
     octant: s.octant ?? emptyOctant(),
     memories: s.memories ?? [],
     cadenceLog: s.cadenceLog ?? {},
+    riskLog: s.riskLog ?? [],
+    incongruence: s.incongruence ?? { streak: 0, log: [] },
+    push: s.push ?? [],
+    rate: s.rate ?? { windowStart: 0, count: 0 },
     consent: {
       ...DEFAULT_CONSENT,
-      storeTranscript: true, voiceSignals: false, typingSignals: false,
+      storeTranscript: true, voiceSignals: false, typingSignals: false, faceSignals: false, pushNotifications: false, retentionDays: 30,
       ...(s.consent as Partial<UserState["consent"]>),
       cadence: { ...DEFAULT_CONSENT.cadence, ...(s.consent?.cadence ?? {}) },
     },

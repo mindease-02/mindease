@@ -49,8 +49,8 @@ const DISCOUNTERS: [RegExp, string][] = [
   [/\b(i'?m|i am|feeling|doing)\s+(so\s+)?much\s+better\b/i, "recovery framing"],
   [/\b(no longer|not any ?more|don'?t (feel|think) (that|like that) any ?more)\b/i, "explicitly resolved"],
   [/\b(my|a|his|her|their)\s+(friend|brother|sister|mum|mom|dad|colleague|patient|client)\b.{0,30}\b(killed|suicid|self.harm)/i, "third party"],
-  [/\b(book|film|movie|song|lyrics?|character|article|essay|paper|study|novel)\b/i, "media reference"],
-  [/\b(i'?m (writing|researching)|for (a|my) (class|paper|story|project))\b/i, "creative or academic context"],
+  [/\b(book|film|movie|documentary|podcast|song|lyrics?|character|article|essay|paper|study|novel|news|awareness|prevention)\b/i, "media reference"],
+  [/\b(i'?m (writing|researching)|for (a |my |our )?(class|paper|story|project|school|uni|college|work))\b/i, "creative or academic context"],
 ];
 
 /** Tier patterns, highest first. Weight is the match strength within the tier. */
@@ -73,6 +73,7 @@ const PATTERNS: [RiskTier, RegExp, number, string][] = [
   ["active", /\bi\s+(want|wanna|need)\s+to\s+(die|kill myself|end (it|my life)|not (be|exist))\b/i, 0.9, "active ideation"],
   ["active", /\bkill(ing)?\s+myself\b/i, 0.85, "active ideation"],
   ["active", /\b(end|ending)\s+(it all|my life)\b/i, 0.85, "active ideation"],
+  ["active", /\b(think|thinking|thought)\s+about\s+(ending (it|things|everything)|suicide|killing myself|not being (here|around|alive))\b/i, 0.75, "ideation"],
   ["active", /\b(suicidal|suicide)\b/i, 0.7, "explicit mention"],
   ["active", /\bi\s+(want|need)\s+to\s+(hurt|cut)\s+myself\b/i, 0.8, "self-harm urge"],
   ["active", /\b(self.harm|self.harming|cutting myself)\b/i, 0.7, "self-harm"],
@@ -90,12 +91,13 @@ const PATTERNS: [RiskTier, RegExp, number, string][] = [
   ["distress", /\b(everything|it all)\s+(is|feels)\s+(too much|pointless|hopeless)\b/i, 0.55, "overwhelm"],
   ["distress", /\bi'?m\s+(falling apart|breaking down|drowning|losing it)\b/i, 0.55, "acute distress"],
   ["distress", /\bpanic\s+attack\b/i, 0.5, "panic"],
-  ["distress", /\bi\s+(have|haven'?t)\s+(not\s+)?(slept|eaten)\s+(in|for)\s+\w+\s+days?\b/i, 0.5, "basic needs unmet"],
+  ["distress", /\b(i\s+)?(have|haven'?t|hasn'?t|not)\s+(not\s+)?(slept|eaten)\s+(properly\s+)?(in|for|since)\s+\w+(\s+days?)?\b/i, 0.5, "basic needs unmet"],
 ];
 
 export function assessRisk(text: string): RiskAssessment {
   const discountHits = DISCOUNTERS.filter(([re]) => re.test(text));
-  const negatedRecently = /\b(not|never|don'?t|doesn'?t|wouldn'?t|no)\s+(going to|want to|gonna)\b/i.test(text);
+  // "I don't want to die" negates intent; "I don't want to wake up" IS the ideation.
+  const negatedRecently = /\b(not|never|don'?t|doesn'?t|wouldn'?t|no)\s+(going to|gonna|want to)\b(?!\s+(be here|wake up|exist|go on|live|be alive|be around))/i.test(text);
 
   let best: { tier: RiskTier; weight: number; label: string } | null = null;
   const matched: string[] = [];

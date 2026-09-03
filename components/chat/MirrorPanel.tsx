@@ -11,6 +11,8 @@ interface Props {
   onPreview: (kind: string) => Promise<void>;
   onLogout: () => void;
   busy: boolean;
+  push: { supported: boolean; enabled: boolean; subscribed: boolean; subscribe: () => Promise<string | null>; unsubscribe: () => Promise<void> };
+  onToast: (t: string) => void;
 }
 
 function Section({ title, children, hint }: { title: string; hint?: string; children: React.ReactNode }) {
@@ -35,7 +37,7 @@ function Toggle({ label, hint, value, onChange }: { label: string; hint?: string
   );
 }
 
-export default function MirrorPanel({ mirror, onClose, onSettings, onPreview, onLogout, busy }: Props) {
+export default function MirrorPanel({ mirror, onClose, onSettings, onPreview, onLogout, busy, push, onToast }: Props) {
   const [tab, setTab] = useState<"read" | "checkins" | "memory" | "settings">("read");
   if (!mirror) return null;
   const m = mirror;
@@ -102,6 +104,15 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onPreview, on
             <Section title="Reliance" hint="Goes up when you're here more and mentioning people less. Ori pulls back when it climbs.">
               <p className="text-sm capitalize">{m.dependency.tier} <span className="text-xs text-clay-muted">({m.dependency.index})</span></p>
               <ul className="mt-1 list-disc pl-4 text-xs text-clay-muted">{m.dependency.reasons.map((r, i) => <li key={i}>{r}</li>)}</ul>
+            </Section>
+            <Section title="Mismatch detector" hint="When your words and the rest disagree. Ori only mentions it after two turns in a row, and logs whether you agreed.">
+              <p className="text-sm">Current streak: {m.incongruence.streak}{m.incongruence.accuracy !== null && <span className="text-xs text-clay-muted"> · you agreed {(m.incongruence.accuracy * 100).toFixed(0)}% of the times it was raised</span>}</p>
+              {m.incongruence.recent.length > 0 && <ul className="mt-1 text-xs text-clay-muted">{m.incongruence.recent.map((e) => <li key={e.at}>{new Date(e.at).toLocaleString()} · gap {e.gap} · masking {e.masking}{e.mentioned ? " · raised" : ""}{e.confirmed === true ? " · you agreed" : e.confirmed === false ? " · you disagreed" : ""}</li>)}</ul>}
+            </Section>
+            <Section title="Safety log" hint="Every message that reached the serious tiers, and whether the deterministic filter or the model's second opinion caught it.">
+              {m.riskLog.length ? (
+                <ul className="text-xs text-clay-muted">{m.riskLog.map((r) => <li key={r.at} className="py-0.5">{new Date(r.at).toLocaleString()} · <span className="text-clay-coral">{r.tier}</span> · {r.source}{r.raised ? " (raised by model)" : ""} · {r.matched.slice(0, 3).join(", ")}</li>)}</ul>
+              ) : <p className="text-xs text-clay-muted">Nothing logged.</p>}
             </Section>
           </>
         )}
@@ -181,6 +192,8 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onPreview, on
                   <input type="number" min={0} max={23.5} step={0.5} className="clay-input w-16 py-1.5 text-center" defaultValue={c.quietTo} onBlur={(e) => onSettings({ consent: { quietTo: Number(e.target.value) } })} />
                 </div>
               </div>
+              <Toggle label="Notify me when the tab is closed" hint={!push.supported ? "Not supported in this browser." : !push.enabled ? "Not configured on the server (VAPID keys)." : `Unprompted messages arrive as OS notifications. ${m.pushDevices} device${m.pushDevices === 1 ? "" : "s"} registered.`}
+                value={push.subscribed} onChange={async (v) => { if (v) { const err = await push.subscribe(); if (err) onToast(err); } else await push.unsubscribe(); await onSettings({}); }} />
               <div className="mt-2 flex flex-wrap gap-2">
                 <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: 3 })}>Pause for 3 days</button>
                 {m.pausedUntil && m.pausedUntil > Date.now() && <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: null })}>Unpause (paused until {new Date(m.pausedUntil).toLocaleDateString()})</button>}
@@ -189,8 +202,13 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onPreview, on
             <Section title="Signals" hint="Each is off until you turn it on. Raw audio and keystrokes never leave your device - only ~10 aggregate numbers do.">
               <Toggle label="Voice tone" hint="Pitch range, pace, pauses, loudness - relative to your own baseline." value={c.voiceSignals} onChange={(v) => onSettings({ consent: { voiceSignals: v } })} />
               <Toggle label="Typing rhythm" hint="Speed, hesitation, deleting-and-rewriting. Never which keys." value={c.typingSignals} onChange={(v) => onSettings({ consent: { typingSignals: v } })} />
+              <Toggle label="Expression (camera)" hint="Runs a face model in your browser while you type; sends two numbers per message. No image ever leaves your device. Weakest signal, weighted lowest." value={c.faceSignals} onChange={(v) => onSettings({ consent: { faceSignals: v } })} />
               <Toggle label="Let Ori mention them" hint="Whether it may say 'you sound flatter than usual' out loud." value={c.allowBehaviouralSignals} onChange={(v) => onSettings({ consent: { allowBehaviouralSignals: v } })} />
               <Toggle label="Keep conversation history" hint="Off = only mood points are kept; Ori forgets the words between sessions." value={c.storeTranscript} onChange={(v) => onSettings({ consent: { storeTranscript: v } })} />
+              <div className="flex items-center justify-between py-1.5 text-sm">
+                <span>Keep messages for<span className="block text-xs text-clay-muted">days · older text is deleted automatically</span></span>
+                <input type="number" min={1} max={365} className="clay-input w-20 py-1.5 text-center" defaultValue={c.retentionDays} onBlur={(e) => onSettings({ consent: { retentionDays: Number(e.target.value) } })} />
+              </div>
             </Section>
             <Section title="Crisis lines shown for">
               <select className="clay-input" defaultValue={m.helplines[0]?.region === "*" ? "" : m.helplines[0]?.region} onChange={(e) => onSettings({ region: e.target.value })}>
@@ -200,6 +218,7 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onPreview, on
             </Section>
             <Section title="Your data">
               <div className="flex flex-wrap gap-2">
+                <a href="/api/export" className="clay-btn px-3 py-1.5 text-xs">Export everything (JSON)</a>
                 <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => { if (confirm("Delete all history, memories and messages? This can't be undone.")) onSettings({ clearAll: true }); }}>Delete everything</button>
                 <button className="clay-btn px-3 py-1.5 text-xs" onClick={onLogout}>Sign out</button>
               </div>

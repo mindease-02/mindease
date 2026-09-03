@@ -1,29 +1,11 @@
 import Link from "next/link";
-import MockChat from "./MockChat";
-
-const STRESS = [
-  { who: "you" as const, text: "three deadlines, landlord emailing, haven't eaten properly since tuesday" },
-  { who: "ori" as const, text: "That's a lot stacked on no food. Which of the three is actually due first?" },
-  { who: "you" as const, text: "the report. friday" },
-  { who: "ori" as const, text: "Then the landlord and the other two can wait until you've eaten something. What's in the kitchen right now?" },
-];
-const ANXIETY = [
-  { who: "you" as const, text: "i'm fine. just can't sleep. keep thinking about the meeting" },
-  { who: "ori" as const, text: "You've said 'fine' and then described a night of not sleeping. Which half should I believe?" },
-  { who: "you" as const, text: "ok not fine. i think they're going to let me go" },
-  { who: "ori" as const, text: "It makes sense you're braced for it, after the way last month went. What's the actual evidence, either way?" },
-];
-const DEPRESSION = [
-  { who: "ori" as const, proactive: true, text: "Your messages have been getting shorter in the evenings this week, and you haven't mentioned Sam since the weekend. Am I reading that right?" },
-  { who: "you" as const, text: "yeah. haven't really felt like anything" },
-  { who: "ori" as const, text: "Okay. You don't have to feel like it. When did you last go outside - even the doorstep?" },
-  { who: "you" as const, text: "monday maybe" },
-  { who: "ori" as const, text: "Monday. Would you text Sam one line today? I'll ask how that went, not how this went." },
-];
+import AnnotatedChat from "./AnnotatedChat";
+import { SCENARIOS } from "./scenarios";
 
 export function Hero({ chatHref = "/login" }: { chatHref?: string }) {
+  const s = SCENARIOS[2];
   return (
-    <section className="relative overflow-hidden px-6 pb-16 pt-16 sm:pt-24">
+    <section className="relative overflow-hidden px-6 pb-12 pt-16 sm:pt-24">
       <div className="fog animate-drift" />
       <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
         <div className="clay animate-rise p-8 sm:p-10">
@@ -36,10 +18,10 @@ export function Hero({ chatHref = "/login" }: { chatHref?: string }) {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href={chatHref} className="clay-btn-primary text-base">Chat with Ori</Link>
-            <a href="#how" className="clay-btn">How it works</a>
+            <a href="#how" className="clay-btn">How it decides</a>
           </div>
           <div className="mt-8 grid grid-cols-3 gap-3">
-            {[["text + voice", "reads words, tone and rhythm"], ["remembers", "your people, plans and past"], ["checks in", "when it matters, never at night"]].map(([t, d]) => (
+            {[["text + voice + face", "reads words, tone, rhythm, expression"], ["remembers", "your people, plans and past"], ["checks in", "when it matters, never at night"]].map(([t, d]) => (
               <div key={t} className="clay-in p-3">
                 <div className="text-xs font-medium">{t}</div>
                 <div className="mt-0.5 text-[11px] leading-snug text-clay-muted">{d}</div>
@@ -48,76 +30,29 @@ export function Hero({ chatHref = "/login" }: { chatHref?: string }) {
           </div>
         </div>
         <div className="flex justify-center lg:justify-end">
-          <MockChat tilt={-1.5} lines={DEPRESSION} caption="An unprompted check-in, and why it happened - always visible." />
+          <div className="w-full max-w-md"><AnnotatedChat title={s.kicker} turns={s.turns} /></div>
         </div>
       </div>
     </section>
   );
 }
 
-function Feature({ title, kicker, body, chat, flip = false, tone, card }: { title: string; kicker: string; body: React.ReactNode; chat: React.ReactNode; flip?: boolean; tone: string; card: string }) {
+export function HowItDecides() {
+  const steps = [
+    { t: "Read", d: "Every message is read for eight emotional axes, nuanced states (loneliness, dread, relief…), how intense it is, and what you seem to need: to vent, to solve, to be distracted, or company. If you allow it, tone of voice, typing rhythm and expression are fused in - each weighed by how sure it is." },
+    { t: "Check the gap", d: "What the words show is compared with what the rest suggests. When 'I'm fine' doesn't match a flat voice or a hesitant reply, Ori lowers its confidence and asks - it never overrides you." },
+    { t: "Remember", d: "Names, plans, struggles and stories from your past are kept as short facts, retrieved when relevant, and shown to you in full. That's what lets a reply say 'Sam' instead of 'a friend'." },
+    { t: "Choose the move", d: "The read picks a register - light, unhurried, slow, or acute - and a move: reflect, one concrete question, validate the feeling but not the conclusion, point outward to a person. Never a list of tips, never two questions at once." },
+    { t: "Gate the check-in", d: "Between conversations, four detectors watch the multi-day trend. Two must agree, quiet hours and daily caps must pass, and reliance must not be climbing, before Ori writes first - and it always says what prompted it." },
+    { t: "Stay safe", d: "A deterministic crisis filter runs before the model on every message and can't be talked out of it. Real helplines are shown by the app; the model never recites a number." },
+  ];
   return (
-    <section className="px-6 py-10">
-      <div className={`mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 ${flip ? "lg:[&>*:first-child]:order-2" : ""}`}>
-        <div className={`${card} p-8 sm:p-10`}>
-          <div className={`mb-3 inline-block rounded-full px-3 py-1 text-xs font-medium shadow-clay-sm ${tone}`}>{kicker}</div>
-          <h2 className="font-serif text-3xl tracking-tight sm:text-4xl">{title}</h2>
-          <div className="mt-4 space-y-3 text-[15.5px] leading-relaxed text-clay-ink/75">{body}</div>
-        </div>
-        <div className="flex justify-center">{chat}</div>
-      </div>
-    </section>
-  );
-}
-
-export function Features() {
-  return (
-    <>
-      <Feature
-        kicker="Stress" tone="bg-clay-surface text-clay-ink" card="clay-amber"
-        title="When everything is due at once"
-        body={<>
-          <p>Stress is usually a sequencing problem wearing a catastrophe costume. Ori helps you find the first thing, and notices when basics - food, sleep, daylight - have quietly dropped off the list.</p>
-          <p>It matches your pace: short when you're short, slower when you're spiralling. It doesn't cheerlead and it won't tell you it'll all be fine.</p>
-        </>}
-        chat={<MockChat tilt={1} lines={STRESS} caption="Concrete over profound. One question at a time." />}
-      />
-      <Feature flip
-        kicker="Anxiety" tone="bg-clay-surface text-clay-ink" card="clay-haze"
-        title="When 'fine' isn't"
-        body={<>
-          <p>Ori reads the gap between what you write and what you're showing - words, tone of voice, how you type - and asks about it, once, without insisting it knows better than you.</p>
-          <p>Fear gets validated as making sense, not as being right. Then you look at the evidence together.</p>
-        </>}
-        chat={<MockChat tilt={-1} lines={ANXIETY} caption="Incongruence between the words and the rest gets named, gently." />}
-      />
-      <Feature
-        kicker="Depression" tone="bg-clay-surface text-clay-ink" card="clay-sage"
-        title="When you've gone quiet"
-        body={<>
-          <p>Low mood hides in the pattern, not the message: shorter replies, later nights, fewer people mentioned. Ori tracks that across days and reaches out when the trend is real - not because a timer went off.</p>
-          <p>Every check-in says what prompted it. If you don't answer, it stops. If you're in danger, it stops everything else and shows real crisis lines - never made-up numbers.</p>
-        </>}
-        chat={<MockChat tilt={1.5} lines={DEPRESSION} caption="The bridge, not the destination: it points you back at people." />}
-      />
-    </>
-  );
-}
-
-const STEPS = [
-  { t: "It reads more than words", d: "Text, tone of voice and typing rhythm are fused into one read - eight emotional axes and nuanced states like loneliness, dread, relief - each weighed by how sure it is." },
-  { t: "It remembers", d: "Names, plans, the story of you. Memories are short facts you can see and delete, not transcripts. It asks about your past because a life with earlier chapters is easier to carry." },
-  { t: "It checks in - carefully", d: "Mornings, isolated evenings, long silences, and real downward trends. Quiet hours, a daily cap, and a hard stop if you go unanswered three times." },
-  { t: "It knows its limits", d: "It's software and says so. It measures how much you rely on it and pulls back when that climbs. Crisis lines are hard-coded and shown automatically." },
-];
-
-export function HowItWorks() {
-  return (
-    <section id="how" className="px-6 py-16">
+    <section id="how" className="px-6 py-12">
       <div className="mx-auto max-w-6xl">
-        <h2 className="font-serif text-3xl tracking-tight sm:text-4xl">How it works</h2>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((s, i) => (
+        <h2 className="font-serif text-3xl tracking-tight sm:text-4xl">How Ori decides what to say</h2>
+        <p className="mt-3 max-w-2xl text-clay-muted">The same six steps run on every message. Below, each conversation is annotated with what was read and which move that led to - the same fields you can open in the app's Mirror panel.</p>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {steps.map((s, i) => (
             <div key={s.t} className="clay p-6">
               <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-clay-bg-deep font-serif text-lg shadow-clay-in">{i + 1}</div>
               <h3 className="font-medium">{s.t}</h3>
@@ -130,6 +65,34 @@ export function HowItWorks() {
   );
 }
 
+export function Features() {
+  return (
+    <>
+      {SCENARIOS.map((s, i) => (
+        <section key={s.id} id={s.id} className="px-6 py-10">
+          <div className={`mx-auto grid max-w-6xl items-start gap-10 lg:grid-cols-2 ${i % 2 ? "lg:[&>*:first-child]:order-2" : ""}`}>
+            <div className={`${s.card} p-8 sm:p-10`}>
+              <div className="mb-3 inline-block rounded-full bg-clay-surface px-3 py-1 text-xs font-medium shadow-clay-sm">{s.kicker}</div>
+              <h2 className="font-serif text-3xl tracking-tight sm:text-4xl">{s.title}</h2>
+              <p className="mt-4 text-[15.5px] leading-relaxed text-clay-ink/75">{s.intro}</p>
+              <h3 className="mt-6 text-[11px] font-medium uppercase tracking-widest text-clay-ink/60">How Ori gets to these answers</h3>
+              <ol className="mt-3 space-y-2.5">
+                {s.how.map((h, j) => (
+                  <li key={j} className="flex gap-3 text-sm leading-relaxed text-clay-ink/80">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-clay-surface text-xs shadow-clay-sm">{j + 1}</span>
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <div className="flex justify-center"><div className="w-full max-w-md"><AnnotatedChat title={s.kicker} turns={s.turns} /></div></div>
+          </div>
+        </section>
+      ))}
+    </>
+  );
+}
+
 export function Safety() {
   return (
     <section className="px-6 py-16">
@@ -137,11 +100,11 @@ export function Safety() {
         <div className="clay-dark p-8 sm:p-10">
           <h2 className="font-serif text-2xl sm:text-3xl">What this is not</h2>
           <div className="mt-4 grid gap-6 text-sm leading-relaxed text-clay-haze sm:grid-cols-3">
-            <p><strong className="text-clay-surface">Not therapy.</strong> Ori can sit with you between the times you talk to people who can do more. It cannot diagnose, treat, or replace care.</p>
+            <p><strong className="text-clay-surface">Not therapy.</strong> Ori can sit with you between the times you talk to people who can do more. It cannot diagnose, treat, or replace care. It is for adults.</p>
             <p><strong className="text-clay-surface">Not a person.</strong> It doesn't have feelings and won't pretend to. It won't be your partner, and it won't tell you it's waiting for you - it isn't running.</p>
-            <p><strong className="text-clay-surface">Not private from you.</strong> Everything it infers is in the Mirror panel: every signal, every gate, every memory. Yours to read and delete.</p>
+            <p><strong className="text-clay-surface">Not private from you.</strong> Everything it infers is in the Mirror panel: every signal, every gate, every memory. Yours to read, export and delete.</p>
           </div>
-          <p className="mt-6 text-xs text-clay-haze/80">If you're in crisis right now: in the US call or text <strong className="text-clay-surface">988</strong>; in the UK call <strong className="text-clay-surface">116 123</strong>; elsewhere see <a className="underline" href="https://findahelpline.com" target="_blank" rel="noreferrer">findahelpline.com</a>. If you're in immediate danger, call your local emergency number.</p>
+          <p className="mt-6 text-xs text-clay-haze/80">If you're in crisis right now: in the US call or text <strong className="text-clay-surface">988</strong>; in the UK call <strong className="text-clay-surface">116 123</strong>; in India call <strong className="text-clay-surface">14416</strong>; elsewhere see <a className="underline" href="https://findahelpline.com" target="_blank" rel="noreferrer">findahelpline.com</a>. If you're in immediate danger, call your local emergency number.</p>
         </div>
       </div>
     </section>
