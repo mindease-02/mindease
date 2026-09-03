@@ -16,6 +16,22 @@ import type { Helpline } from "@/lib/safety/resources";
 interface Msg { role: "user" | "assistant"; content: string; at: number; proactive?: boolean; kind?: string; pending?: boolean }
 
 const POLL_MS = 45_000;
+
+function greeting(name: string, a: { label: string; note?: string } | null): string {
+  if (!a) return `Hey ${name}. I'm Ori — software, I'll say that once so it's said. What's today been like?`;
+  const by: Record<string, string> = {
+    Heavy: `Heavy, then. Okay. You don't have to explain it yet — what's the heaviest bit right now?`,
+    Anxious: `Anxious. Alright, let's slow it down a notch. What's the thing your head keeps going back to?`,
+    Lonely: `Lonely. I'm glad you came here instead of sitting with it. Who's the person you'd have told, if you could?`,
+    Numb: `Numb is a real one, and hard to describe. When did the colour start going out of things — today, or a while back?`,
+    Angry: `Angry. Fair enough — go on, then. Who or what?`,
+    Restless: `Restless. Like you need to do something and can't work out what. What's the nearest thing you've been avoiding?`,
+    Okay: `Okay is good, honestly. What's had your attention today?`,
+    Hopeful: `Hopeful — that's nice to hear. What shifted?`,
+  };
+  const line = by[a.label] ?? `You said “${a.label}”. Tell me about that.`;
+  return a.note ? `${line} You also mentioned “${a.note}” — start wherever you like.` : line;
+}
 const SELF_EVAL_MS = 10 * 60_000;
 
 export default function ChatApp({ name }: { name: string }) {
@@ -65,8 +81,9 @@ export default function ChatApp({ name }: { name: string }) {
   useEffect(() => {
     (async () => {
       const j = await refresh(true);
+      const a = j?.arrival as { label: string; note?: string } | null;
       if (j?.messages?.length) { setMessages(j.messages); scroll(); }
-      else setMessages([{ role: "assistant", content: `Hi ${name}. I'm Ori. I'm software - I'll say that once so it's said. What's today been like so far?`, at: Date.now() }]);
+      else setMessages([{ role: "assistant", content: greeting(name, a), at: Date.now() }]);
     })();
     const poll = setInterval(() => refresh(false), POLL_MS);
     const evaluate = async () => { try { await fetch("/api/checkin/evaluate", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }); await refresh(false); } catch { /* ignore */ } };
@@ -181,7 +198,7 @@ export default function ChatApp({ name }: { name: string }) {
         <Orb size={40} tint={tint} />
         <div className="leading-tight">
           <div className="font-serif text-lg">Ori</div>
-          <div className="text-[11px] text-clay-muted">software &middot; here for {name}</div>
+          <div className="text-[11px] text-clay-muted">software &middot; here for {name} &middot; <a href="/mood" className="underline decoration-dotted">change mood</a></div>
         </div>
         <div className="ml-auto flex items-center gap-2">
           <button onClick={() => setSpeak((s) => !s)} className={`clay-btn px-3 py-2 text-xs ${speak ? "bg-clay-peach" : ""}`} title="Read replies aloud">{speak ? "voice on" : "voice off"}</button>

@@ -1,0 +1,35 @@
+"use client";
+import { useEffect, useRef } from "react";
+
+/** Adds `in` to [data-reveal] descendants (and itself) when they enter the viewport. */
+export default function Reveal({ children, as: Tag = "div", className = "", ...rest }: { children: React.ReactNode; as?: keyof React.JSX.IntrinsicElements; className?: string } & Record<string, unknown>) {
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const targets = [root, ...Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"))].filter((n) => n.hasAttribute("data-reveal"));
+    if (!targets.length) return;
+    // Anything already on screen reveals at once - no dependence on the observer
+    // firing (it does not in background tabs), staggered by each element's --d.
+    const vh = window.innerHeight;
+    for (const t of targets) { if (t.getBoundingClientRect().top < vh * 0.95) t.classList.add("in"); }
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    }, { rootMargin: "0px 0px -10% 0px", threshold: 0.1 });
+    targets.filter((t) => !t.classList.contains("in")).forEach((t) => io.observe(t));
+    return () => io.disconnect();
+  }, []);
+  const T = Tag as unknown as React.ElementType;
+  return <T ref={ref} className={className} {...rest}>{children}</T>;
+}
+
+/** Splits a headline into words that slide up in sequence. */
+export function Words({ text, start = 0, step = 60 }: { text: string; start?: number; step?: number }) {
+  return (
+    <>
+      {text.split(" ").map((w, i) => (
+        <span key={i} className="word" style={{ ["--d" as string]: `${start + i * step}ms` }}><span>{w}</span>{i < text.split(" ").length - 1 ? " " : ""}</span>
+      ))}
+    </>
+  );
+}

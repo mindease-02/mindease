@@ -223,6 +223,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     analysis, octant: state.octant, memories: memoriesUsed, reminiscence,
     displayName: state.displayName, localTime: localTimeString(now, state.timeZone),
     surfaceIncongruence,
+    arrival: state.arrival && now - state.arrival.at < 6 * HOUR ? state.arrival : undefined,
   });
   const history = context.slice(-16).map((m) => ({ role: m.role, content: m.content }));
   let reply: string;

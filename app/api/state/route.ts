@@ -16,5 +16,6 @@ export async function GET(req: Request) {
   const state = migrate(await loadOrCreate(session.userId, session.name, tz));
   const outbox = await store.drainOutbox(session.userId);
   const mirror = url.searchParams.get("mirror") === "1" ? mirrorView(state) : null;
-  return NextResponse.json({ name: state.displayName, outbox, mirror, messages: state.consent.storeTranscript ? state.messages.slice(-60) : [] });
+  const arrival = state.arrival && Date.now() - state.arrival.at < 6 * 3600_000 ? state.arrival : null;
+  return NextResponse.json({ name: state.displayName, outbox, mirror, arrival, messages: state.consent.storeTranscript ? state.messages.slice(-60) : [] });
 }

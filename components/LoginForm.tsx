@@ -22,7 +22,7 @@ export default function LoginForm() {
       });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error ?? "couldn't sign in");
-      router.push("/chat");
+      router.push("/mood");
     } catch (err) {
       setError((err as Error).message);
       setBusy(false);

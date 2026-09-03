@@ -112,6 +112,8 @@ export interface UserState {
   push: PushSub[];
   /** Per-user rate limiting window for /api/chat. */
   rate: { windowStart: number; count: number };
+  /** The mood the person chose on the way in, and when. Expires after a session. */
+  arrival?: { mood: string; label: string; hint: string; note?: string; at: number };
 }
 
 export interface Store {
