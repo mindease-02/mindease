@@ -1,0 +1,2 @@
+# Minimal config so the Supabase GitHub integration can apply supabase/migrations/*.sql.
+project_id = "mindease-02"
