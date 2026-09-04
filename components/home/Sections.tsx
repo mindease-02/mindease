@@ -5,7 +5,7 @@ import Reveal, { Words } from "./Reveal";
 import Magnetic from "./Magnetic";
 import ThemeOrb from "./ThemeOrb";
 
-import { PxEye, PxBrain, PxBell, PxShield, PxPlay, PxRefresh, PxCheck, PxHand, PxArrow } from "./pixelIcons";
+import { PxEye, PxBrain, PxBell, PxShield, PxPlay, PxRefresh, PxCheck, PxHand, PxArrow, PxHeart, PxStar, PxMoon, PxMessage, PxSun } from "./pixelIcons";
 /* Streamline "Pixel - Free" icons (CC BY 4.0). */
 const I = {
   eye: <PxEye className="pxicon" />, memory: <PxBrain className="pxicon" />, bell: <PxBell className="pxicon" />, shield: <PxShield className="pxicon" />,
@@ -111,10 +111,10 @@ function Wheel() {
   );
 }
 
-export function FeatureRows() {
+export function FeatureRows({ chatHref = "/login" }: { chatHref?: string }) {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const els = Array.from(document.querySelectorAll<HTMLElement>(".feat-visual"));
+    const els = Array.from(document.querySelectorAll<HTMLElement>(".feat-visual, .cutout, .wordmark .big"));
     let raf = 0;
     const f = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => {
       for (const el of els) { const r = el.getBoundingClientRect(); const p = (window.innerHeight / 2 - (r.top + r.height / 2)) / window.innerHeight; el.style.setProperty("--py", String(Math.max(-1, Math.min(1, p)))); }
@@ -123,7 +123,7 @@ export function FeatureRows() {
     return () => { window.removeEventListener("scroll", f); cancelAnimationFrame(raf); };
   }, []);
   return (
-    <Reveal as="section" id="features" className="block" style={{ paddingTop: 0 }}>
+    <Reveal as="section" id="features" className="band">
       <div className="container">
         <div className="sec-head" style={{ marginBottom: 24 }}>
           <div className="eyebrow" data-reveal>What it does</div>
@@ -131,6 +131,7 @@ export function FeatureRows() {
         </div>
 
         <div className="feat" data-reveal>
+          <span className="cutout a" aria-hidden><PxEye /></span>
           <div>
             <div className="icon">{I.eye}</div>
             <h3 className="display">Reads more than words</h3>
@@ -141,6 +142,7 @@ export function FeatureRows() {
         </div>
 
         <div className="feat flip" data-reveal>
+          <span className="cutout b" aria-hidden><PxBrain /></span>
           <div>
             <div className="icon">{I.memory}</div>
             <h3 className="display">Remembers you</h3>
@@ -157,6 +159,7 @@ export function FeatureRows() {
         </div>
 
         <div className="feat" data-reveal>
+          <span className="cutout c" aria-hidden><PxBell /></span>
           <div>
             <div className="icon">{I.bell}</div>
             <h3 className="display">Checks in, carefully</h3>
@@ -174,6 +177,9 @@ export function FeatureRows() {
               ))}
             </div>
           </div>
+        </div>
+        <div className="mid-cta" data-reveal>
+          <Magnetic href={chatHref} className="btn-primary btn-sticker">Start talking {I.arrow}</Magnetic>
         </div>
       </div>
     </Reveal>
@@ -222,6 +228,11 @@ export function Cta({ chatHref }: { chatHref: string }) {
 export function Footer() {
   return (
     <footer>
+      <div className="wordmark" aria-hidden>
+        <div className="path" />
+        <span className="float"><PxHeart /></span><span className="float"><PxStar /></span><span className="float"><PxMoon /></span><span className="float"><PxMessage /></span>
+        <div className="big">MINDEASE</div>
+      </div>
       <div className="container">
         <div className="foot">
           <div>

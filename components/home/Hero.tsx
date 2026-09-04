@@ -9,10 +9,10 @@ import type { Drag } from "./Scene3D";
 const Scene3D = dynamic(() => import("./Scene3D"), { ssr: false, loading: () => null });
 
 const CARDS = [
-  { k: "read", t: <><b>loneliness</b> <span className="v">62%</span> · need: company</>, style: { left: "2%", top: "16%", "--fd": "0s" }, keep: true },
-  { k: "remembered", t: <>Maya · sister · fell out in <b>March</b></>, style: { right: "0%", top: "26%", "--fd": "1.3s" } },
-  { k: "check-in", t: <>quiet hours · <b>22:30 → 08:00</b> · budget 1/2</>, style: { left: "6%", bottom: "14%", "--fd": "2.4s" } },
-  { k: "mismatch", t: <>words <b>fine</b> · voice <span className="v">flat</span> · asking, not assuming</>, style: { right: "4%", bottom: "8%", "--fd": "0.7s" } },
+  { k: "read", t: <><b>loneliness</b> <span className="v">62%</span> · need: company</>, style: { left: "2%", top: "16%", "--fd": "0s", "--rot": "-4deg" }, keep: true },
+  { k: "remembered", t: <>Maya · sister · fell out in <b>March</b></>, style: { right: "0%", top: "26%", "--fd": "1.3s", "--rot": "3deg" } },
+  { k: "check-in", t: <>quiet hours · <b>22:30 → 08:00</b> · budget 1/2</>, style: { left: "6%", bottom: "14%", "--fd": "2.4s", "--rot": "2deg" } },
+  { k: "mismatch", t: <>words <b>fine</b> · voice <span className="v">flat</span> · asking, not assuming</>, style: { right: "4%", bottom: "8%", "--fd": "0.7s", "--rot": "-3deg" } },
 ];
 
 export default function Hero({ chatHref }: { chatHref: string }) {
@@ -66,7 +66,7 @@ export default function Hero({ chatHref }: { chatHref: string }) {
       <div className="rays" aria-hidden />
       <div className="container hero-grid">
         <div className="copy">
-          <div className="eyebrow" data-reveal style={{ ["--d" as string]: "0ms" }}>An AI companion · not a therapist · says so</div>
+          <div className="sticker" data-reveal style={{ ["--d" as string]: "0ms" }}>An AI companion · not a therapist · says so</div>
           <h1 id="hero-title" className="display">
             <Words text="Someone who" start={80} /> <br />
             <em><Words text="notices." start={260} /></em>
@@ -91,11 +91,16 @@ export default function Hero({ chatHref }: { chatHref: string }) {
             ))}
           </div>
           {CARDS.map((c) => (
-            <div key={c.k} className={`float-card glass ${c.keep ? "keep" : ""}`}
-              style={{ ...(c.style as React.CSSProperties), transform: `translate3d(calc(var(--px, 0) * -14px), calc(var(--py, 0) * -10px), 0)` }}>
+            <div key={c.k} className={`float-card glass ${c.keep ? "keep" : ""}`} style={c.style as React.CSSProperties}>
               <span className="k">{c.k}</span>{c.t}
             </div>
           ))}
+          <div className="flank l" aria-label="How it reads">
+            <span><b>8</b>emotional axes</span><span><b>4</b>detectors, two must agree</span><span><b>2</b>check-ins a day, at most</span>
+          </div>
+          <div className="flank r" aria-label="What it never does">
+            <span><b>0</b>numbers invented</span><span><b>22:30</b>quiet hours start</span><span><b>IN</b>helplines by default</span>
+          </div>
         </div>
       </div>
       <div className="scroll-hint" aria-hidden>scroll</div>
