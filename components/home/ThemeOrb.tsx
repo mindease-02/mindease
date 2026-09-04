@@ -2,7 +2,6 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { applyPalette, currentPalette, nextPalette, PALETTES, type Palette } from "@/lib/theme";
-import PixelOrb from "./PixelOrb";
 
 const Sphere3D = dynamic(() => import("./Sphere3D"), { ssr: false, loading: () => null });
 

@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Magnetic from "./Magnetic";
-import PixelOrb from "./PixelOrb";
 import { PxMenu, PxRemove, PxArrow } from "./pixelIcons";
 
 const LINKS = [["#demo", "See it"], ["#features", "What it does"], ["#story", "Why"], ["#start", "Start"]];
@@ -27,7 +26,7 @@ export default function Nav({ chatHref, signedIn }: { chatHref: string; signedIn
       <header className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-inner">
           <Link href="/" className="flex items-center gap-3 no-underline" style={{ color: "var(--ink)" }} aria-label="MindEase home">
-            <PixelOrb size={30} />
+            <span className="block h-7 w-7 rounded-full" style={{ background: "radial-gradient(circle at 35% 30%, #fff, rgba(255,255,255,0) 40%), linear-gradient(145deg, var(--coral-2), var(--accent-mid) 60%, var(--accent-deep))", boxShadow: "0 8px 20px -6px rgba(var(--accent-rgb),.7)" }} />
             <span className="display" style={{ fontSize: ".95rem" }}>MindEase</span>
           </Link>
           <nav className="nav-links glass" aria-label="Primary">

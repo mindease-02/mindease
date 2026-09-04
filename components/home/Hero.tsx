@@ -3,7 +3,6 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import Magnetic from "./Magnetic";
 import { Words } from "./Reveal";
-import PixelOrb from "./PixelOrb";
 import { PxArrow } from "./pixelIcons";
 
 import type { Drag } from "./Scene3D";
@@ -84,7 +83,7 @@ export default function Hero({ chatHref }: { chatHref: string }) {
         <div ref={stage} className="stage" data-reveal style={{ ["--d" as string]: "200ms" }}
           onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onUp}>
           {(mode === "webgl" || mode === "webgl-lite") && <Scene3D pointer={pointer} drag={drag} lite={mode === "webgl-lite"} />}
-          {mode === "css" && <div className="fallback-orb" aria-hidden><PixelOrb size={200} /></div>}
+          {mode === "css" && <div className="fallback-orb" aria-hidden />}
           <div className="flare" aria-hidden><i /><b /></div>
           <div className="particles" aria-hidden>
             {Array.from({ length: 18 }).map((_, i) => (

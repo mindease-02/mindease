@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import PixelOrb from "../home/PixelOrb";
+import Orb from "../Orb";
 import { PxMirror, PxSound, PxMic, PxMicoff, PxSend } from "../home/pixelIcons";
 import CrisisCard from "./CrisisCard";
 import MirrorPanel from "./MirrorPanel";
@@ -196,7 +196,7 @@ export default function ChatApp({ name }: { name: string }) {
     <div className="chat relative z-[1] flex h-screen flex-col" style={{ ["--warm" as string]: tint.warm, ["--cool" as string]: tint.cool, ["--dim" as string]: tint.dim }}>
       <div className="presence" aria-hidden><i /><b /></div>
       <header className="chat-head flex items-center gap-3 px-4 py-3 sm:px-6">
-        <PixelOrb size={40} />
+        <Orb size={40} tint={tint} />
         <div className="leading-tight">
           <div className="display text-lg">Ori</div>
           <div className="text-[11px] text-clay-muted">software &middot; here for {name} &middot; <a href="/mood" className="underline decoration-dotted">change mood</a></div>

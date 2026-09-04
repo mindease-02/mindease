@@ -4,7 +4,6 @@ import Link from "next/link";
 import Reveal, { Words } from "./Reveal";
 import Magnetic from "./Magnetic";
 import ThemeOrb from "./ThemeOrb";
-import PixelOrb from "./PixelOrb";
 
 import { PxEye, PxBrain, PxBell, PxShield, PxPlay, PxRefresh, PxCheck, PxHand, PxArrow } from "./pixelIcons";
 /* Streamline "Pixel - Free" icons (CC BY 4.0). */
@@ -61,7 +60,7 @@ export function Demo() {
         </div>
         <div className="demo">
           <div ref={host} className="device" data-reveal role="region" aria-label="Replayed example conversation">
-            <div className="device-head"><PixelOrb size={22} />Ori <span className="muted">· example, replayed</span></div>
+            <div className="device-head"><span className="dot" aria-hidden />Ori <span className="muted">· example, replayed</span></div>
             <div className="device-body" aria-live="polite">
               {SCRIPT.map((l, i) => (
                 <div key={i} style={{ display: "contents" }}>

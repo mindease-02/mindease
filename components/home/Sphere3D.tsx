@@ -8,9 +8,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
-import { RenderPixelatedPass } from "three/examples/jsm/postprocessing/RenderPixelatedPass.js";
-import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { THEME_EVENT, currentPalette, type Palette } from "@/lib/theme";
 
 export default function Sphere3D({ tapSignal }: { tapSignal: React.MutableRefObject<number> }) {
@@ -23,7 +20,7 @@ export default function Sphere3D({ tapSignal }: { tapSignal: React.MutableRefObj
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
-    renderer.setPixelRatio(1);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, small ? 1.25 : 1.6));
     renderer.setSize(el.clientWidth, el.clientHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -33,10 +30,6 @@ export default function Sphere3D({ tapSignal }: { tapSignal: React.MutableRefObj
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     const camera = new THREE.PerspectiveCamera(30, el.clientWidth / el.clientHeight, 0.1, 30);
-    const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPixelatedPass(small ? 5 : 6, scene, camera, { normalEdgeStrength: 0.3, depthEdgeStrength: 0.4 }));
-    composer.addPass(new OutputPass());
-    renderer.domElement.style.imageRendering = "pixelated";
     camera.position.set(0, 0.2, 6.6);
 
     let pal = currentPalette();
@@ -79,12 +72,12 @@ export default function Sphere3D({ tapSignal }: { tapSignal: React.MutableRefObj
       root.position.y = 0.2 + (reduced ? 0 : Math.sin(t * 0.7) * 0.06);
       root.rotation.y = pointer.x * 0.35 + (reduced ? 0 : t * 0.1);
       root.rotation.x = -pointer.y * 0.2;
-      composer.render();
+      renderer.render(scene, camera);
       raf = requestAnimationFrame(frame);
     };
     frame();
 
-    const ro = new ResizeObserver(() => { renderer.setSize(el.clientWidth, el.clientHeight); composer.setSize(el.clientWidth, el.clientHeight); camera.aspect = el.clientWidth / el.clientHeight; camera.updateProjectionMatrix(); });
+    const ro = new ResizeObserver(() => { renderer.setSize(el.clientWidth, el.clientHeight); camera.aspect = el.clientWidth / el.clientHeight; camera.updateProjectionMatrix(); });
     ro.observe(el);
     const io = new IntersectionObserver(([e]) => { running = e.isIntersecting && !document.hidden; if (running) { clock.getDelta(); frame(); } });
     io.observe(el);
@@ -94,7 +87,7 @@ export default function Sphere3D({ tapSignal }: { tapSignal: React.MutableRefObj
     return () => {
       running = false; cancelAnimationFrame(raf); ro.disconnect(); io.disconnect();
       document.removeEventListener("visibilitychange", onVis); window.removeEventListener(THEME_EVENT, onTheme); window.removeEventListener("pointermove", onMove);
-      pmrem.dispose(); composer.dispose(); renderer.dispose(); el.removeChild(renderer.domElement);
+      pmrem.dispose(); renderer.dispose(); el.removeChild(renderer.domElement);
       scene.traverse((o) => { if (o instanceof THREE.Mesh) { o.geometry.dispose(); (o.material as THREE.Material).dispose(); } });
     };
   }, [tapSignal]);

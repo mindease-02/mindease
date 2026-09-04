@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MOODS, type MoodId } from "@/lib/moods";
 import { applyPalette, paletteById } from "@/lib/theme";
-import PixelOrb from "./home/PixelOrb";
 import { PxArrow } from "./home/pixelIcons";
 
 export default function MoodPicker({ name }: { name: string }) {
@@ -36,7 +35,7 @@ export default function MoodPicker({ name }: { name: string }) {
         {MOODS.map((m) => (
           <button key={m.id} type="button" className="mood" aria-pressed={mood === m.id} disabled={busy} style={{ ["--c" as string]: m.c }}
             onClick={() => { setMood(m.id); const pal = paletteById(m.id); if (pal) applyPalette(pal); go(m.id, note); }}>
-            <span className="dot" aria-hidden><PixelOrb size={40} color={m.c} /></span><b>{m.label}</b><span>{m.hint}</span>
+            <span className="dot" aria-hidden /><b>{m.label}</b><span>{m.hint}</span>
             <small>{m.description}</small>
           </button>
         ))}
