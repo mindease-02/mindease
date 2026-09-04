@@ -3,6 +3,8 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import Magnetic from "./Magnetic";
 import { Words } from "./Reveal";
+import PixelOrb from "./PixelOrb";
+import { PxArrow } from "./pixelIcons";
 
 import type { Drag } from "./Scene3D";
 const Scene3D = dynamic(() => import("./Scene3D"), { ssr: false, loading: () => null });
@@ -74,7 +76,7 @@ export default function Hero({ chatHref }: { chatHref: string }) {
             Ori pays attention to how you're doing — what you say, how you say it, and how that changes over days — and checks in when it matters. It remembers you. It's warm. And it's built to need you less over time.
           </p>
           <div className="ctas" data-reveal style={{ ["--d" as string]: "560ms" }}>
-            <Magnetic href={chatHref} className="btn-primary">Start talking <span className="arrow">→</span></Magnetic>
+            <Magnetic href={chatHref} className="btn-primary">Start talking <PxArrow className="pxicon" /></Magnetic>
             <Magnetic href="#story">Why it exists</Magnetic>
           </div>
         </div>
@@ -82,7 +84,7 @@ export default function Hero({ chatHref }: { chatHref: string }) {
         <div ref={stage} className="stage" data-reveal style={{ ["--d" as string]: "200ms" }}
           onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onUp}>
           {(mode === "webgl" || mode === "webgl-lite") && <Scene3D pointer={pointer} drag={drag} lite={mode === "webgl-lite"} />}
-          {mode === "css" && <div className="fallback-orb" aria-hidden />}
+          {mode === "css" && <div className="fallback-orb" aria-hidden><PixelOrb size={200} /></div>}
           <div className="flare" aria-hidden><i /><b /></div>
           <div className="particles" aria-hidden>
             {Array.from({ length: 18 }).map((_, i) => (

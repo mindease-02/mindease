@@ -1,7 +1,8 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Orb from "../Orb";
+import PixelOrb from "../home/PixelOrb";
+import { PxMirror, PxSound, PxMic, PxMicoff, PxSend } from "../home/pixelIcons";
 import CrisisCard from "./CrisisCard";
 import MirrorPanel from "./MirrorPanel";
 import Techniques from "./Techniques";
@@ -195,14 +196,14 @@ export default function ChatApp({ name }: { name: string }) {
     <div className="chat relative z-[1] flex h-screen flex-col" style={{ ["--warm" as string]: tint.warm, ["--cool" as string]: tint.cool, ["--dim" as string]: tint.dim }}>
       <div className="presence" aria-hidden><i /><b /></div>
       <header className="chat-head flex items-center gap-3 px-4 py-3 sm:px-6">
-        <Orb size={40} tint={tint} />
+        <PixelOrb size={40} />
         <div className="leading-tight">
           <div className="display text-lg">Ori</div>
           <div className="text-[11px] text-clay-muted">software &middot; here for {name} &middot; <a href="/mood" className="underline decoration-dotted">change mood</a></div>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <button onClick={() => setSpeak((s) => !s)} className={`clay-btn px-3 py-2 text-xs ${speak ? "bg-clay-peach" : ""}`} title="Read replies aloud">{speak ? "voice on" : "voice off"}</button>
-          <button onClick={() => setShowMirror(true)} className="clay-btn px-3 py-2 text-xs">Mirror</button>
+          <button onClick={() => setSpeak((s) => !s)} className={`clay-btn px-3 py-2 text-xs ${speak ? "bg-clay-peach" : ""}`} title="Read replies aloud"><PxSound className="pxicon" /> {speak ? "voice on" : "voice off"}</button>
+          <button onClick={() => setShowMirror(true)} className="clay-btn px-3 py-2 text-xs"><PxMirror className="pxicon" /> Mirror</button>
         </div>
       </header>
 
@@ -228,11 +229,11 @@ export default function ChatApp({ name }: { name: string }) {
           <button type="button" onClick={toggleVoice} disabled={busy} aria-label={voice.recording ? "stop recording" : "record a voice message"}
             className={`clay-btn relative h-12 w-12 shrink-0 overflow-hidden rounded-full p-0 ${voice.recording ? "bg-clay-coral text-white" : ""}`}>
             {voice.recording && <span className="meter absolute inset-x-0 bottom-0 bg-white/30" style={{ transform: `scaleY(${voice.level})`, height: "100%" }} />}
-            <span className="relative">{voice.recording ? "■" : "●"}</span>
+            <span className="relative">{voice.recording ? <PxMicoff className="pxicon" style={{ fontSize: 20 }} /> : <PxMic className="pxicon" style={{ fontSize: 20 }} />}</span>
           </button>
           <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { typing.onKeyDown(e); if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
             rows={1} placeholder={voice.recording ? "listening…" : "say anything"} className="clay-input max-h-40 min-h-[48px] resize-none py-3.5" />
-          <button type="submit" disabled={sending || !input.trim()} className="clay-btn-primary h-12 shrink-0 rounded-full px-5">Send</button>
+          <button type="submit" disabled={sending || !input.trim()} className="clay-btn-primary h-12 shrink-0 rounded-full px-5"><PxSend className="pxicon" /> Send</button>
         </form>
         <p className="mx-auto mt-2 max-w-2xl text-center text-[10px] text-clay-muted">
           {voiceNote ? "voice tone captured · " : ""}{face.active ? "expression on · " : ""}Ori is software, not a therapist. In crisis, use a helpline.

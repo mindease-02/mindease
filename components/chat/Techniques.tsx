@@ -7,6 +7,7 @@
  * minutes.
  */
 import { useEffect, useState } from "react";
+import { PxRemove } from "../home/pixelIcons";
 
 type Kind = "box" | "sigh" | "ground" | "move";
 const PHASES = { box: [["Breathe in", 4], ["Hold", 4], ["Breathe out", 4], ["Hold", 4]] as [string, number][], sigh: [["Breathe in", 2], ["Sip in more", 1], ["Long breath out", 6], ["Rest", 2]] as [string, number][] };
@@ -41,7 +42,7 @@ export default function Techniques({ mood, onClose, initial }: { mood: string | 
           <div className="eyebrow">{mood === "angry" ? "Bringing the heat down" : mood === "anxious" ? "Settling" : "Techniques"}</div>
           <p className="muted t-sub">{mood === "angry" ? "Anger's a full-body thing. Two minutes of this and the next sentence comes out different." : "Pick one. None of them need you to feel like it."}</p>
         </div>
-        <button className="clay-btn px-3 py-1.5 text-xs" onClick={onClose} aria-label="Close techniques"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+        <button className="clay-btn px-3 py-1.5 text-xs" onClick={onClose} aria-label="Close techniques"><PxRemove className="pxicon" style={{ fontSize: 18 }} /></button>
       </div>
       <div className="t-tabs">
         {([["box", "Box breathing"], ["sigh", "Physiological sigh"], ["ground", "5-4-3-2-1"], ["move", "Move it"]] as [Kind, string][]).map(([k, l]) => (

@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { UserView } from "@/lib/pipeline/userView";
 import AxisWheel from "./AxisWheel";
 import Sparkline from "./Sparkline";
+import { PxRemove, PxDownload, PxBin, PxUser } from "../home/pixelIcons";
 
 interface Props {
   mirror: UserView | null;
@@ -54,7 +55,7 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
           <h2 className="display text-xl">The Mirror</h2>
           <p className="text-xs text-clay-muted">What Ori has of you. Yours to read, change and delete.</p>
         </div>
-        <button className="clay-btn px-3 py-2" onClick={onClose} aria-label="Close the Mirror"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+        <button className="clay-btn px-3 py-2" onClick={onClose} aria-label="Close the Mirror"><PxRemove className="pxicon" style={{ fontSize: 18 }} /></button>
       </header>
       <nav className="flex gap-1 px-5 pb-3">
         {(["you", "memory", "settings"] as const).map((t) => (
@@ -145,9 +146,9 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
             </Section>
             <Section title="Your data">
               <div className="flex flex-wrap gap-2">
-                <a href="/api/export" className="clay-btn px-3 py-1.5 text-xs">Download everything</a>
-                <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => { if (confirm("Delete all history, memories and messages? This can't be undone.")) onSettings({ clearAll: true }); }}>Delete everything</button>
-                <button className="clay-btn px-3 py-1.5 text-xs" onClick={onLogout}>Sign out</button>
+                <a href="/api/export" className="clay-btn px-3 py-1.5 text-xs"><PxDownload className="pxicon" /> Download everything</a>
+                <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => { if (confirm("Delete all history, memories and messages? This can't be undone.")) onSettings({ clearAll: true }); }}><PxBin className="pxicon" /> Delete everything</button>
+                <button className="clay-btn px-3 py-1.5 text-xs" onClick={onLogout}><PxUser className="pxicon" /> Sign out</button>
               </div>
             </Section>
           </>

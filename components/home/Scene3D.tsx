@@ -13,8 +13,7 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { RenderPixelatedPass } from "three/examples/jsm/postprocessing/RenderPixelatedPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { THEME_EVENT, currentPalette, type Palette } from "@/lib/theme";
 
@@ -29,7 +28,7 @@ export default function Scene3D({ pointer, drag, lite = false }: { pointer: Reac
     let raf = 0, running = true;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, lite ? 1.25 : 1.5));
+    renderer.setPixelRatio(1);
     renderer.setSize(el.clientWidth, el.clientHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -53,13 +52,15 @@ export default function Scene3D({ pointer, drag, lite = false }: { pointer: Reac
 
     // Post: a restrained bloom so the clearcoat highlight and the ring's rim read
     // as light, not as texture. Threshold high enough that the body stays matte.
+    // Pixel art: render at a coarse grid with hard edges, no smoothing anywhere.
     const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    if (!lite) composer.addPass(new UnrealBloomPass(new THREE.Vector2(el.clientWidth, el.clientHeight), 0.42, 0.65, 0.82));
+    const pixel = new RenderPixelatedPass(lite ? 5 : 6, scene, camera, { normalEdgeStrength: 0.35, depthEdgeStrength: 0.5 });
+    composer.addPass(pixel);
     composer.addPass(new OutputPass());
+    renderer.domElement.style.imageRendering = "pixelated";
 
     // Lighting: warm key, cool rim, soft fill. The environment does the reflections.
-    const key = new THREE.DirectionalLight(new THREE.Color(pal0.accent2).lerp(new THREE.Color(0xffffff), 0.6), 2.2);
+    const key = new THREE.DirectionalLight(new THREE.Color(pal0.accent2).lerp(new THREE.Color(0xffffff), 0.6), 2.6);
     key.position.set(3, 4, 3); key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024); key.shadow.radius = 6; key.shadow.bias = -0.0005;
     scene.add(key);
@@ -69,7 +70,7 @@ export default function Scene3D({ pointer, drag, lite = false }: { pointer: Reac
     const group = new THREE.Group(); scene.add(group);
 
     const coral = new THREE.MeshPhysicalMaterial({
-      color: pal0.accent, metalness: 0.15, roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.08,
+      color: pal0.accent, metalness: 0.1, roughness: 0.45, clearcoat: 0.6, clearcoatRoughness: 0.3,
       sheen: 0.4, sheenColor: new THREE.Color(pal0.accent2), envMapIntensity: 1.1,
     });
     const core = new THREE.Mesh(new THREE.SphereGeometry(1.35, 96, 96), coral);

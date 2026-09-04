@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { PxArrow } from "./home/pixelIcons";
 import { useRouter } from "next/navigation";
 
 const ACCOUNTS = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -99,7 +100,7 @@ export default function LoginForm() {
       {notice && <p role="status" style={{ color: "var(--ink)", fontSize: ".9rem", marginTop: 14 }}>{notice}</p>}
       <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 22 }} aria-busy={busy}
         disabled={busy || (!ACCOUNTS ? !identifier.trim() || !adult : mode === "forgot" ? !email : !email || password.length < 8 || (mode === "signup" && (!adult || !name.trim())))}>
-        {busy ? "One moment…" : mode === "forgot" ? "Send reset link" : mode === "signup" ? "Create account" : "Continue"} <span className="arrow" aria-hidden>→</span>
+        {busy ? "One moment…" : mode === "forgot" ? "Send reset link" : mode === "signup" ? "Create account" : "Continue"} <PxArrow className="pxicon" />
       </button>
 
       {ACCOUNTS && (

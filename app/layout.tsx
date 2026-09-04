@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { body, display } from "@/components/home/fonts";
+import { body, display, heading } from "@/components/home/fonts";
 
 export const metadata: Metadata = {
   title: "MindEase - Ori, a companion that notices",
@@ -11,7 +11,7 @@ export const viewport: Viewport = { themeColor: "#07080b", width: "device-width"
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`min-h-full ${display.variable} ${body.variable}`}>{children}</body>
+      <body className={`min-h-full ${display.variable} ${heading.variable} ${body.variable}`}>{children}</body>
     </html>
   );
 }

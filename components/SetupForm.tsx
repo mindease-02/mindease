@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { PxArrow } from "./home/pixelIcons";
 import { useRouter } from "next/navigation";
 import Magnetic from "./home/Magnetic";
 

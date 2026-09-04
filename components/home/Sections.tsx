@@ -4,18 +4,15 @@ import Link from "next/link";
 import Reveal, { Words } from "./Reveal";
 import Magnetic from "./Magnetic";
 import ThemeOrb from "./ThemeOrb";
+import PixelOrb from "./PixelOrb";
 
-/* Inline SVG icons (Lucide-style, stroke 1.5). No emoji as icons. */
+import { PxEye, PxBrain, PxBell, PxShield, PxPlay, PxRefresh, PxCheck, PxHand, PxArrow } from "./pixelIcons";
+/* Streamline "Pixel - Free" icons (CC BY 4.0). */
 const I = {
-  eye: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></svg>,
-  memory: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 3a7 7 0 0 0-7 7c0 3 2 5 3 6v3h8v-3c1-1 3-3 3-6a7 7 0 0 0-7-7Z" /><path d="M10 21h4" /></svg>,
-  bell: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10 21a2 2 0 0 0 4 0" /></svg>,
-  shield: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z" /><path d="m9 12 2 2 4-4" /></svg>,
-  play: <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M8 5v14l11-7z" /></svg>,
-  pause: <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>,
-  replay: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v5h5" /></svg>,
-  check: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m5 12 4 4L19 6" /></svg>,
-  minus: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M6 12h12" /></svg>,
+  eye: <PxEye className="pxicon" />, memory: <PxBrain className="pxicon" />, bell: <PxBell className="pxicon" />, shield: <PxShield className="pxicon" />,
+  play: <PxPlay className="pxicon" />, pause: <PxHand className="pxicon" />, replay: <PxRefresh className="pxicon" />, check: <PxCheck className="pxicon" />,
+  minus: <svg viewBox="0 0 32 32" className="pxicon" shapeRendering="crispEdges" fill="currentColor" aria-hidden><path d="M6 14h20v4H6z" /></svg>,
+  arrow: <PxArrow className="pxicon" />,
 };
 
 /* ------------------------------------------------------------- Product demo */
@@ -64,7 +61,7 @@ export function Demo() {
         </div>
         <div className="demo">
           <div ref={host} className="device" data-reveal role="region" aria-label="Replayed example conversation">
-            <div className="device-head"><span className="dot" aria-hidden />Ori <span className="muted">· example, replayed</span></div>
+            <div className="device-head"><PixelOrb size={22} />Ori <span className="muted">· example, replayed</span></div>
             <div className="device-body" aria-live="polite">
               {SCRIPT.map((l, i) => (
                 <div key={i} style={{ display: "contents" }}>
@@ -214,7 +211,7 @@ export function Cta({ chatHref }: { chatHref: string }) {
           <h2 className="display"><Words text="Tell it how you're arriving." step={50} /></h2>
           <p>Pick a mood, say a line if you want, and Ori meets you there. No account, no password — a name is enough.</p>
           <div className="ctas">
-            <Magnetic href={chatHref} className="btn-primary">Start talking <span className="arrow" aria-hidden>→</span></Magnetic>
+            <Magnetic href={chatHref} className="btn-primary">Start talking {I.arrow}</Magnetic>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { PxArrow } from "./home/pixelIcons";
 import { useRouter } from "next/navigation";
 
 /** Set a new password after the email link (the callback already exchanged the code for a session). */
@@ -28,7 +29,7 @@ export default function ResetForm() {
       <label htmlFor="pw2" className="label" style={{ marginTop: 14 }}>Again, to be sure</label>
       <input id="pw2" type="password" className="field" value={pw2} onChange={(e) => setPw2(e.target.value)} autoComplete="new-password" minLength={8} required />
       {error && <p role="alert" style={{ color: "var(--coral-2)", fontSize: ".9rem", marginTop: 14 }}>{error}</p>}
-      <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 22 }} disabled={busy || pw.length < 8} aria-busy={busy}>{busy ? "Saving…" : "Save and continue"} <span className="arrow" aria-hidden>→</span></button>
+      <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 22 }} disabled={busy || pw.length < 8} aria-busy={busy}>{busy ? "Saving…" : "Save and continue"} <PxArrow className="pxicon" /></button>
     </form>
   );
 }

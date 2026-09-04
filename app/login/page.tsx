@@ -2,7 +2,7 @@ import "../home.css";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentSession } from "@/lib/auth";
-import { body, display } from "@/components/home/fonts";
+import { body, display, heading } from "@/components/home/fonts";
 import ThemeInit from "@/components/home/ThemeInit";
 import LoginForm from "@/components/LoginForm";
 import Reveal from "@/components/home/Reveal";
@@ -10,7 +10,7 @@ import Reveal from "@/components/home/Reveal";
 export default async function LoginPage() {
   if (await currentSession()) redirect("/mood");
   return (
-    <div className={`world ${display.variable} ${body.variable}`}>
+    <div className={`world ${display.variable} ${heading.variable} ${body.variable}`}>
       <ThemeInit />
       <div className="atmos" aria-hidden /><div className="vignette" aria-hidden /><div className="grain" aria-hidden /><div className="bars" aria-hidden><span /><span /></div>
       <header className="nav"><div className="container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

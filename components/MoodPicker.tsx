@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MOODS, type MoodId } from "@/lib/moods";
 import { applyPalette, paletteById } from "@/lib/theme";
+import PixelOrb from "./home/PixelOrb";
+import { PxArrow } from "./home/pixelIcons";
 
 export default function MoodPicker({ name }: { name: string }) {
   const router = useRouter();
@@ -34,7 +36,7 @@ export default function MoodPicker({ name }: { name: string }) {
         {MOODS.map((m) => (
           <button key={m.id} type="button" className="mood" aria-pressed={mood === m.id} disabled={busy} style={{ ["--c" as string]: m.c }}
             onClick={() => { setMood(m.id); const pal = paletteById(m.id); if (pal) applyPalette(pal); go(m.id, note); }}>
-            <span className="dot" aria-hidden /><b>{m.label}</b><span>{m.hint}</span>
+            <span className="dot" aria-hidden><PixelOrb size={40} color={m.c} /></span><b>{m.label}</b><span>{m.hint}</span>
             <small>{m.description}</small>
           </button>
         ))}
@@ -43,7 +45,7 @@ export default function MoodPicker({ name }: { name: string }) {
         <label htmlFor="own-words" className="label">Or say it in your own words</label>
         <input id="own-words" className="field" value={note} onChange={(e) => setNote(e.target.value.slice(0, 200))} placeholder="e.g. exam on Monday and I can’t focus" disabled={busy} />
         <button type="submit" className="go" aria-label="Go to the chat" disabled={busy || !note.trim()}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          <PxArrow className="pxicon" style={{ fontSize: 22 }} />
         </button>
       </form>
       {error && <p style={{ color: "var(--coral-2)", marginTop: 12 }}>{error}</p>}
