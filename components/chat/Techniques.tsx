@@ -11,8 +11,8 @@ import { useEffect, useState } from "react";
 type Kind = "box" | "sigh" | "ground" | "move";
 const PHASES = { box: [["Breathe in", 4], ["Hold", 4], ["Breathe out", 4], ["Hold", 4]] as [string, number][], sigh: [["Breathe in", 2], ["Sip in more", 1], ["Long breath out", 6], ["Rest", 2]] as [string, number][] };
 
-export default function Techniques({ mood, onClose }: { mood: string | null; onClose: () => void }) {
-  const [kind, setKind] = useState<Kind>(mood === "anxious" ? "sigh" : "box");
+export default function Techniques({ mood, onClose, initial }: { mood: string | null; onClose: () => void; initial?: Kind }) {
+  const [kind, setKind] = useState<Kind>(initial ?? (mood === "anxious" ? "sigh" : "box"));
   const [running, setRunning] = useState(false);
   const [phase, setPhase] = useState(0);
   const [left, setLeft] = useState(0);

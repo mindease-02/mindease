@@ -16,7 +16,7 @@
 import { cosine, embed, overlap } from "./embed";
 import { DAY } from "../util/time";
 
-export type MemoryKind = "person" | "event" | "preference" | "past" | "fact" | "goal" | "struggle";
+export type MemoryKind = "person" | "event" | "preference" | "past" | "fact" | "goal" | "struggle" | "routine";
 
 export interface MemoryItem {
   id: string;

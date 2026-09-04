@@ -15,6 +15,7 @@ import { prosodyReading, type ProsodyFeatures } from "../affect/prosody";
 import { typingReading, type TypingFeatures } from "../affect/typing";
 import { faceReading, type FaceFeatures } from "../affect/face";
 import { secondOpinion, assessmentForTier } from "../safety/secondOpinion";
+import { lifestylePatterns } from "../lifestyle/patterns";
 import { octantFromVAD, updateOctant } from "../affect/octant";
 import type { ChannelReading, VAD } from "../affect/types";
 import { updateBaseline } from "../util/stats";
@@ -64,6 +65,55 @@ export interface TurnResult {
   llmConfigured: boolean;
   /** Set when the model second opinion raised the tier above the regex. */
   riskRaised?: boolean;
+  /** The app asks, in the chat, whether a grounding technique would help right now. */
+  techniqueOffer?: { reason: string; suggested: ("box" | "sigh" | "ground" | "move")[] };
+}
+
+const TECHNIQUE_COOLDOWN = 45 * 60_000;
+
+/**
+ * Should the app offer a technique this turn? Only when it is actually
+ * warranted: they arrived angry/anxious/restless and this is their first
+ * message, or the read is hot and intense. Never during a serious-risk turn
+ * (the card takes over), and not more than once per cooldown.
+ */
+function decideTechniqueOffer(state: UserState, analysis: AffectAnalysis, risk: RiskAssessment, now: number): TurnResult["techniqueOffer"] | undefined {
+  if (atLeast(risk.tier, "active")) return undefined;
+  if (state.lastTechniqueOfferAt && now - state.lastTechniqueOfferAt < TECHNIQUE_COOLDOWN) return undefined;
+  const axes = analysis.axes as unknown as Record<string, number>;
+  const st = (n: string) => analysis.states.find((x) => x.name === n)?.intensity ?? 0;
+  const anger = Math.max(axes.anger ?? 0, st("frustration"), st("rage"));
+  const fear = Math.max(axes.fear ?? 0, st("anxiety"), st("panic"), st("dread"), st("overwhelm"));
+  const intense = analysis.intensity >= 0.6;
+  const arrival = state.arrival && now - state.arrival.at < 6 * HOUR ? state.arrival.mood : null;
+  const turnsSinceArrival = state.arrival ? state.messages.filter((m) => m.role === "user" && m.at >= state.arrival!.at).length : 99;
+  const arrivalHot = !!arrival && ["angry", "anxious", "restless"].includes(arrival) && turnsSinceArrival <= 1;
+  const hot = (anger >= 0.45 || fear >= 0.5) && intense;
+  if (!arrivalHot && !hot) return undefined;
+  const kind = arrival === "angry" || (anger >= fear && anger >= 0.45) ? "angry" : arrival === "anxious" || fear >= 0.5 ? "anxious" : "restless";
+  const offers = {
+    angry: { reason: "Want two minutes to bring the heat down before we go on? Pick one, or keep talking - either's fine.", suggested: ["box", "move", "sigh"] as const },
+    anxious: { reason: "Your body's probably ahead of your head right now. Want to slow it down first? Pick one, or just keep going.", suggested: ["sigh", "box", "ground"] as const },
+    restless: { reason: "Want to try something with your hands for a minute, or keep talking?", suggested: ["move", "ground", "box"] as const },
+  }[kind];
+  state.lastTechniqueOfferAt = now;
+  return { reason: offers.reason, suggested: [...offers.suggested] };
+}
+
+/** Same opener, or a question already asked in the last few replies. */
+function isRepetitive(reply: string, recent: string[]): boolean {
+  const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  const opener = (t: string) => norm(t).split(" ").slice(0, 3).join(" ");
+  const qs = (t: string) => t.split(/(?<=\?)/).map((q) => norm(q)).filter((q) => q.length > 12);
+  const mine = opener(reply);
+  if (mine && recent.some((r) => opener(r) === mine)) return true;
+  const recentQs = recent.flatMap(qs);
+  return qs(reply).some((q) => recentQs.some((r) => r === q || overlap(q, r) >= 0.8));
+}
+function overlap(a: string, b: string): number {
+  const A = new Set(a.split(" ")), B = new Set(b.split(" "));
+  let i = 0; for (const w of A) if (B.has(w)) i++;
+  return i / Math.max(1, Math.min(A.size, B.size));
 }
 
 export class RateLimitError extends Error {
@@ -162,6 +212,9 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   };
   const confidence = Math.max(snapshot.confidence, analysis.source === "model" ? Math.min(0.85, 0.45 + ta.reading.coverage * 0.5) : 0);
   const incongruent = snapshot.incongruence.present || analysis.masking > 0.6;
+  const life = lifestylePatterns(state.history, state.timeZone, now);
+  const techniqueOffer = decideTechniqueOffer(state, analysis, risk, now);
+  const recentReplies = state.messages.filter((m) => m.role === "assistant").slice(-6).map((m) => m.content);
 
   // Incongruence calibration: was last turn's flag confirmed or denied? Then the
   // streak - the prompt only gets to mention a mismatch once it has held for two turns.
@@ -224,15 +277,23 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     displayName: state.displayName, localTime: localTimeString(now, state.timeZone),
     surfaceIncongruence,
     arrival: state.arrival && now - state.arrival.at < 6 * HOUR ? state.arrival : undefined,
+    recentReplies,
+    lifestyle: life.sufficient ? { lines: life.lines, window: life.now.window, predictedLow: life.now.predictedLow } : undefined,
+    techniqueOffered: !!techniqueOffer,
   });
   const history = context.slice(-16).map((m) => ({ role: m.role, content: m.content }));
   let reply: string;
   const configured = !!llmConfig();
   if (configured) {
     try {
-      reply = await complete([{ role: "system", content: system }, ...history, { role: "user", content: text }],
-        { tier: "chat", temperature: analysis.intensity > 0.7 ? 0.5 : 0.75, maxTokens: 420 });
-      reply = tidy(reply);
+      const msgs = [{ role: "system" as const, content: system }, ...history, { role: "user" as const, content: text }];
+      reply = tidy(await complete(msgs, { tier: "chat", temperature: analysis.intensity > 0.7 ? 0.5 : 0.75, maxTokens: 420 }));
+      // Repetition guard: same opener or a question already asked → one rewrite with the draft shown.
+      if (isRepetitive(reply, recentReplies)) {
+        const redo = await complete([...msgs, { role: "system" as const, content: `Your draft repeated how you have opened before, or re-asked a question you already asked:\n"${reply}"\nWrite a different reply: a new first word, a new shape, and no question you have asked in this conversation. Keep it as short.` }],
+          { tier: "chat", temperature: 0.9, maxTokens: 420 });
+        reply = tidy(redo);
+      }
     } catch (err) {
       console.error("[turn] LLM failed:", (err as Error).message);
       reply = fallbackReply(risk, state.displayName);
@@ -260,6 +321,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     newMemories: extracted.map((m) => ({ id: m.id, text: m.text, kind: m.kind })),
     llmConfigured: configured,
     riskRaised: second.raised || undefined,
+    techniqueOffer,
   };
 }
 

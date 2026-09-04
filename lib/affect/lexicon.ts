@@ -109,3 +109,8 @@ export const INTENSIFIERS: Record<string, number> = {
   kinda: 0.6, kind: 0.7, sorta: 0.6, slightly: 0.5, bit: 0.6, little: 0.65,
   somewhat: 0.65, barely: 0.4, hardly: 0.4, maybe: 0.75, sometimes: 0.7,
 };
+
+// Gen Z / Hinglish usage folded into the fallback tables.
+import { SLANG_INTENSIFIERS, SLANG_VAD } from "./slang";
+Object.assign(VAD_LEXICON, SLANG_VAD);
+Object.assign(INTENSIFIERS, SLANG_INTENSIFIERS);

@@ -75,6 +75,10 @@ const PATTERNS: [RiskTier, RegExp, number, string][] = [
   ["active", /\b(end|ending)\s+(it all|my life)\b/i, 0.85, "active ideation"],
   ["active", /\b(think|thinking|thought)\s+about\s+(ending (it|things|everything)|suicide|killing myself|not being (here|around|alive))\b/i, 0.75, "ideation"],
   ["active", /\b(suicidal|suicide)\b/i, 0.7, "explicit mention"],
+  // Internet euphemisms. Casual spelling does not make them casual.
+  ["active", /\b(unalive|un-alive)\s+(myself|me)\b|\bkms\b|\bsewerslide\b|\b(delete|off|end)\s+myself\b|\b(want|wanna|going|gonna)\s+(to\s+)?unalive\b/i, 0.8, "suicide euphemism"],
+  ["active", /\b(won'?t|not gonna|not going to)\s+be\s+(here|around)\s+(much longer|for long|anymore)\b/i, 0.7, "euphemism for not being here"],
+  ["passive", /\b(done|finished)\s+with\s+(life|living|everything|it all)\b/i, 0.5, "done with life"],
   ["active", /\bi\s+(want|need)\s+to\s+(hurt|cut)\s+myself\b/i, 0.8, "self-harm urge"],
   ["active", /\b(self.harm|self.harming|cutting myself)\b/i, 0.7, "self-harm"],
 

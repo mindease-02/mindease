@@ -10,6 +10,7 @@ import { decideProactive } from "../proactive/policy";
 import { summarizeOctant } from "../affect/octant";
 import { isolationToday } from "./checkin";
 import { helplinesFor, emergencyFor } from "../safety/resources";
+import { lifestylePatterns } from "../lifestyle/patterns";
 import type { UserState } from "../store/types";
 
 const PLAIN: Record<string, string> = {
@@ -56,6 +57,7 @@ export function userView(state: UserState, now = Date.now()) {
         ? (decision.rationale[0] ?? "something it noticed")
         : (PLAIN[decision.blockedBy ?? "no_trigger"] ?? "not right now"),
     },
+    patterns: lifestylePatterns(state.history, state.timeZone, now).lines,
     memories: state.memories.slice().sort((x, y) => y.at - x.at).map((m) => ({ id: m.id, kind: m.kind, text: m.text, at: m.at, era: m.era ?? null })),
     helplines: helplinesFor(state.region),
     emergency: emergencyFor(state.region),

@@ -123,6 +123,8 @@ export interface CadenceContext {
   cadenceLog: { morning?: string; evening?: string };
   /** Today's isolation read, 0..1: low social reference, low valence, few sessions. */
   isolation: number;
+  /** Lifestyle prediction: this is one of the person's usual low windows. */
+  predictedLow?: boolean;
   /** Number of messages the user sent today (local). */
   messagesToday: number;
 }
@@ -274,7 +276,7 @@ export function decideProactive(args: {
       rationale: ["it's morning and this is one of the check-ins you asked for"],
     });
 
-    const eveningOk = consent.cadence.evening && hour >= EVENING_FROM && hour < EVENING_TO && cad.cadenceLog.evening !== today && cad.isolation >= 0.45;
+    const eveningOk = consent.cadence.evening && hour >= EVENING_FROM && hour < EVENING_TO && cad.cadenceLog.evening !== today && (cad.isolation >= 0.45 || !!cad.predictedLow);
     cadenceCandidates.push({
       kind: "evening", ok: eveningOk,
       detail: !consent.cadence.evening ? "evening check-ins are off"

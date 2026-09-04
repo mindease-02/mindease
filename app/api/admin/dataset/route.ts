@@ -2,6 +2,7 @@ import { isAdmin } from "@/lib/admin";
 import { getStore, migrate } from "@/lib/store";
 import { assessDependency } from "@/lib/dependency";
 import { assessTrend } from "@/lib/trend";
+import { lifestylePatterns } from "@/lib/lifestyle/patterns";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -33,6 +34,7 @@ export async function GET(req: Request) {
       history: s.history, octant: s.octant, lastAnalysis: s.lastAnalysis ?? null,
       trend: assessTrend(s.history, s.ewma, s.cusum, s.timeZone, now),
       dependency: assessDependency(s.history, userText, now),
+      lifestyle: lifestylePatterns(s.history, s.timeZone, now),
       outreach: s.outreach, bandit: s.bandit, riskLog: s.riskLog, incongruence: s.incongruence,
       memories: s.memories.map(({ embedding: _e, ...m }) => m),
       messages: withText && s.consent.storeTranscript ? s.messages : undefined,

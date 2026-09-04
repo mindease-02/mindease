@@ -17,8 +17,9 @@ export default function MoodPicker({ name }: { name: string }) {
     try {
       const body = pick ? { mood: pick, note: text } : text.trim() ? { mood: "okay", note: text, noteOnly: true } : { skip: true };
       const r = await fetch("/api/mood", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error ?? "Couldn't save that - try again.");
-      router.push("/chat");
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error ?? "Couldn't save that - try again.");
+      router.push(j.needsSetup ? "/setup" : "/chat");
     } catch (err) {
       setError((err as Error).message); setBusy(false);
     }
@@ -28,7 +29,7 @@ export default function MoodPicker({ name }: { name: string }) {
     <div className="container" style={{ maxWidth: 920 }}>
       <div className="eyebrow" data-reveal>Before we start</div>
       <h1 className="display" data-reveal style={{ fontSize: "clamp(2.6rem, 6vw, 4.8rem)", margin: "14px 0 0", ["--d" as string]: "60ms" }}>How are you arriving, {name}?</h1>
-      <p className="muted" data-reveal style={{ fontWeight: 300, marginTop: 14, maxWidth: "36rem", lineHeight: 1.6, ["--d" as string]: "120ms" }}>Tap one and you're in. It gives Ori a sense of what to hold, and you can be wrong about it.</p>
+      <p className="muted" data-reveal style={{ fontWeight: 300, marginTop: 14, maxWidth: "36rem", lineHeight: 1.6, ["--d" as string]: "120ms" }}>Tap one. It gives Ori a sense of what to hold, and you can be wrong about it.</p>
       <div className={`moods ${busy ? "busy" : ""}`} role="group" aria-label="Mood" data-reveal style={{ ["--d" as string]: "180ms" }}>
         {MOODS.map((m) => (
           <button key={m.id} type="button" className="mood" aria-pressed={mood === m.id} disabled={busy} style={{ ["--c" as string]: m.c }}

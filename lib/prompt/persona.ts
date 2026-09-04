@@ -30,6 +30,7 @@
  * should be doing.
  */
 import { ROLE_LIMIT_STATEMENT, emergencyFor, helplinesFor } from "../safety/resources";
+import { slangBlock } from "../affect/slang";
 import type { RiskAssessment } from "../safety/crisis";
 import type { DependencyAssessment } from "../dependency";
 import type { AffectSnapshot } from "../affect/types";
@@ -135,6 +136,12 @@ export interface PromptContext {
   surfaceIncongruence?: boolean;
   /** The mood they chose on the way in, if recent. */
   arrival?: { label: string; hint: string; note?: string; at: number };
+  /** Ori's last few replies, so it does not open the same way or ask the same thing. */
+  recentReplies?: string[];
+  /** Lifestyle patterns derived from when they talk. */
+  lifestyle?: { lines: string[]; window: string; predictedLow: boolean };
+  /** True when the app is showing a technique choice under this reply. */
+  techniqueOffered?: boolean;
 }
 
 export function buildSystemPrompt(ctx: PromptContext): string {
@@ -143,7 +150,11 @@ export function buildSystemPrompt(ctx: PromptContext): string {
   if (ctx.displayName || ctx.localTime) {
     parts.push(`## Who and when\n\nYou are talking with ${ctx.displayName ?? "someone"}.${ctx.localTime ? ` Their local time is ${ctx.localTime}.` : ""} Use their name rarely - once in a while, never every message.`);
   }
+  parts.push(slangBlock());
+  if (ctx.lifestyle) parts.push(lifestyleBlock(ctx.lifestyle));
   if (ctx.arrival) parts.push(arrivalBlock(ctx.arrival));
+  if (ctx.recentReplies?.length) parts.push(repetitionBlock(ctx.recentReplies));
+  parts.push(techniqueBlock(ctx.techniqueOffered ?? false));
   if (ctx.memories?.length) parts.push(memoryBlock(ctx.memories));
   if (ctx.snapshot) parts.push(affectBlock(ctx));
   if (ctx.analysis) parts.push(analysisBlock(ctx.analysis, ctx.octant, ctx.surfaceIncongruence ?? false));
@@ -166,11 +177,38 @@ function arrivalBlock(a: NonNullable<PromptContext["arrival"]>): string {
     `${ago < 2 ? "Just now" : `${ago} minutes ago`}, before opening the chat, they picked: **${a.label}** (${a.hint}).${a.note ? ` They added: "${a.note}".` : ""}`,
     "",
     "Start from there. Don't ask how they are - they told you. Don't repeat the word back like a form field; respond to it like a friend who just read it. If the first message contradicts it, trust the message and let it go.",
-    ...(a.label === "Angry" || a.label === "Anxious" || a.label === "Restless" ? [
-      "",
-      `They arrived ${a.label.toLowerCase()}. The app has a Techniques panel on screen (box breathing, the physiological sigh - two short breaths in, one long out - 5-4-3-2-1 grounding, and for anger: shake out the arms, cold water on the wrists, a ten-minute walk). Let them say the thing first. When there's a pause, offer ONE of these, in one sentence, as something to try right now - not as advice, not as a list. If they wave it off, drop it.`,
-    ] : []),
   ].join("\n");
+}
+
+function lifestyleBlock(l: NonNullable<PromptContext["lifestyle"]>): string {
+  return [
+    "## Their patterns (from when they talk, not what they say)",
+    "",
+    ...l.lines.map((x) => `- ${x}`),
+    `- Right now is their ${l.window}${l.predictedLow ? " - usually one of their lower stretches" : ""}.`,
+    "",
+    "Use this to anticipate, not to diagnose, and never recite it back as a report. If this is one of their low windows, come in gentler and shorter. If they've been up late several nights, sleep is fair to ask about - once. If they're back after a longer gap than usual, notice it lightly, without guilt.",
+  ].join("\n");
+}
+
+function repetitionBlock(recent: string[]): string {
+  const opener = (t: string) => t.trim().split(/\s+/).slice(0, 7).join(" ");
+  const questions = recent.flatMap((t) => t.split(/(?<=\?)/).map((q) => q.trim()).filter((q) => q.endsWith("?"))).slice(-6);
+  return [
+    "## Don't repeat yourself",
+    "",
+    "Your last replies opened like this - open differently this time, with a different first word and a different shape:",
+    ...recent.slice(-5).map((t) => `- "${opener(t)}…"`),
+    ...(questions.length ? ["", "Questions you have already asked - do not ask these again, or anything that amounts to the same thing:", ...questions.map((q) => `- ${q}`)] : []),
+    "",
+    "If there is nothing new to ask, don't ask. Say something, or stay with what they said.",
+  ].join("\n");
+}
+
+function techniqueBlock(offered: boolean): string {
+  return offered
+    ? "## Techniques\n\nThe app is showing them a choice of grounding techniques right under your reply (box breathing, the physiological sigh, 5-4-3-2-1, moving the body). You may add ONE short clause acknowledging it - \"there's something on screen if you want it\" - or say nothing about it. Do not list or explain techniques yourself."
+    : "## Techniques\n\nDon't offer breathing or grounding exercises unprompted; the app offers them itself when it's warranted. If they ask for one, describe a single one in one or two lines, plainly.";
 }
 
 function memoryBlock(memories: MemoryItem[]): string {

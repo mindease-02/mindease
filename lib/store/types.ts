@@ -114,6 +114,10 @@ export interface UserState {
   rate: { windowStart: number; count: number };
   /** The mood the person chose on the way in, and when. Expires after a session. */
   arrival?: { mood: string; label: string; hint: string; note?: string; at: number };
+  /** First-run setup completed (sign in → mood → settings → chat). */
+  setupDone?: boolean;
+  /** Last time the app offered a technique; enforces a cooldown. */
+  lastTechniqueOfferAt?: number;
 }
 
 export interface Store {

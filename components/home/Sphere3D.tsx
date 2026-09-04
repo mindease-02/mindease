@@ -1,6 +1,6 @@
 "use client";
 /**
- * The ball in "why it exists": a glossy sphere, lit by
+ * The ball in "why it exists": a single glossy sphere, lit by
  * an HDR room environment. Its colour is exactly the emotion's assigned colour
  * (lib/theme.ts); it eases to the next colour when tapped, squashes on the tap,
  * and drifts with the pointer.
@@ -40,8 +40,6 @@ export default function Sphere3D({ tapSignal }: { tapSignal: React.MutableRefObj
     const root = new THREE.Group(); root.position.y = 0.2; scene.add(root);
     const mat = new THREE.MeshPhysicalMaterial({ color: pal.accent, metalness: 0.15, roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.08, sheen: 0.4, sheenColor: new THREE.Color(pal.accent2), envMapIntensity: 1.1 });
     const ball = new THREE.Mesh(new THREE.SphereGeometry(1.3, 96, 96), mat); root.add(ball);
-    const satMat = new THREE.MeshPhysicalMaterial({ color: pal.cool, metalness: 0.2, roughness: 0.15, clearcoat: 1, emissive: new THREE.Color(pal.cool).multiplyScalar(0.25), emissiveIntensity: 0.6 });
-    const sat = new THREE.Mesh(new THREE.SphereGeometry(0.12, 32, 32), satMat); root.add(sat);
     const shadow = new THREE.Mesh(new THREE.CircleGeometry(1.25, 48), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35 }));
     shadow.rotation.x = -Math.PI / 2; shadow.position.y = -1.7; scene.add(shadow);
 
@@ -65,7 +63,6 @@ export default function Sphere3D({ tapSignal }: { tapSignal: React.MutableRefObj
       const t = clock.elapsedTime;
       const k = 1 - Math.pow(0.002, dt);
       mat.color.lerp(targetColor, k); mat.sheenColor.lerp(targetSheen, k);
-      satMat.color.lerp(targetCool, k); satMat.emissive.copy(satMat.color).multiplyScalar(0.25);
       rim.color.lerp(targetCool, k); key.color.copy(targetSheen).lerp(new THREE.Color(0xffffff), 0.6);
 
       if (tapSignal.current !== lastTap) { lastTap = tapSignal.current; squashV = -6; }
@@ -75,7 +72,6 @@ export default function Sphere3D({ tapSignal }: { tapSignal: React.MutableRefObj
       root.position.y = 0.2 + (reduced ? 0 : Math.sin(t * 0.7) * 0.06);
       root.rotation.y = pointer.x * 0.35 + (reduced ? 0 : t * 0.1);
       root.rotation.x = -pointer.y * 0.2;
-      const a = t * 0.5; sat.position.set(Math.cos(a) * 2.05, Math.sin(a * 0.8) * 0.3, Math.sin(a) * 2.05);
       renderer.render(scene, camera);
       raf = requestAnimationFrame(frame);
     };

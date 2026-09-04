@@ -5,6 +5,7 @@ import Orb from "../Orb";
 import CrisisCard from "./CrisisCard";
 import MirrorPanel from "./MirrorPanel";
 import Techniques from "./Techniques";
+import TechniqueOffer, { type TechKind } from "./TechniqueOffer";
 import { useTypingMetrics } from "../hooks/useTypingMetrics";
 import { useVoiceFeatures } from "../hooks/useVoiceFeatures";
 import { useFaceAffect } from "../hooks/useFaceAffect";
@@ -43,7 +44,8 @@ export default function ChatApp({ name }: { name: string }) {
   const [mirror, setMirror] = useState<UserView | null>(null);
   const [showMirror, setShowMirror] = useState(false);
   const [arrivalMood, setArrivalMood] = useState<string | null>(null);
-  const [showTech, setShowTech] = useState(false);
+  const [offer, setOffer] = useState<{ reason: string; suggested: TechKind[] } | null>(null);
+  const [tech, setTech] = useState<TechKind | null>(null);
   const [crisis, setCrisis] = useState<{ helplines: Helpline[]; emergency: string } | null>(null);
   const [tint, setTint] = useState<{ warm: number; cool: number; dim: number }>({ warm: 0.5, cool: 0.3, dim: 0 });
   const [speak, setSpeak] = useState(false);
@@ -85,7 +87,7 @@ export default function ChatApp({ name }: { name: string }) {
     (async () => {
       const j = await refresh(true);
       const a = j?.arrival as { mood?: string; label: string; note?: string } | null;
-      if (a?.mood) { setArrivalMood(a.mood); if (a.mood === "angry") setShowTech(true); }
+      if (a?.mood) setArrivalMood(a.mood);
       if (j?.messages?.length) { setMessages(j.messages); scroll(); }
       else setMessages([{ role: "assistant", content: greeting(name, a), at: Date.now() }]);
     })();
@@ -144,6 +146,7 @@ export default function ChatApp({ name }: { name: string }) {
       typing.onPromptShown();
       if (j.helplines) setCrisis({ helplines: j.helplines, emergency: j.emergency });
       else if (crisis && j.risk.tier === "none" && /\b(ok|okay|fine|better|safe)\b/i.test(text)) setCrisis(null);
+      if (j.techniqueOffer) { setOffer(j.techniqueOffer); setTech(null); } else setOffer(null);
       const a = j.analysis.axes;
       setTint({ warm: Math.min(1, a.joy * 0.7 + a.trust * 0.5 + a.anticipation * 0.3), cool: Math.min(1, a.sadness * 0.6 + a.fear * 0.5), dim: Math.min(1, (a.sadness + a.disgust) * 0.5) });
       if (speak) say(j.reply);
@@ -198,7 +201,6 @@ export default function ChatApp({ name }: { name: string }) {
           <div className="text-[11px] text-clay-muted">software &middot; here for {name} &middot; <a href="/mood" className="underline decoration-dotted">change mood</a></div>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <button onClick={() => setShowTech((t) => !t)} className={`clay-btn px-3 py-2 text-xs ${showTech ? "bg-clay-peach" : ""}`} title="Breathing and grounding techniques">Techniques</button>
           <button onClick={() => setSpeak((s) => !s)} className={`clay-btn px-3 py-2 text-xs ${speak ? "bg-clay-peach" : ""}`} title="Read replies aloud">{speak ? "voice on" : "voice off"}</button>
           <button onClick={() => setShowMirror(true)} className="clay-btn px-3 py-2 text-xs">Mirror</button>
         </div>
@@ -216,10 +218,11 @@ export default function ChatApp({ name }: { name: string }) {
             </div>
           ))}
           {crisis && <CrisisCard helplines={crisis.helplines} emergency={crisis.emergency} />}
+          {offer && !tech && <TechniqueOffer reason={offer.reason} suggested={offer.suggested} onPick={(k) => { setTech(k); setOffer(null); }} onDismiss={() => setOffer(null)} />}
         </div>
       </div>
 
-      {showTech && <div className="px-4 sm:px-6"><div className="mx-auto max-w-2xl"><Techniques mood={arrivalMood} onClose={() => setShowTech(false)} /></div></div>}
+      {tech && <div className="px-4 sm:px-6"><div className="mx-auto max-w-2xl"><Techniques mood={arrivalMood} initial={tech} onClose={() => setTech(null)} /></div></div>}
       <footer className="px-4 pb-4 pt-2 sm:px-6">
         <form className="composer glass mx-auto flex max-w-2xl items-end gap-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
           <button type="button" onClick={toggleVoice} disabled={busy} aria-label={voice.recording ? "stop recording" : "record a voice message"}

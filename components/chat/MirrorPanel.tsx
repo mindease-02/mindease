@@ -77,6 +77,11 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
                 <AxisWheel weather={m.octant.weather} climate={m.octant.climate} />
               </Section>
             )}
+            {m.patterns.length > 0 && (
+              <Section title="Your patterns" hint="From when you tend to talk, not what you say. Ori uses this to anticipate, not to judge.">
+                <ul className="space-y-1 text-sm">{m.patterns.map((l) => <li key={l}>{l}</li>)}</ul>
+              </Section>
+            )}
             <Section title="Mood across recent conversations">
               <Sparkline points={m.mood} />
             </Section>

@@ -18,6 +18,7 @@ import { DAY, HOUR } from "../util/time";
 import { localTimeString } from "./turn";
 import { mean } from "../util/stats";
 import { sendPush } from "../push";
+import { lifestylePatterns } from "../lifestyle/patterns";
 
 export interface CheckinResult {
   decision: ProactiveDecision;
@@ -49,7 +50,7 @@ export async function evaluateUser(userId: string, opts: { now?: number; force?:
   const trend = assessTrend(state.history, state.ewma, state.cusum, state.timeZone, now);
   const recentUserText = state.messages.filter((m) => m.role === "user").slice(-30).map((m) => m.content);
   const dependency = assessDependency(state.history, recentUserText, now);
-  const cadence = { cadenceLog: state.cadenceLog, ...isolationToday(state, now) };
+  const cadence = { cadenceLog: state.cadenceLog, ...isolationToday(state, now), predictedLow: lifestylePatterns(state.history, state.timeZone, now).now.predictedLow };
 
   let decision = decideProactive({
     trend, dependency, consent: state.consent, history: state.outreach,

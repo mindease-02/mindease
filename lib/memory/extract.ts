@@ -11,7 +11,7 @@ const KINDS: MemoryKind[] = ["person", "event", "preference", "past", "fact", "g
 const SYSTEM = `You extract durable memories for a companion app from ONE message a person wrote. Return JSON: {"memories":[{"kind":..., "text":..., "importance":0-1, "era":string|null}]}.
 
 Rules:
-- At most 3. Often 0. Only things worth remembering in a week: named people and the relationship, events with a time, preferences, ongoing struggles, goals, and stories from their past (kind "past", with "era" like "childhood", "university", "last year" when stated).
+- At most 3. Often 0. Only things worth remembering in a week: named people and the relationship, events with a time, preferences, ongoing struggles, goals, stories from their past (kind "past", with "era" like "childhood", "university", "last year" when stated), and routines / lifestyle (kind "routine": sleep and wake times, work or study hours, exercise, meals, commute, substances, how weekends usually go).
 - Write each as one plain third-person sentence about the person ("Their brother Sam calls every Sunday").
 - Never store passing moods ("feels tired today") - those are tracked elsewhere. Never store anything about self-harm methods.
 - importance: 0.9 for bereavements, diagnoses, relationships, big life changes; 0.5 for routines and preferences; 0.3 for small details.`;

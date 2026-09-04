@@ -15,6 +15,7 @@ export async function POST(req: Request) {
   const state = migrate(raw);
   const body = (await req.json().catch(() => ({}))) as {
     consent?: Partial<typeof state.consent> & { cadence?: Partial<typeof state.consent.cadence> };
+    setupDone?: boolean;
     forgetMemoryId?: string;
     pauseDays?: number | null;
     clearAll?: boolean;
@@ -31,6 +32,7 @@ export async function POST(req: Request) {
   if (body.forgetMemoryId) state.memories = forget(state.memories, body.forgetMemoryId);
   if (body.pauseDays !== undefined) state.pausedUntil = body.pauseDays ? Date.now() + body.pauseDays * DAY : undefined;
   if (body.region) state.region = body.region.toUpperCase().slice(0, 2);
+  if (body.setupDone !== undefined) state.setupDone = !!body.setupDone;
   if (body.clearAll) {
     state.history = []; state.messages = []; state.memories = []; state.outreach = [];
   }
