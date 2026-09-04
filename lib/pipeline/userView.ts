@@ -11,6 +11,7 @@ import { summarizeOctant } from "../affect/octant";
 import { isolationToday } from "./checkin";
 import { helplinesFor, emergencyFor } from "../safety/resources";
 import { lifestylePatterns } from "../lifestyle/patterns";
+import { autoTune } from "../lifestyle/autoTune";
 import type { UserState } from "../store/types";
 
 const PLAIN: Record<string, string> = {
@@ -26,6 +27,7 @@ const PLAIN: Record<string, string> = {
 };
 
 export function userView(state: UserState, now = Date.now()) {
+  const behaviour = autoTune(state, now);
   const trend = assessTrend(state.history, state.ewma, state.cusum, state.timeZone, now);
   const recentUserText = state.messages.filter((m) => m.role === "user").slice(-30).map((m) => m.content);
   const dependency = assessDependency(state.history, recentUserText, now);
@@ -58,6 +60,7 @@ export function userView(state: UserState, now = Date.now()) {
         : (PLAIN[decision.blockedBy ?? "no_trigger"] ?? "not right now"),
     },
     patterns: lifestylePatterns(state.history, state.timeZone, now).lines,
+    behaviour,
     memories: state.memories.slice().sort((x, y) => y.at - x.at).map((m) => ({ id: m.id, kind: m.kind, text: m.text, at: m.at, era: m.era ?? null })),
     helplines: helplinesFor(state.region),
     emergency: emergencyFor(state.region),

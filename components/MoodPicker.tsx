@@ -20,7 +20,7 @@ export default function MoodPicker({ name }: { name: string }) {
       const r = await fetch("/api/mood", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(j.error ?? "Couldn't save that - try again.");
-      router.push(j.needsSetup ? "/setup" : "/chat");
+      router.push("/chat");
     } catch (err) {
       setError((err as Error).message); setBusy(false);
     }
@@ -28,7 +28,7 @@ export default function MoodPicker({ name }: { name: string }) {
 
   return (
     <div className="container" style={{ maxWidth: 920 }}>
-      <div className="steps-ind" data-reveal aria-label="Step 2 of 3"><i className="on" /><i className="on" /><i /><span>Step 2 of 3 · how you're arriving</span></div>
+      <div className="steps-ind" data-reveal aria-label="Step 2 of 2"><i className="on" /><i className="on" /><span>Step 2 of 2 · how you're arriving</span></div>
       <h1 className="display" data-reveal style={{ fontSize: "clamp(2.6rem, 6vw, 4.8rem)", margin: "14px 0 0", ["--d" as string]: "60ms" }}>How are you arriving, {name}?</h1>
       <p className="muted" data-reveal style={{ fontWeight: 300, marginTop: 14, maxWidth: "36rem", lineHeight: 1.6, ["--d" as string]: "120ms" }}>Tap one. It gives Ori a sense of what to hold, and you can be wrong about it.</p>
       <div className={`moods ${busy ? "busy" : ""}`} role="group" aria-label="Mood" data-stagger>

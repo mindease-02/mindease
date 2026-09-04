@@ -11,8 +11,6 @@ interface Props {
   onSettings: (body: Record<string, unknown>) => Promise<void>;
   onLogout: () => void;
   busy: boolean;
-  push: { supported: boolean; enabled: boolean; subscribed: boolean; subscribe: () => Promise<string | null>; unsubscribe: () => Promise<void> };
-  onToast: (t: string) => void;
 }
 
 function Section({ title, children, hint }: { title: string; hint?: string; children: React.ReactNode }) {
@@ -25,25 +23,14 @@ function Section({ title, children, hint }: { title: string; hint?: string; chil
   );
 }
 
-function Toggle({ label, hint, value, onChange }: { label: string; hint?: string; value: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <label className="flex cursor-pointer items-start justify-between gap-3 py-1.5">
-      <span className="text-sm">{label}{hint && <span className="block text-xs text-clay-muted">{hint}</span>}</span>
-      <button type="button" role="switch" aria-checked={value} onClick={() => onChange(!value)}
-        className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full shadow-clay-in transition-colors ${value ? "bg-clay-coral" : "bg-clay-bg-deep"}`}>
-        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-clay-surface shadow-clay-sm transition-all ${value ? "left-[22px]" : "left-0.5"}`} />
-      </button>
-    </label>
-  );
-}
 
 /**
  * The Mirror, kept small on purpose: how you seem, what Ori remembers, and the
  * switches. The detector maths, gate verdicts and safety log exist but are not
  * a thing a person needs in front of them while talking.
  */
-export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, busy, push, onToast }: Props) {
-  const [tab, setTab] = useState<"you" | "memory" | "settings">("you");
+export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, busy }: Props) {
+  const [tab, setTab] = useState<"you" | "memory">("you");
   if (!mirror) return null;
   const m = mirror;
   const c = m.consent;
@@ -53,12 +40,12 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
       <header className="flex items-center justify-between px-5 pb-3 pt-5">
         <div>
           <h2 className="display text-xl">The Mirror</h2>
-          <p className="text-xs text-clay-muted">What Ori has of you. Yours to read, change and delete.</p>
+          <p className="text-xs text-clay-muted">What Ori has of you. Yours to read and delete.</p>
         </div>
         <button className="clay-btn px-3 py-2" onClick={onClose} aria-label="Close the Mirror"><PxRemove className="pxicon" style={{ fontSize: 18 }} /></button>
       </header>
       <nav className="flex gap-1 px-5 pb-3">
-        {(["you", "memory", "settings"] as const).map((t) => (
+        {(["you", "memory"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`rounded-full px-3 py-1.5 text-xs capitalize ${tab === t ? "bg-clay-slate text-clay-surface shadow-clay-sm" : "text-clay-muted"}`}>
             {t === "memory" ? "memories" : t}
           </button>
@@ -110,49 +97,20 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
           </Section>
         )}
 
-        {tab === "settings" && (
-          <>
-            <Section title="Check-ins">
-              <Toggle label="Let Ori write to me first" value={c.enabled} onChange={(v) => onSettings({ consent: { enabled: v } })} />
-              <Toggle label="Mornings" value={c.cadence.morning} onChange={(v) => onSettings({ consent: { cadence: { morning: v } } })} />
-              <Toggle label="Quiet evenings" hint="Only when the day looked isolated." value={c.cadence.evening} onChange={(v) => onSettings({ consent: { cadence: { evening: v } } })} />
-              <Toggle label="After a long silence" value={c.cadence.inactivityHours > 0} onChange={(v) => onSettings({ consent: { cadence: { inactivityHours: v ? 36 : 0 } } })} />
-              <div className="flex items-center justify-between gap-2 py-1.5 text-sm">
-                <span>Quiet hours<span className="block text-xs text-clay-muted">{c.timeZone}</span></span>
-                <div className="flex items-center gap-1">
-                  <input type="number" min={0} max={23.5} step={0.5} className="clay-input w-16 py-1.5 text-center" defaultValue={c.quietFrom} onBlur={(e) => onSettings({ consent: { quietFrom: Number(e.target.value) } })} />
-                  <span className="text-clay-muted">→</span>
-                  <input type="number" min={0} max={23.5} step={0.5} className="clay-input w-16 py-1.5 text-center" defaultValue={c.quietTo} onBlur={(e) => onSettings({ consent: { quietTo: Number(e.target.value) } })} />
-                </div>
-              </div>
-              <Toggle label="Notify me when the tab is closed" hint={!push.supported ? "Not supported in this browser." : !push.enabled ? "Not set up on the server yet." : `${m.pushDevices} device${m.pushDevices === 1 ? "" : "s"} registered.`}
-                value={push.subscribed} onChange={async (v) => { if (v) { const err = await push.subscribe(); if (err) onToast(err); } else await push.unsubscribe(); await onSettings({}); }} />
-              <div className="mt-2 flex flex-wrap gap-2">
-                <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: 3 })}>Give me 3 days of space</button>
-                {m.pausedUntil && m.pausedUntil > Date.now() && <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: null })}>Unpause</button>}
-              </div>
-            </Section>
-            <Section title="What Ori may read" hint="Off until you turn it on. Raw audio, keystrokes and camera frames never leave your device.">
-              <Toggle label="Tone of voice" value={c.voiceSignals} onChange={(v) => onSettings({ consent: { voiceSignals: v } })} />
-              <Toggle label="Typing rhythm" value={c.typingSignals} onChange={(v) => onSettings({ consent: { typingSignals: v } })} />
-              <Toggle label="Expression (camera)" value={c.faceSignals} onChange={(v) => onSettings({ consent: { faceSignals: v } })} />
-              <Toggle label="Let it mention them" hint="Whether Ori may say 'you sound flatter than usual'." value={c.allowBehaviouralSignals} onChange={(v) => onSettings({ consent: { allowBehaviouralSignals: v } })} />
-              <Toggle label="Keep conversation history" hint="Off = Ori forgets the words between sessions." value={c.storeTranscript} onChange={(v) => onSettings({ consent: { storeTranscript: v } })} />
-            </Section>
-            <Section title="Crisis lines shown for">
-              <select className="clay-input" defaultValue={m.region ?? "IN"} onChange={(e) => onSettings({ region: e.target.value })}>
-                {["IN", "US", "GB", "IE", "AU", "CA", "NZ", "DE", "FR", "ZA"].map((r) => <option key={r} value={r}>{r}</option>)}
-              </select>
-            </Section>
-            <Section title="Your data">
-              <div className="flex flex-wrap gap-2">
-                <a href="/api/export" className="clay-btn px-3 py-1.5 text-xs"><PxDownload className="pxicon" /> Download everything</a>
-                <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => { if (confirm("Delete all history, memories and messages? This can't be undone.")) onSettings({ clearAll: true }); }}><PxBin className="pxicon" /> Delete everything</button>
-                <button className="clay-btn px-3 py-1.5 text-xs" onClick={onLogout}><PxUser className="pxicon" /> Sign out</button>
-              </div>
-            </Section>
-          </>
-        )}
+        <Section title="How Ori is behaving" hint="Ori sets this itself from your own patterns. It changes as it learns you.">
+          <ul className="space-y-1 text-sm">{m.behaviour.map((n) => <li key={n.key}>{n.text}</li>)}</ul>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: 3 })}>Give me 3 days of space</button>
+            {m.pausedUntil && m.pausedUntil > Date.now() && <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: null })}>Unpause</button>}
+          </div>
+        </Section>
+        <Section title="Your data">
+          <div className="flex flex-wrap gap-2">
+            <a href="/api/export" className="clay-btn px-3 py-1.5 text-xs">Download everything</a>
+            <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => { if (confirm("Delete all history, memories and messages? This can't be undone.")) onSettings({ clearAll: true }); }}>Delete everything</button>
+            <button className="clay-btn px-3 py-1.5 text-xs" onClick={onLogout}>Sign out</button>
+          </div>
+        </Section>
       </div>
     </aside>
   );

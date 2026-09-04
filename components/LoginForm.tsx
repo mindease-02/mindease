@@ -13,7 +13,6 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [proactive, setProactive] = useState(true);
   const [adult, setAdult] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +25,7 @@ export default function LoginForm() {
     const region = (navigator.language.split("-")[1] ?? "").toUpperCase() || undefined;
     try {
       if (!ACCOUNTS) {
-        const r = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ identifier, timeZone, region, proactive }) });
+        const r = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ identifier, timeZone, region }) });
         const j = await r.json();
         if (!r.ok) throw new Error(j.error ?? "Couldn't sign in.");
         router.push("/mood"); return;
@@ -37,7 +36,7 @@ export default function LoginForm() {
         setNotice("If that address has an account, a reset link is on its way. Check spam too."); setBusy(false); return;
       }
       const url = mode === "signup" ? "/api/auth/signup" : "/api/auth/signin";
-      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password, name, timeZone, region, proactive }) });
+      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password, name, timeZone, region }) });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Couldn't sign in.");
       if (j.needsConfirmation) { setNotice("Almost there - open the confirmation email we just sent, then sign in."); setMode("signin"); setBusy(false); return; }
@@ -51,7 +50,7 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={submit} className="glass w-full" style={{ maxWidth: 520, padding: 32 }} aria-labelledby="login-title">
-      <div className="steps-ind" aria-label="Step 1 of 3"><i className="on" /><i /><i /><span>Step 1 of 3 · {mode === "signup" ? "create account" : "sign in"}</span></div>
+      <div className="steps-ind" aria-label="Step 1 of 2"><i className="on" /><i /><span>Step 1 of 2 · {mode === "signup" ? "create account" : "sign in"}</span></div>
       <h1 id="login-title" className="display" style={{ fontSize: "clamp(2rem, 4vw, 2.8rem)", margin: "12px 0 18px" }}>{title}</h1>
 
       {!ACCOUNTS ? (
@@ -86,12 +85,8 @@ export default function LoginForm() {
       {(mode === "signup" || !ACCOUNTS) && (
         <>
           <label className="check" style={{ marginTop: 22 }}>
-            <input type="checkbox" checked={proactive} onChange={(e) => setProactive(e.target.checked)} />
-            <span><b>Let Ori check in on me unprompted.</b><span>Mornings, isolated evenings, long silences, real downward trends. Never in quiet hours, at most twice a day, and it stops if you don&apos;t answer.</span></span>
-          </label>
-          <label className="check" style={{ marginTop: 10 }}>
             <input type="checkbox" checked={adult} onChange={(e) => setAdult(e.target.checked)} required />
-            <span><b>I&apos;m 18 or over, and I understand what this is.</b><span>Software, not a therapist or a crisis service. It keeps short memories and mood estimates you can read, export and delete.</span></span>
+            <span><b>I&apos;m 18 or over, and I understand what this is.</b><span>Software, not a therapist or a crisis service. It may write to you first when it notices something, never at night. It keeps short memories and mood estimates you can read, export and delete.</span></span>
           </label>
         </>
       )}

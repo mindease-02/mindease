@@ -99,7 +99,7 @@ export default function Hero({ chatHref }: { chatHref: string }) {
             <span><b>8</b>emotional axes</span><span><b>4</b>detectors, two must agree</span><span><b>2</b>check-ins a day, at most</span>
           </div>
           <div className="flank r" aria-label="What it never does">
-            <span><b>0</b>numbers invented</span><span><b>22:30</b>quiet hours start</span><span><b>IN</b>helplines by default</span>
+            <span><b>0</b>numbers invented</span><span><b>zzz</b>quiet hours, learned</span><span><b>IN</b>helplines by default</span>
           </div>
         </div>
       </div>

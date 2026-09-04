@@ -22,5 +22,5 @@ export async function POST(req: Request) {
       : { mood: m.id, label: m.label, hint: m.hint, note, at: Date.now() };
   }
   await getStore().put(state);
-  return NextResponse.json({ ok: true, arrival: state.arrival ?? null, needsSetup: !state.setupDone });
+  return NextResponse.json({ ok: true, arrival: state.arrival ?? null });
 }

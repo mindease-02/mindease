@@ -19,6 +19,7 @@ import { localTimeString } from "./turn";
 import { mean } from "../util/stats";
 import { sendPush } from "../push";
 import { lifestylePatterns } from "../lifestyle/patterns";
+import { autoTune } from "../lifestyle/autoTune";
 
 export interface CheckinResult {
   decision: ProactiveDecision;
@@ -47,6 +48,7 @@ export async function evaluateUser(userId: string, opts: { now?: number; force?:
   // Score outreach that is old enough to judge, and mark ignored ones.
   scoreOutstanding(state, now);
 
+  autoTune(state, now);
   const trend = assessTrend(state.history, state.ewma, state.cusum, state.timeZone, now);
   const recentUserText = state.messages.filter((m) => m.role === "user").slice(-30).map((m) => m.content);
   const dependency = assessDependency(state.history, recentUserText, now);

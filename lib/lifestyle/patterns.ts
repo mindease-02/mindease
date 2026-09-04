@@ -29,6 +29,8 @@ export interface LifestyleView {
     usualGapDays: number | null;     // median gap between sessions
     currentGapDays: number | null;
     weekendDelta: number | null;     // weekend − weekday valence
+    /** Inferred sleep window (local hours, may wrap midnight), from the longest quiet stretch in their activity. */
+    sleepWindow: { from: number; to: number } | null;
   };
 }
 
@@ -61,7 +63,7 @@ function sessions(points: MoodPoint[]): number[] {
 export function lifestylePatterns(points: MoodPoint[], tz: string, now = Date.now()): LifestyleView {
   const empty: LifestyleView = {
     sufficient: false, lines: [], now: { expectedValence: null, predictedLow: false, window: "" },
-    facts: { activeWindow: "", lateNightShare: 0, lateNights7d: 0, lowestDay: null, highestDay: null, lowestPart: null, usualGapDays: null, currentGapDays: null, weekendDelta: null },
+    facts: { activeWindow: "", lateNightShare: 0, lateNights7d: 0, lowestDay: null, highestDay: null, lowestPart: null, usualGapDays: null, currentGapDays: null, weekendDelta: null, sleepWindow: null },
   };
   const pts = points.filter((p) => p.confidence >= 0.3);
   const starts = sessions(pts);
@@ -92,6 +94,17 @@ export function lifestylePatterns(points: MoodPoint[], tz: string, now = Date.no
   const wk = loc.filter((l) => l.day === 0 || l.day === 6).map((l) => l.v), wd = loc.filter((l) => l.day > 0 && l.day < 6).map((l) => l.v);
   const weekendDelta = wk.length >= 4 && wd.length >= 4 ? mean(wk) - mean(wd) : null;
 
+  // Sleep window: the longest run of hours with no session starts, if they have enough days to say.
+  const hourHist = new Array(24).fill(0);
+  for (const st of starts) hourHist[local(st, tz).hour]++;
+  const days = new Set(starts.map((st) => local(st, tz).key)).size;
+  let sleepWindow: { from: number; to: number } | null = null;
+  if (starts.length >= 10 && days >= 5) {
+    let best = { start: 0, len: 0 }, run = 0, runStart = 0;
+    for (let i = 0; i < 48; i++) { const h = i % 24; if (hourHist[h] === 0) { if (run === 0) runStart = h; run++; if (run > best.len) best = { start: runStart, len: run }; } else run = 0; }
+    if (best.len >= 5 && best.len <= 14) sleepWindow = { from: (best.start + 23.5) % 24, to: (best.start + best.len + 0.5) % 24 };
+  }
+
   // Return cadence.
   const gaps = starts.slice(1).map((s, i) => (s - starts[i]) / 86_400_000);
   const usualGapDays = gaps.length >= 3 ? median(gaps) : null;
@@ -116,6 +129,6 @@ export function lifestylePatterns(points: MoodPoint[], tz: string, now = Date.no
   return {
     sufficient: true, lines: lines.slice(0, 5),
     now: { expectedValence: Number(expectedValence.toFixed(2)), predictedLow, window: `${DAYS[here.day]} ${PARTS[partOf(here.hour)]}` },
-    facts: { activeWindow, lateNightShare: Number(lateNightShare.toFixed(2)), lateNights7d, lowestDay: lowestDay ? { day: lowestDay.day, delta: Number(lowestDay.delta.toFixed(2)) } : null, highestDay: highestDay ? { day: highestDay.day, delta: Number(highestDay.delta.toFixed(2)) } : null, lowestPart: lowestPart ? { part: lowestPart.part, delta: Number(lowestPart.delta.toFixed(2)) } : null, usualGapDays: usualGapDays !== null ? Number(usualGapDays.toFixed(1)) : null, currentGapDays: Number(currentGapDays.toFixed(1)), weekendDelta: weekendDelta !== null ? Number(weekendDelta.toFixed(2)) : null },
+    facts: { sleepWindow, activeWindow, lateNightShare: Number(lateNightShare.toFixed(2)), lateNights7d, lowestDay: lowestDay ? { day: lowestDay.day, delta: Number(lowestDay.delta.toFixed(2)) } : null, highestDay: highestDay ? { day: highestDay.day, delta: Number(highestDay.delta.toFixed(2)) } : null, lowestPart: lowestPart ? { part: lowestPart.part, delta: Number(lowestPart.delta.toFixed(2)) } : null, usualGapDays: usualGapDays !== null ? Number(usualGapDays.toFixed(1)) : null, currentGapDays: Number(currentGapDays.toFixed(1)), weekendDelta: weekendDelta !== null ? Number(weekendDelta.toFixed(2)) : null },
   };
 }

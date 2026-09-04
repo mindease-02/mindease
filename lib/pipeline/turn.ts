@@ -16,6 +16,7 @@ import { typingReading, type TypingFeatures } from "../affect/typing";
 import { faceReading, type FaceFeatures } from "../affect/face";
 import { secondOpinion, assessmentForTier } from "../safety/secondOpinion";
 import { lifestylePatterns } from "../lifestyle/patterns";
+import { autoTune } from "../lifestyle/autoTune";
 import { octantFromVAD, updateOctant } from "../affect/octant";
 import type { ChannelReading, VAD } from "../affect/types";
 import { updateBaseline } from "../util/stats";
@@ -212,6 +213,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   };
   const confidence = Math.max(snapshot.confidence, analysis.source === "model" ? Math.min(0.85, 0.45 + ta.reading.coverage * 0.5) : 0);
   const incongruent = snapshot.incongruence.present || analysis.masking > 0.6;
+  autoTune(state, now);
   const life = lifestylePatterns(state.history, state.timeZone, now);
   const techniqueOffer = decideTechniqueOffer(state, analysis, risk, now);
   const recentReplies = state.messages.filter((m) => m.role === "assistant").slice(-6).map((m) => m.content);
