@@ -22,7 +22,7 @@ export default async function Home() {
       <ScrollTitle />
       <ScrollProgress />
       <a href="#main" className="skip">Skip to content</a>
-      <Nav chatHref={chatHref} signedIn={!!session} />
+      <Nav chatHref={chatHref} signedIn={!!session} name={session?.name} />
       <main id="main" tabIndex={-1}>
         <Hero chatHref={chatHref} />
         <Marquee items={TICKER} />

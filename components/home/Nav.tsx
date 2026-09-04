@@ -6,7 +6,8 @@ import { PxMenu, PxRemove, PxArrow } from "./pixelIcons";
 
 const LINKS = [["#demo", "See it"], ["#features", "What it does"], ["#story", "Why"], ["#start", "Start"]];
 
-export default function Nav({ chatHref, signedIn }: { chatHref: string; signedIn: boolean }) {
+export default function Nav({ chatHref, signedIn, name }: { chatHref: string; signedIn: boolean; name?: string }) {
+  async function signOut() { await fetch("/api/auth/logout", { method: "POST" }).catch(() => {}); window.location.href = "/login"; }
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string>("");
@@ -33,7 +34,8 @@ export default function Nav({ chatHref, signedIn }: { chatHref: string; signedIn
             {LINKS.map(([h, l]) => <a key={h} href={h} aria-current={active === h ? "true" : undefined}>{l}</a>)}
           </nav>
           <div className="nav-cta">
-            <Magnetic href={chatHref} className="btn-primary" >{signedIn ? "Open chat" : "Talk to Ori"} <PxArrow className="pxicon" /></Magnetic>
+            {signedIn && <button type="button" className="linkish nav-signout" onClick={signOut} title={name ? `Signed in as ${name}` : "Signed in"}>Sign out</button>}
+            <Magnetic href={chatHref} className="btn-primary" >{signedIn ? (name ? `Chat as ${name}` : "Open chat") : "Talk to Ori"} <PxArrow className="pxicon" /></Magnetic>
             <button className="burger" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
               {open ? <PxRemove className="pxicon" style={{ fontSize: 20 }} /> : <PxMenu className="pxicon" style={{ fontSize: 20 }} />}
             </button>
@@ -43,7 +45,8 @@ export default function Nav({ chatHref, signedIn }: { chatHref: string; signedIn
       {open && (
         <div className="mobile-menu glass" role="dialog" aria-label="Menu">
           {LINKS.map(([h, l]) => <a key={h} href={h} onClick={() => setOpen(false)}>{l}</a>)}
-          <Link href={chatHref} className="btn btn-primary" style={{ justifyContent: "center", marginTop: 6 }} onClick={() => setOpen(false)}>{signedIn ? "Open chat" : "Talk to Ori"}</Link>
+          <Link href={chatHref} className="btn btn-primary" style={{ justifyContent: "center", marginTop: 6 }} onClick={() => setOpen(false)}>{signedIn ? (name ? `Chat as ${name}` : "Open chat") : "Talk to Ori"}</Link>
+          {signedIn && <button type="button" className="btn" style={{ justifyContent: "center" }} onClick={signOut}>Sign out</button>}
         </div>
       )}
     </>

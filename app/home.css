@@ -761,3 +761,6 @@ body:has(> .world) { background: var(--bg, #07080b); }
 @media (max-width: 1024px) { .world .hero-grid { grid-template-columns: 1fr; } .world .flank { display: none; } .world .cutout { font-size: 36px; } }
 @media (max-width: 720px) { .world .cutout, .world .wordmark .float { display: none; } .world .band { margin: 40px 0; padding: 56px 0; } .world .band::before, .world .band::after { height: 24px; } .world .band::before { top: -24px; } .world .band::after { bottom: -24px; } .world .wordmark .big { font-size: 2.6rem; text-shadow: 4px 4px 0 var(--accent-deep); } .world .hero h1 { font-size: 1.7rem; } .world .marquee { font-size: .62rem; } .world .feat-visual { --tilt: 0deg !important; } }
 @media (prefers-reduced-motion: reduce) { .world .marquee-track, .world .cutout, .world .wordmark .float, .world .pre-orb, .world .pre-icons svg { animation: none !important; } .world .preloader { display: none; } .world .feat-visual, .world .float-card { transform: none !important; } }
+
+.world .nav-signout { font-family: var(--font-heading), monospace; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; margin-right: 6px; }
+@media (max-width: 720px) { .world .nav-cta .nav-signout { display: none; } }
