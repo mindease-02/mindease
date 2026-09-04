@@ -8,4 +8,4 @@ training/.cache
 *.tsbuildinfo
 next-env.d.ts
 .env*
-.claude/skills/ui-ux-pro-max/
+.claude/skills/
