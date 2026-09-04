@@ -232,7 +232,7 @@ export function Footer() {
           <div><h5>Crisis lines · India</h5><a href="https://telemanas.mohfw.gov.in" target="_blank" rel="noreferrer">Tele-MANAS · 14416</a><a href="tel:18005990019">Kiran · 1800-599-0019</a><a href="https://www.vandrevalafoundation.com" target="_blank" rel="noreferrer">Vandrevala · +91 9999 666 555</a><a href="tel:112">Emergency · 112</a></div>
           <div><h5>Source</h5><a href="https://github.com/mindease-02/mindease" target="_blank" rel="noreferrer">GitHub</a><Link href="/login">Sign in</Link></div>
         </div>
-        <div className="foot-bottom"><span>© {new Date().getFullYear()} MindEase</span><span>Not therapy · Not a person · Not private from you</span></div>
+        <div className="foot-bottom"><span>© {new Date().getFullYear()} MindEase · icons: <a href="https://www.streamlinehq.com/icons/pixel" target="_blank" rel="noreferrer" style={{ display: "inline" }}>Streamline Pixel</a> (CC BY 4.0)</span><span>Not therapy · Not a person · Not private from you</span></div>
       </div>
     </footer>
   );
