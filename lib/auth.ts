@@ -1,13 +1,15 @@
 /**
- * "Log in with anything." A name is enough. There is no password and nothing to
- * recover, because the identity here is only a key for the person's own state.
+ * Who is signed in.
  *
- * The cookie is an HMAC-signed JSON blob so it cannot be forged to read someone
- * else's history. userId is a hash of the identifier so the raw name/email is
- * not the storage key.
+ * With Supabase configured: email + password accounts (Supabase Auth), the
+ * session lives in Supabase's own cookies, and userId is the auth user's id.
+ *
+ * Without it (local dev, or before keys are added): the original "log in with
+ * anything" flow - an HMAC-signed cookie holding a hash of whatever they typed.
  */
 import { createHmac, createHash, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import { serverClient, supabaseConfigured } from "./supabase";
 
 export const SESSION_COOKIE = "me_session";
 const MAX_AGE = 60 * 60 * 24 * 90;
@@ -48,6 +50,20 @@ export function verifySession(token: string | undefined): Session | null {
 }
 
 export async function currentSession(): Promise<Session | null> {
+  if (supabaseConfigured()) {
+    try {
+      const sb = await serverClient();
+      const { data } = await sb.auth.getUser();
+      const u = data.user;
+      if (!u) return null;
+      const email = u.email ?? "";
+      const name = (typeof u.user_metadata?.name === "string" && u.user_metadata.name.trim()) || email.split("@")[0] || "you";
+      return { userId: u.id, name: name.slice(0, 40), identifier: email, createdAt: Date.parse(u.created_at) || Date.now() };
+    } catch (err) {
+      console.warn("[auth] supabase session check failed:", (err as Error).message);
+      return null;
+    }
+  }
   const jar = await cookies();
   return verifySession(jar.get(SESSION_COOKIE)?.value);
 }

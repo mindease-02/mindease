@@ -25,6 +25,7 @@ Samantha's warmth, 2049's atmosphere, and a design that refuses to be Joi: Ori i
 | Face channel | `lib/affect/face.ts`, `components/hooks/useFaceAffect.ts` | Opt-in. MediaPipe Face Landmarker runs in the browser and reduces blendshapes to two numbers per message. Lowest-weighted channel; no image leaves the device. |
 | Safety second opinion | `lib/safety/secondOpinion.ts` | The fast model reviews messages the regex found clean and may **raise** the tier (never lower). Every serious-tier turn is written to an audit log. |
 | Web Push | `lib/push.ts`, `public/sw.js`, `app/api/push/` | Second-consent OS notifications for unprompted messages when the tab is closed (VAPID). |
+| Accounts + storage | `lib/supabase.ts`, `lib/store/supabase.ts`, `supabase/schema.sql`, `app/api/auth/*` | Email + password accounts via Supabase Auth (sign up, sign in, reset by email, change password) and a Postgres-backed state store, both on the free tier. Without Supabase keys the app falls back to the name-only login and Upstash / in-memory state. |
 | Hardening | `lib/store/crypto.ts`, `app/api/export/` | AES-256-GCM at rest (`DATA_ENCRYPTION_KEY`), JSON export, transcript retention, per-user rate limiting. |
 | Training | `training/` | Parity-checked hashing, GoEmotions trainer → `models/emotion.model.json`, DPO/LoRA skeleton, empathy judge + preference-pair builder in `scripts/`. |
 
@@ -49,8 +50,9 @@ source .venv/bin/activate && python training/train_text_heads.py   # retrain the
 
 1. Push this repo to GitHub, then **Import** it at vercel.com/new.
 2. In *Environment Variables* add `GROQ_API_KEY`, `SESSION_SECRET` (any long random string), `CRON_SECRET` (same), and — for proactive check-ins to work when nobody has the tab open — `KV_REST_API_URL` + `KV_REST_API_TOKEN` from the Upstash integration (Marketplace → Upstash → Redis).
-3. Optional hardening: `DATA_ENCRYPTION_KEY` (`openssl rand -hex 32`) and `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` (`npx web-push generate-vapid-keys`) for push.
-4. `vercel.json` schedules `/api/checkin/sweep` daily at 09:00 UTC (the Hobby plan allows one run per day; change it to `0 * * * *` on Pro). The in-app scheduler evaluates every 10 minutes while the tab is open.
+3. **Accounts and durable data (recommended):** create a free Supabase project, run `supabase/schema.sql` in its SQL editor, and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. In Supabase → Authentication → URL configuration, set the Site URL to your Vercel domain and add `https://<your-domain>/auth/callback` to the redirect list.
+4. Optional hardening: `DATA_ENCRYPTION_KEY` (`openssl rand -hex 32`) and `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` (`npx web-push generate-vapid-keys`) for push.
+5. `vercel.json` schedules `/api/checkin/sweep` daily at 09:00 UTC (the Hobby plan allows one run per day; change it to `0 * * * *` on Pro). The in-app scheduler evaluates every 10 minutes while the tab is open.
 
 ## Safety notes
 

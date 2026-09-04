@@ -16,6 +16,8 @@ import { emptyEwma } from "../trend/ewma";
 import { DEFAULT_REGION } from "../safety/resources";
 import { MemoryStore } from "./memory";
 import { UpstashStore } from "./upstash";
+import { SupabaseStore } from "./supabase";
+import { supabaseStoreConfigured } from "../supabase";
 import type { Store, UserState } from "./types";
 
 declare global {
@@ -29,14 +31,16 @@ export function getStore(): Store {
   const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
 
   let store: Store;
-  if (url && token) {
+  if (supabaseStoreConfigured()) {
+    store = new SupabaseStore();
+  } else if (url && token) {
     store = new UpstashStore(url, token);
   } else {
     if (process.env.NODE_ENV === "production") {
       console.warn(
         "[mindease] No KV configured. Running with in-memory state: it is per-instance, " +
         "it disappears on redeploy, and the check-in sweep will find no users. " +
-        "Set KV_REST_API_URL and KV_REST_API_TOKEN.",
+        "Set NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (or KV_REST_API_URL + KV_REST_API_TOKEN).",
       );
     }
     store = new MemoryStore();

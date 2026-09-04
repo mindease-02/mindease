@@ -555,3 +555,5 @@ body:has(> .world) { background: var(--bg, #07080b); }
   .world .feat-visual { transform: none; }
   .world .feat ul li { opacity: 1; transform: none; }
 }
+.world .linkish { background: none; border: 0; padding: 6px 0; color: var(--ink-2); text-decoration: underline; text-decoration-color: rgba(255,255,255,.25); text-underline-offset: 3px; cursor: pointer; font: inherit; font-size: .85rem; box-shadow: none; min-height: 44px; }
+.world .linkish:hover { color: var(--ink); }
