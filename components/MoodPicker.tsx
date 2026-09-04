@@ -13,6 +13,11 @@ export default function MoodPicker({ name }: { name: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const grid = useRef<HTMLDivElement>(null);
+  // Ghost-click guard: a tap that navigated here from the previous page can deliver
+  // its synthesised click to whatever now sits under the finger. Ignore the first beat.
+  const mountedAt = useRef(0);
+  useEffect(() => { mountedAt.current = performance.now(); }, []);
+  const armed = () => performance.now() - mountedAt.current > 700;
   useEffect(() => { const un = Array.from(grid.current?.querySelectorAll<HTMLElement>(".mood") ?? []).map((el) => bindLift(el, { lift: -6, scale: 1.02 })); return () => un.forEach((u) => u()); }, []);
 
   async function go(pick: MoodId | null, text: string) {
@@ -37,13 +42,13 @@ export default function MoodPicker({ name }: { name: string }) {
       <div ref={grid} className={`moods ${busy ? "busy" : ""}`} role="group" aria-label="Mood" data-stagger>
         {MOODS.map((m) => (
           <button key={m.id} type="button" className="mood" aria-pressed={mood === m.id} disabled={busy} style={{ ["--c" as string]: m.c }}
-            onClick={() => { setMood(m.id); const pal = paletteById(m.id); if (pal) applyPalette(pal); go(m.id, note); }}>
+            onClick={() => { if (!armed()) return; setMood(m.id); const pal = paletteById(m.id); if (pal) applyPalette(pal); go(m.id, note); }}>
             <span className="dot" aria-hidden /><b>{m.label}</b><span>{m.hint}</span>
             <small>{m.description}</small>
           </button>
         ))}
       </div>
-      <form data-reveal className="note-row" style={{ ["--d" as string]: "260ms" }} onSubmit={(e) => { e.preventDefault(); go(mood, note); }}>
+      <form data-reveal className="note-row" style={{ ["--d" as string]: "260ms" }} onSubmit={(e) => { e.preventDefault(); if (armed()) go(mood, note); }}>
         <label htmlFor="own-words" className="label">Or say it in your own words</label>
         <input id="own-words" className="field" value={note} onChange={(e) => setNote(e.target.value.slice(0, 200))} placeholder="e.g. exam on Monday and I can’t focus" disabled={busy} />
         <button type="submit" className="go" aria-label="Go to the chat" disabled={busy || !note.trim()}>

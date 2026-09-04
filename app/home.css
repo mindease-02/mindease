@@ -820,10 +820,19 @@ body:has(> .world) { background: var(--bg, #07080b); }
 }
 @media (prefers-reduced-motion: reduce) { .world .xp { height: auto; } .world .xp-stage { position: relative; } }
 
-/* text-swap hover on nav links (the label slides up and its twin slides in) */
-.world .nav-links a.swap { overflow: hidden; }
-.world .nav-links a.swap > span { display: inline-block; position: relative; transition: transform .45s var(--ease); }
-.world .nav-links a.swap > span::after { content: attr(data-t); position: absolute; left: 0; top: 100%; color: var(--coral-2); }
-.world .nav-links a.swap:hover > span { transform: translateY(-100%); }
+/* text-swap hover on nav links: the label slides up out of its own clip box and a coral twin slides in */
+.world .nav-links a { --nav-c: var(--ink-2); }
+.world .nav-links a:hover, .world .nav-links a[aria-current="true"] { --nav-c: var(--ink); }
+.world .nav-links a.swap > span { display: block; position: relative; overflow: hidden; height: 1.3em; line-height: 1.3em; color: transparent; }
+.world .nav-links a.swap > span::before, .world .nav-links a.swap > span::after { content: attr(data-t); position: absolute; left: 0; top: 0; color: var(--nav-c); transition: transform .45s var(--ease); white-space: nowrap; }
+.world .nav-links a.swap > span::after { top: 100%; color: var(--coral-2); }
+.world .nav-links a.swap:hover > span::before, .world .nav-links a.swap:hover > span::after { transform: translateY(-100%); }
 /* thin centred loader line, like a projector start */
 .world .progress { left: 50%; width: 60vw; transform-origin: center; transform: translateX(-50%) scaleX(var(--p, 0)); }
+
+/* touch: no 300ms tap delay, no double-tap zoom on controls */
+.world button, .world a, .world .mood, .world .offer-opt { touch-action: manipulation; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+.world .xp { height: 560vh; }
+@media (max-width: 720px) { .world .xp { height: 480vh; } }

@@ -119,7 +119,9 @@ export default function Scene3D({ pointer, drag, lite = false, story }: { pointe
       (i: number, o: Float32Array) => { const t = i / N_VOX, a = t * Math.PI * 10; const R = 0.6 + t * 2.2; o[0] = Math.cos(a) * R; o[1] = (t - 0.5) * 3.2; o[2] = Math.sin(a) * R; },
     ];
     const tmp = new Float32Array(3), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(1, 1, 1), vpos = new THREE.Vector3();
-    let curForm = -1;
+    const AXIS = new THREE.Vector3(0.3, 1, 0.2).normalize();
+    const sm = { assemble: 0, scatter: 0 }; // smoothed story values so scroll never jerks the parts
+    let curForm = -1, frameNo = 0, lastT = 0;
     const vcur = new Float32Array(N_VOX * 3); vcur.set(start);
     const bodyMat = coral as THREE.MeshPhysicalMaterial; bodyMat.transparent = true;
 
@@ -162,10 +164,17 @@ export default function Scene3D({ pointer, drag, lite = false, story }: { pointe
       particles.rotation.y = t * 0.02;
 
       // Assembly: lerp every voxel from where it is toward its formation target, jittered by the story's scatter.
-      const st = story?.current ?? { assemble: 1, formation: 0, scatter: 0 };
+      const raw = story?.current ?? { assemble: 1, formation: 0, scatter: 0 };
+      // Time-based smoothing (independent of frame rate): ~0.25s to settle.
+      const dtS = Math.min(0.1, Math.max(0.001, t - lastT)); lastT = t;
+      const kS = 1 - Math.exp(-dtS * 7);
+      sm.assemble += (raw.assemble - sm.assemble) * kS; sm.scatter += (raw.scatter - sm.scatter) * kS;
+      const st = { assemble: sm.assemble, scatter: sm.scatter, formation: raw.formation };
+      const settled = st.formation === 0 && sm.assemble > 0.999 && sm.scatter < 0.002;
+      frameNo++;
       if (st.formation !== curForm) { curForm = st.formation; for (let i = 0; i < N_VOX; i++) { formations[curForm % formations.length](i, tmp); form[i * 3] = tmp[0]; form[i * 3 + 1] = tmp[1]; form[i * 3 + 2] = tmp[2]; } }
-      const k = reduced ? 1 : 0.06;
-      for (let i = 0; i < N_VOX; i++) {
+      const k = reduced ? 1 : 1 - Math.exp(-dtS * 5);
+      if (!settled || frameNo % 3 === 0) for (let i = 0; i < N_VOX; i++) {
         const j = i * 3, sctr = st.scatter * (0.35 + rnd(i + 7) * 0.8);
         const tx = form[j] * (1 + sctr) + Math.sin(t * 0.9 + i) * 0.03 * st.scatter * 4, ty = form[j + 1] * (1 + sctr) + Math.cos(t * 0.7 + i * 1.3) * 0.03, tz = form[j + 2] * (1 + sctr);
         const mix = reduced ? 1 : st.assemble;
@@ -173,7 +182,7 @@ export default function Scene3D({ pointer, drag, lite = false, story }: { pointe
         vcur[j] += (gx - vcur[j]) * k; vcur[j + 1] += (gy - vcur[j + 1]) * k; vcur[j + 2] += (gz - vcur[j + 2]) * k;
         vpos.set(vcur[j], vcur[j + 1], vcur[j + 2]);
         const s = 0.6 + 0.6 * (1 - Math.min(1, st.assemble)) + (st.formation === 0 ? 0 : 0.3);
-        sc.setScalar(s); q.setFromAxisAngle(new THREE.Vector3(0.3, 1, 0.2).normalize(), t * 0.4 + i);
+        sc.setScalar(s); q.setFromAxisAngle(AXIS, t * 0.4 + i);
         m4.compose(vpos, q, sc); vox.setMatrixAt(i, m4);
       }
       vox.instanceMatrix.needsUpdate = true;
