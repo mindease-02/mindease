@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { currentSession } from "@/lib/auth";
 import { body, display, heading } from "@/components/home/fonts";
 import ThemeInit from "@/components/home/ThemeInit";
+import PageEnter from "@/components/home/PageEnter";
 import LoginForm from "@/components/LoginForm";
 import Reveal from "@/components/home/Reveal";
 
@@ -12,6 +13,7 @@ export default async function LoginPage() {
   return (
     <div className={`world ${display.variable} ${heading.variable} ${body.variable}`}>
       <ThemeInit />
+      <PageEnter />
       <div className="atmos" aria-hidden /><div className="vignette" aria-hidden /><div className="grain" aria-hidden /><div className="bars" aria-hidden><span /><span /></div>
       <header className="nav"><div className="container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Link href="/" className="display no-underline" style={{ color: "var(--ink)", fontSize: "1.35rem" }}>MindEase</Link>

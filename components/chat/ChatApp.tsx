@@ -8,6 +8,7 @@ import MirrorPanel from "./MirrorPanel";
 import Techniques from "./Techniques";
 import TechniqueOffer, { type TechKind } from "./TechniqueOffer";
 import ScreeningCard, { type ScreeningResult } from "./ScreeningCard";
+import { popIn } from "@/lib/motion";
 import type { ScreeningOffer } from "@/lib/screening";
 import { useTypingMetrics } from "../hooks/useTypingMetrics";
 import { useVoiceFeatures } from "../hooks/useVoiceFeatures";
@@ -49,6 +50,12 @@ export default function ChatApp({ name }: { name: string }) {
   const [arrivalMood, setArrivalMood] = useState<string | null>(null);
   const [offer, setOffer] = useState<{ reason: string; suggested: TechKind[] } | null>(null);
   const [screening, setScreening] = useState<ScreeningOffer | null>(null);
+  // Every bubble that has not been shown yet pops in (history on load staggers; new ones arrive one at a time).
+  useEffect(() => {
+    const fresh = Array.from(listRef.current?.querySelectorAll<HTMLElement>(".bubble-ai:not([data-shown]), .bubble-user:not([data-shown]), .bubble-proactive:not([data-shown])") ?? []);
+    fresh.forEach((el, i) => { el.dataset.shown = "1"; if (!popIn(el, Math.min(i, 12) * 40)) el.style.opacity = "1"; });
+  }, [messages]);
+  useEffect(() => { const c = listRef.current?.querySelector(".offer"); if (c) popIn(c, 120); }, [offer, screening]);
   const [tech, setTech] = useState<TechKind | null>(null);
   const [crisis, setCrisis] = useState<{ helplines: Helpline[]; emergency: string } | null>(null);
   const [tint, setTint] = useState<{ warm: number; cool: number; dim: number }>({ warm: 0.5, cool: 0.3, dim: 0 });

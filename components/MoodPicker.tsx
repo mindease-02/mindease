@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { bindLift } from "@/lib/motion";
 import { useRouter } from "next/navigation";
 import { MOODS, type MoodId } from "@/lib/moods";
 import { applyPalette, paletteById } from "@/lib/theme";
@@ -11,6 +12,8 @@ export default function MoodPicker({ name }: { name: string }) {
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const grid = useRef<HTMLDivElement>(null);
+  useEffect(() => { const un = Array.from(grid.current?.querySelectorAll<HTMLElement>(".mood") ?? []).map((el) => bindLift(el, { lift: -6, scale: 1.02 })); return () => un.forEach((u) => u()); }, []);
 
   async function go(pick: MoodId | null, text: string) {
     if (busy) return;
@@ -31,7 +34,7 @@ export default function MoodPicker({ name }: { name: string }) {
       <div className="steps-ind" data-reveal aria-label="Step 2 of 2"><i className="on" /><i className="on" /><span>Step 2 of 2 · how you're arriving</span></div>
       <h1 className="display" data-reveal style={{ fontSize: "clamp(2.6rem, 6vw, 4.8rem)", margin: "14px 0 0", ["--d" as string]: "60ms" }}>How are you arriving, {name}?</h1>
       <p className="muted" data-reveal style={{ fontWeight: 300, marginTop: 14, maxWidth: "36rem", lineHeight: 1.6, ["--d" as string]: "120ms" }}>Tap one. It gives Ori a sense of what to hold, and you can be wrong about it.</p>
-      <div className={`moods ${busy ? "busy" : ""}`} role="group" aria-label="Mood" data-stagger>
+      <div ref={grid} className={`moods ${busy ? "busy" : ""}`} role="group" aria-label="Mood" data-stagger>
         {MOODS.map((m) => (
           <button key={m.id} type="button" className="mood" aria-pressed={mood === m.id} disabled={busy} style={{ ["--c" as string]: m.c }}
             onClick={() => { setMood(m.id); const pal = paletteById(m.id); if (pal) applyPalette(pal); go(m.id, note); }}>

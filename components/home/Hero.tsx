@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import Magnetic from "./Magnetic";
 import { Words } from "./Reveal";
+import { heroTimeline } from "@/lib/motion";
 import { PxArrow } from "./pixelIcons";
 
 import type { Drag } from "./Scene3D";
@@ -22,6 +23,7 @@ export default function Hero({ chatHref }: { chatHref: string }) {
   const stage = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<"pending" | "webgl" | "webgl-lite" | "css">("pending");
   const [ready, setReady] = useState(false);
+  const section = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -31,7 +33,14 @@ export default function Hero({ chatHref }: { chatHref: string }) {
     // Phones get the real scene too, in a lighter configuration; the CSS orb is
     // only for reduced-motion or missing WebGL.
     setMode(!webgl ? "css" : small ? "webgl-lite" : "webgl");
-    const t = setTimeout(() => setReady(true), 60);
+    const t = setTimeout(() => {
+      setReady(true);
+      const root = section.current; if (!root) return;
+      heroTimeline({
+        eyebrow: root.querySelector(".sticker"), words: root.querySelectorAll("h1 .word > span"), lede: root.querySelector(".lede"), ctas: root.querySelector(".ctas"),
+        stage: root.querySelector(".stage"), cards: root.querySelectorAll(".float-card"),
+      });
+    }, 60);
     const move = (e: PointerEvent) => {
       pointer.current = { x: (e.clientX / window.innerWidth - 0.5) * 2, y: (e.clientY / window.innerHeight - 0.5) * 2 };
       if (stage.current && !reduced) {
@@ -62,7 +71,7 @@ export default function Hero({ chatHref }: { chatHref: string }) {
   const onUp = () => { drag.current.active = false; last.current = null; stage.current?.classList.remove("dragging"); };
 
   return (
-    <section className={`hero ${ready ? "in" : ""}`} aria-labelledby="hero-title">
+    <section ref={section} className={`hero anime ${ready ? "in" : ""}`} aria-labelledby="hero-title">
       <div className="rays" aria-hidden />
       <div className="container hero-grid">
         <div className="copy">
@@ -91,7 +100,7 @@ export default function Hero({ chatHref }: { chatHref: string }) {
             ))}
           </div>
           {CARDS.map((c) => (
-            <div key={c.k} className={`float-card glass ${c.keep ? "keep" : ""}`} style={c.style as React.CSSProperties}>
+            <div key={c.k} className={`float-card glass ${c.keep ? "keep" : ""}`} data-rot={String(c.style["--rot"]).replace("deg", "")} style={c.style as React.CSSProperties}>
               <span className="k">{c.k}</span>{c.t}
             </div>
           ))}

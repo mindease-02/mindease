@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Reveal, { Words } from "./Reveal";
+import { bindLift, bindParallax, popIn } from "@/lib/motion";
 import Magnetic from "./Magnetic";
 import ThemeOrb from "./ThemeOrb";
 
@@ -44,6 +45,7 @@ export function Demo() {
   }, [playing, step]);
   // Pause when offscreen or hidden (skill: pause media when offscreen).
   const host = useRef<HTMLDivElement>(null);
+  useEffect(() => { const lines = host.current?.querySelectorAll(".device-body .line, .device-body .cap"); if (lines?.length) popIn(lines[lines.length - 1]); }, [step, typing]);
   useEffect(() => {
     const el = host.current; if (!el) return;
     const io = new IntersectionObserver(([e]) => { if (!e.isIntersecting) setPlaying(false); });
@@ -113,14 +115,13 @@ function Wheel() {
 
 export function FeatureRows({ chatHref = "/login" }: { chatHref?: string }) {
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const els = Array.from(document.querySelectorAll<HTMLElement>(".feat-visual, .cutout, .wordmark .big"));
-    let raf = 0;
-    const f = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => {
-      for (const el of els) { const r = el.getBoundingClientRect(); const p = (window.innerHeight / 2 - (r.top + r.height / 2)) / window.innerHeight; el.style.setProperty("--py", String(Math.max(-1, Math.min(1, p)))); }
-    }); };
-    f(); window.addEventListener("scroll", f, { passive: true });
-    return () => { window.removeEventListener("scroll", f); cancelAnimationFrame(raf); };
+    // Scroll-synced parallax (Anime onScroll): visuals drift 24px, cut-outs 60px, the wordmark 30px.
+    const unbind: (() => void)[] = [];
+    document.querySelectorAll<HTMLElement>(".feat-visual").forEach((el) => unbind.push(bindParallax(el, el.closest(".feat") as HTMLElement, 24, -24)));
+    document.querySelectorAll<HTMLElement>(".cutout").forEach((el) => unbind.push(bindParallax(el, el.closest(".feat") as HTMLElement, 60, -60)));
+    const big = document.querySelector<HTMLElement>(".wordmark .big"); if (big) unbind.push(bindParallax(big, big.closest("footer") as HTMLElement, 40, -10));
+    document.querySelectorAll<HTMLElement>(".feat-visual, .device").forEach((el) => unbind.push(bindLift(el, { lift: -6, scale: 1.01 })));
+    return () => unbind.forEach((u) => u());
   }, []);
   return (
     <Reveal as="section" id="features" className="band">

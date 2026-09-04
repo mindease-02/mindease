@@ -6,7 +6,8 @@
  * Nothing here is clinical advice; it's the stuff that works in the next five
  * minutes.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { popIn } from "@/lib/motion";
 import { PxRemove } from "../home/pixelIcons";
 
 type Kind = "box" | "sigh" | "ground" | "move";
@@ -19,6 +20,8 @@ export default function Techniques({ mood, onClose, initial }: { mood: string | 
   const [left, setLeft] = useState(0);
   const [round, setRound] = useState(0);
   const phases = kind === "sigh" ? PHASES.sigh : PHASES.box;
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => { popIn(root.current); }, []);
 
   useEffect(() => {
     if (!running) return;
@@ -36,7 +39,7 @@ export default function Techniques({ mood, onClose, initial }: { mood: string | 
   const scale = !running ? 0.7 : label.includes("in") || label.includes("Sip") ? 1 : label.includes("out") ? 0.62 : undefined;
 
   return (
-    <div className="techniques" role="region" aria-label="Techniques">
+    <div ref={root} className="techniques" role="region" aria-label="Techniques">
       <div className="t-head">
         <div>
           <div className="eyebrow">{mood === "angry" ? "Bringing the heat down" : mood === "anxious" ? "Settling" : "Techniques"}</div>
