@@ -7,6 +7,8 @@ import CrisisCard from "./CrisisCard";
 import MirrorPanel from "./MirrorPanel";
 import Techniques from "./Techniques";
 import TechniqueOffer, { type TechKind } from "./TechniqueOffer";
+import ScreeningCard, { type ScreeningResult } from "./ScreeningCard";
+import type { ScreeningOffer } from "@/lib/screening";
 import { useTypingMetrics } from "../hooks/useTypingMetrics";
 import { useVoiceFeatures } from "../hooks/useVoiceFeatures";
 import { useFaceAffect } from "../hooks/useFaceAffect";
@@ -46,6 +48,7 @@ export default function ChatApp({ name }: { name: string }) {
   const [showMirror, setShowMirror] = useState(false);
   const [arrivalMood, setArrivalMood] = useState<string | null>(null);
   const [offer, setOffer] = useState<{ reason: string; suggested: TechKind[] } | null>(null);
+  const [screening, setScreening] = useState<ScreeningOffer | null>(null);
   const [tech, setTech] = useState<TechKind | null>(null);
   const [crisis, setCrisis] = useState<{ helplines: Helpline[]; emergency: string } | null>(null);
   const [tint, setTint] = useState<{ warm: number; cool: number; dim: number }>({ warm: 0.5, cool: 0.3, dim: 0 });
@@ -148,6 +151,7 @@ export default function ChatApp({ name }: { name: string }) {
       if (j.helplines) setCrisis({ helplines: j.helplines, emergency: j.emergency });
       else if (crisis && j.risk.tier === "none" && /\b(ok|okay|fine|better|safe)\b/i.test(text)) setCrisis(null);
       if (j.techniqueOffer) { setOffer(j.techniqueOffer); setTech(null); } else setOffer(null);
+      if (j.screeningOffer) setScreening(j.screeningOffer);
       const a = j.analysis.axes;
       setTint({ warm: Math.min(1, a.joy * 0.7 + a.trust * 0.5 + a.anticipation * 0.3), cool: Math.min(1, a.sadness * 0.6 + a.fear * 0.5), dim: Math.min(1, (a.sadness + a.disgust) * 0.5) });
       if (speak) say(j.reply);
@@ -220,6 +224,13 @@ export default function ChatApp({ name }: { name: string }) {
           ))}
           {crisis && <CrisisCard helplines={crisis.helplines} emergency={crisis.emergency} />}
           {offer && !tech && <TechniqueOffer reason={offer.reason} suggested={offer.suggested} onPick={(k) => { setTech(k); setOffer(null); }} onDismiss={() => setOffer(null)} />}
+          {screening && <ScreeningCard offer={screening} onDismiss={() => setScreening(null)} onDone={(r: ScreeningResult) => {
+            setScreening(null);
+            setMessages((m) => [...m, { role: "assistant", content: r.message, at: Date.now() }]);
+            if (r.crisis && r.helplines) setCrisis({ helplines: r.helplines as Helpline[], emergency: r.emergency });
+            if (speak) say(r.message);
+            scroll();
+          }} />}
         </div>
       </div>
 

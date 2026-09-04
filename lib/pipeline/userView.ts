@@ -12,6 +12,8 @@ import { isolationToday } from "./checkin";
 import { helplinesFor, emergencyFor } from "../safety/resources";
 import { lifestylePatterns } from "../lifestyle/patterns";
 import { autoTune } from "../lifestyle/autoTune";
+import { patternReport } from "../screening";
+import { INSTRUMENTS } from "../screening/instruments";
 import type { UserState } from "../store/types";
 
 const PLAIN: Record<string, string> = {
@@ -61,6 +63,8 @@ export function userView(state: UserState, now = Date.now()) {
     },
     patterns: lifestylePatterns(state.history, state.timeZone, now).lines,
     behaviour,
+    screenings: (state.screenings ?? []).filter((x) => x.completedAt).sort((a, b) => b.completedAt! - a.completedAt!).slice(0, 6).map((x) => ({ name: INSTRUMENTS[x.instrument].name, domain: INSTRUMENTS[x.instrument].domain, at: x.completedAt!, score: x.score!, max: INSTRUMENTS[x.instrument].max, band: x.band! })),
+    signals: patternReport(state, now),
     memories: state.memories.slice().sort((x, y) => y.at - x.at).map((m) => ({ id: m.id, kind: m.kind, text: m.text, at: m.at, era: m.era ?? null })),
     helplines: helplinesFor(state.region),
     emergency: emergencyFor(state.region),

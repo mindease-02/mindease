@@ -24,6 +24,7 @@ import type { MoodPoint } from "../trend";
 import type { RiskTier } from "../safety/crisis";
 import type { MemoryItem } from "../memory";
 import type { AffectAnalysis } from "../llm/analyze";
+import type { Screening } from "../screening";
 
 /** Audit entry for every turn at tier >= active (regex or model second opinion). */
 export interface RiskLogEntry {
@@ -118,6 +119,10 @@ export interface UserState {
   setupDone?: boolean;
   /** Last time the app offered a technique; enforces a cooldown. */
   lastTechniqueOfferAt?: number;
+  /** Validated screenings (PHQ-9, GAD-7, ISI): in flight, declined, or scored. */
+  screenings?: Screening[];
+  /** Last time a screening was offered, to avoid re-asking every turn. */
+  lastScreeningOfferAt?: number;
 }
 
 export interface Store {

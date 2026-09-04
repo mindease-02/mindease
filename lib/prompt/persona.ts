@@ -142,6 +142,10 @@ export interface PromptContext {
   lifestyle?: { lines: string[]; window: string; predictedLow: boolean };
   /** True when the app is showing a technique choice under this reply. */
   techniqueOffered?: boolean;
+  /** Name of the screener the app is offering under this reply, if any. */
+  screeningOffered?: string;
+  /** A screening they completed in the last three days. */
+  lastScreening?: { name: string; score: number; max: number; band: string; when: number };
 }
 
 export function buildSystemPrompt(ctx: PromptContext): string {
@@ -155,6 +159,7 @@ export function buildSystemPrompt(ctx: PromptContext): string {
   if (ctx.arrival) parts.push(arrivalBlock(ctx.arrival));
   if (ctx.recentReplies?.length) parts.push(repetitionBlock(ctx.recentReplies));
   parts.push(techniqueBlock(ctx.techniqueOffered ?? false));
+  parts.push(screeningBlock(ctx.screeningOffered, ctx.lastScreening));
   if (ctx.memories?.length) parts.push(memoryBlock(ctx.memories));
   if (ctx.snapshot) parts.push(affectBlock(ctx));
   if (ctx.analysis) parts.push(analysisBlock(ctx.analysis, ctx.octant, ctx.surfaceIncongruence ?? false));
@@ -209,6 +214,17 @@ function techniqueBlock(offered: boolean): string {
   return offered
     ? "## Techniques\n\nThe app is showing them a choice of grounding techniques right under your reply (box breathing, the physiological sigh, 5-4-3-2-1, moving the body). You may add ONE short clause acknowledging it - \"there's something on screen if you want it\" - or say nothing about it. Do not list or explain techniques yourself."
     : "## Techniques\n\nDon't offer breathing or grounding exercises unprompted; the app offers them itself when it's warranted. If they ask for one, describe a single one in one or two lines, plainly.";
+}
+
+function screeningBlock(offered?: string, last?: PromptContext["lastScreening"]): string {
+  const lines = [
+    "## Screening, not diagnosis",
+    "",
+    "You never diagnose. You do not say or imply that someone has depression, anxiety, a disorder, or any condition. You can say that answers or patterns are 'in a range doctors take seriously' or 'the kind of thing worth getting assessed', and you can name who does that (a GP, a psychologist, Tele-MANAS on 14416). If they ask 'do I have X?', answer honestly: you can't tell, a screening can show a range, an assessment by a person is what answers it - and offer to help them get there.",
+  ];
+  if (offered) lines.push("", `The app is offering the ${offered} screener right under your reply. You may add one clause acknowledging it ('there's a short check on screen if you want it'). Don't list the questions yourself.`);
+  if (last) lines.push("", `They completed the ${last.name} ${Math.round((Date.now() - last.when) / 3_600_000)} hours ago: ${last.score}/${last.max}, ${last.band} range. You may refer to it plainly if it's relevant. If it was moderate or above, the useful thing is a concrete next step toward assessment, and the summary page (/summary) they can print for a clinician.`);
+  return lines.join("\n");
 }
 
 function memoryBlock(memories: MemoryItem[]): string {

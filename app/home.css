@@ -764,3 +764,27 @@ body:has(> .world) { background: var(--bg, #07080b); }
 
 .world .nav-signout { font-family: var(--font-heading), monospace; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; margin-right: 6px; }
 @media (max-width: 720px) { .world .nav-cta .nav-signout { display: none; } }
+/* screening card */
+.world .screen-prog { display: flex; gap: 4px; }
+.world .screen-prog i { flex: 1; height: 4px; background: var(--line-2); }
+.world .screen-prog i.on { background: var(--color-primary); }
+.world .offer.screen .offer-opt { min-width: 44%; }
+/* clinician summary sheet */
+.world.summary .sheet { position: relative; z-index: 1; max-width: 820px; padding: 40px 0 80px; }
+.world .sheet-h { font-size: 1rem; margin: 34px 0 10px; }
+.world .sheet-table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.world .sheet-table th, .world .sheet-table td { text-align: left; padding: 8px 10px; border-bottom: 2px solid var(--px-edge); }
+.world .sheet-table th { font-family: var(--font-heading), monospace; font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+.world .sheet-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.world .sheet-list li { display: grid; grid-template-columns: 220px 120px 1fr; gap: 12px; align-items: center; font-size: .95rem; }
+.world .sheet-list .bar { display: block; height: 10px; background: var(--surface-2); border: 2px solid var(--px-edge); }
+.world .sheet-list .bar i { display: block; height: 100%; background: var(--color-primary); }
+@media (max-width: 720px) { .world .sheet-list li { grid-template-columns: 1fr; gap: 4px; } }
+@media print {
+  .world.summary { background: #fff !important; color: #111 !important; }
+  .world.summary .atmos, .world.summary .grain, .world.summary::after, .world.summary .no-print { display: none !important; }
+  .world.summary .muted { color: #444 !important; }
+  .world .sheet-table th, .world .sheet-table td { border-color: #111; }
+  .world .sheet-list .bar { border-color: #111; background: #eee; } .world .sheet-list .bar i { background: #111; }
+  .world .sticker { background: #eee; color: #111; box-shadow: none; transform: none; border-color: #111; }
+}

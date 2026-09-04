@@ -65,6 +65,15 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
                 <AxisWheel weather={m.octant.weather} climate={m.octant.climate} />
               </Section>
             )}
+            <Section title="Screening" hint="Short checks doctors use, when the pattern warrants one. A range, not a diagnosis.">
+              {m.screenings.length ? (
+                <ul className="space-y-1 text-sm">{m.screenings.map((x) => <li key={x.at}><b>{x.name}</b> ({x.domain}) · {new Date(x.at).toLocaleDateString()} · {x.score}/{x.max} · <span className="text-clay-coral">{x.band}</span></li>)}</ul>
+              ) : <p className="text-xs text-clay-muted">None yet. Ori offers one when it's warranted; you can also ask for "the mood check", "the anxiety check" or "the sleep check" in the chat.</p>}
+              {m.signals.length > 0 && (
+                <ul className="mt-3 space-y-1 text-xs text-clay-muted">{m.signals.slice(0, 4).map((sg) => <li key={sg.domain}><span className="text-clay-ink">Consistent with {sg.domain}</span> · {sg.evidence}</li>)}</ul>
+              )}
+              <a href="/summary" className="clay-btn mt-3 inline-block px-3 py-1.5 text-xs">One-page summary for a clinician</a>
+            </Section>
             {m.patterns.length > 0 && (
               <Section title="Your patterns" hint="From when you tend to talk, not what you say. Ori uses this to anticipate, not to judge.">
                 <ul className="space-y-1 text-sm">{m.patterns.map((l) => <li key={l}>{l}</li>)}</ul>

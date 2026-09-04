@@ -17,6 +17,8 @@ import { faceReading, type FaceFeatures } from "../affect/face";
 import { secondOpinion, assessmentForTier } from "../safety/secondOpinion";
 import { lifestylePatterns } from "../lifestyle/patterns";
 import { autoTune } from "../lifestyle/autoTune";
+import { decideScreening, type ScreeningOffer } from "../screening";
+import { INSTRUMENTS, type InstrumentId } from "../screening/instruments";
 import { octantFromVAD, updateOctant } from "../affect/octant";
 import type { ChannelReading, VAD } from "../affect/types";
 import { updateBaseline } from "../util/stats";
@@ -68,6 +70,20 @@ export interface TurnResult {
   riskRaised?: boolean;
   /** The app asks, in the chat, whether a grounding technique would help right now. */
   techniqueOffer?: { reason: string; suggested: ("box" | "sigh" | "ground" | "move")[] };
+  /** The app offers a validated screener (PHQ-9 / GAD-7 / ISI) when the pattern warrants it, or when asked. */
+  screeningOffer?: ScreeningOffer;
+}
+
+const SCREENING_OFFER_GAP = 24 * 60 * 60_000;
+
+/** Explicit requests ("can we do the mood check", "phq") always get the offer. */
+function requestedScreening(text: string): InstrumentId | null {
+  const t = text.toLowerCase();
+  if (/\b(phq|depression (test|check|screen|questionnaire)|mood (check|test|questionnaire|screen))\b/.test(t)) return "phq9";
+  if (/\b(gad|anxiety (test|check|screen|questionnaire))\b/.test(t)) return "gad7";
+  if (/\b(isi|insomnia|sleep (test|check|screen|questionnaire))\b/.test(t)) return "isi";
+  if (/\b(questionnaire|screening|assessment|am i depressed|do i have (depression|anxiety))\b/.test(t)) return "phq9";
+  return null;
 }
 
 const TECHNIQUE_COOLDOWN = 45 * 60_000;
@@ -216,6 +232,16 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   autoTune(state, now);
   const life = lifestylePatterns(state.history, state.timeZone, now);
   const techniqueOffer = decideTechniqueOffer(state, analysis, risk, now);
+  // Screening: never alongside a technique offer, never during serious risk, at most once a day unless asked.
+  let screeningOffer: ScreeningOffer | undefined;
+  const asked = requestedScreening(text);
+  if (asked && !atLeast(risk.tier, "active")) {
+    const inst = INSTRUMENTS[asked];
+    screeningOffer = { instrument: asked, reason: "you asked", intro: inst.intro };
+  } else if (!techniqueOffer && !atLeast(risk.tier, "active") && (!state.lastScreeningOfferAt || now - state.lastScreeningOfferAt > SCREENING_OFFER_GAP)) {
+    screeningOffer = decideScreening(state, now);
+  }
+  if (screeningOffer) state.lastScreeningOfferAt = now;
   const recentReplies = state.messages.filter((m) => m.role === "assistant").slice(-6).map((m) => m.content);
 
   // Incongruence calibration: was last turn's flag confirmed or denied? Then the
@@ -282,6 +308,8 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     recentReplies,
     lifestyle: life.sufficient ? { lines: life.lines, window: life.now.window, predictedLow: life.now.predictedLow } : undefined,
     techniqueOffered: !!techniqueOffer,
+    screeningOffered: screeningOffer ? INSTRUMENTS[screeningOffer.instrument].name : undefined,
+    lastScreening: (() => { const d = (state.screenings ?? []).filter((x) => x.completedAt && now - x.completedAt! < 3 * DAY).sort((a, b) => b.completedAt! - a.completedAt!)[0]; return d ? { name: INSTRUMENTS[d.instrument].name, score: d.score!, max: INSTRUMENTS[d.instrument].max, band: d.band!, when: d.completedAt! } : undefined; })(),
   });
   const history = context.slice(-16).map((m) => ({ role: m.role, content: m.content }));
   let reply: string;
@@ -324,6 +352,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     llmConfigured: configured,
     riskRaised: second.raised || undefined,
     techniqueOffer,
+    screeningOffer,
   };
 }
 
