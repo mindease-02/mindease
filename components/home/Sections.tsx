@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Reveal from "./Reveal";
+import Reveal, { Words } from "./Reveal";
 import Magnetic from "./Magnetic";
 import ThemeOrb from "./ThemeOrb";
 
@@ -31,15 +31,20 @@ const SCRIPT: { who: "you" | "ori"; text: string; cap?: [string, string] }[] = [
 export function Demo() {
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(true);
+  const [typing, setTyping] = useState(false);
   const reduced = useRef(false);
   useEffect(() => {
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced.current) { setStep(SCRIPT.length); setPlaying(false); }
   }, []);
   useEffect(() => {
-    if (!playing || step >= SCRIPT.length) return;
-    const t = setTimeout(() => setStep((s) => s + 1), step === 0 ? 600 : 1900);
-    return () => clearTimeout(t);
+    if (!playing || step >= SCRIPT.length) { setTyping(false); return; }
+    const next = SCRIPT[step];
+    const wait = step === 0 ? 500 : 1500;
+    // Ori "types" for a beat before her line lands; your lines just arrive.
+    const t1 = setTimeout(() => { if (next.who === "ori") setTyping(true); }, Math.max(0, wait - 900));
+    const t2 = setTimeout(() => { setTyping(false); setStep((s) => s + 1); }, next.who === "ori" ? wait + 700 : wait);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [playing, step]);
   // Pause when offscreen or hidden (skill: pause media when offscreen).
   const host = useRef<HTMLDivElement>(null);
@@ -55,7 +60,7 @@ export function Demo() {
       <div className="container">
         <div className="sec-head">
           <div className="eyebrow" data-reveal>See it</div>
-          <h2 id="demo-title" className="display" data-reveal style={{ ["--d" as string]: "80ms" }}>A conversation, with the reasoning shown.</h2>
+          <h2 id="demo-title" className="display" data-reveal style={{ ["--d" as string]: "80ms" }}><Words text="A conversation, with the reasoning shown." step={45} /></h2>
         </div>
         <div className="demo">
           <div ref={host} className="device" data-reveal role="region" aria-label="Replayed example conversation">
@@ -63,10 +68,11 @@ export function Demo() {
             <div className="device-body" aria-live="polite">
               {SCRIPT.map((l, i) => (
                 <div key={i} style={{ display: "contents" }}>
-                  <div className={`line ${l.who} ${i < step ? "in" : ""}`}>{l.text}</div>
-                  {l.cap && <div className={`cap ${i < step ? "in" : ""}`}><b>{l.cap[0]}:</b> {l.cap[1]}</div>}
+                  {i < step && <div className={`line ${l.who} in`}>{l.text}</div>}
+                  {i < step && l.cap && <div className="cap in"><b>{l.cap[0]}:</b> {l.cap[1]}</div>}
                 </div>
               ))}
+              {typing && <div className="line ori in typing" aria-label="Ori is typing"><i /><i /><i /></div>}
             </div>
             <div className="device-foot">
               <div className="prog" aria-hidden>{SCRIPT.map((_, i) => <i key={i} className={i < step ? "on" : ""} />)}</div>
@@ -79,7 +85,7 @@ export function Demo() {
           <div className="demo-copy" data-reveal style={{ ["--d" as string]: "120ms" }}>
             <h3>Every reply has a reason you can read.</h3>
             <p>The captions under Ori's lines are the real fields the app produces on every turn. Open the Mirror in the chat and you'll see yours.</p>
-            <div className="list">
+            <div className="list" data-stagger>
               <div>{I.eye}<div><b>Read</b><p>Intensity, eight emotional axes, nuanced states, what you seem to need.</p></div></div>
               <div>{I.shield}<div><b>Check the gap</b><p>When words and tone disagree, Ori lowers its confidence and asks. It never overrides you.</p></div></div>
               <div>{I.memory}<div><b>Remember</b><p>People, plans and past — retrieved when relevant, shown to you in full.</p></div></div>
@@ -110,12 +116,22 @@ function Wheel() {
 }
 
 export function FeatureRows() {
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const els = Array.from(document.querySelectorAll<HTMLElement>(".feat-visual"));
+    let raf = 0;
+    const f = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => {
+      for (const el of els) { const r = el.getBoundingClientRect(); const p = (window.innerHeight / 2 - (r.top + r.height / 2)) / window.innerHeight; el.style.setProperty("--py", String(Math.max(-1, Math.min(1, p)))); }
+    }); };
+    f(); window.addEventListener("scroll", f, { passive: true });
+    return () => { window.removeEventListener("scroll", f); cancelAnimationFrame(raf); };
+  }, []);
   return (
     <Reveal as="section" id="features" className="block" style={{ paddingTop: 0 }}>
       <div className="container">
         <div className="sec-head" style={{ marginBottom: 24 }}>
           <div className="eyebrow" data-reveal>What it does</div>
-          <h2 className="display" data-reveal style={{ ["--d" as string]: "80ms" }}>Three things, done properly.</h2>
+          <h2 className="display" data-reveal style={{ ["--d" as string]: "80ms" }}><Words text="Three things, done properly." step={50} /></h2>
         </div>
 
         <div className="feat" data-reveal>
@@ -136,7 +152,7 @@ export function FeatureRows() {
             <ul><li>Retrieved when relevant, not recited</li><li>Reminiscence: it asks about your past, gently</li><li>Yours to forget, one tap</li></ul>
           </div>
           <div className="feat-visual" aria-hidden>
-            <div className="chips">
+            <div className="chips" data-stagger>
               {[["person", "Sister Maya — fell out in March, hasn't called"], ["past", "Grew up by the sea; misses it in winter"], ["goal", "Wants the promotion, scared of the interview"], ["routine", "Usually up past midnight on work nights"]].map(([k, t]) => (
                 <div className="chip-mem" key={t}><span className="k">{k}</span>{t}<span className="x">forget</span></div>
               ))}
@@ -156,7 +172,7 @@ export function FeatureRows() {
               <span style={{ display: "block", fontSize: ".62rem", letterSpacing: ".16em", textTransform: "uppercase", color: "var(--color-accent)", marginBottom: 4 }}>unprompted · because your evenings have been shorter</span>
               Your messages have been getting shorter in the evenings this week. Am I reading that right?
             </div>
-            <div className="gates">
+            <div className="gates" data-stagger>
               {[["ok", "Two of four detectors agree", "trend 0.68"], ["ok", "Outside quiet hours", "22:30 → 08:00"], ["ok", "Budget", "1 of 2 today"], ["no", "Reliance not climbing", "waiting"]].map(([s, t, v]) => (
                 <div className={`gate ${s}`} key={t}>{s === "ok" ? I.check : I.minus}<b>{t}</b><span>{v}</span></div>
               ))}
@@ -195,7 +211,7 @@ export function Cta({ chatHref }: { chatHref: string }) {
       <div className="container">
         <div className="cta" data-reveal>
           <div className="light" /><div className="planet" />
-          <h2 className="display">Tell it how you're arriving.</h2>
+          <h2 className="display"><Words text="Tell it how you're arriving." step={50} /></h2>
           <p>Pick a mood, say a line if you want, and Ori meets you there. No account, no password — a name is enough.</p>
           <div className="ctas">
             <Magnetic href={chatHref} className="btn-primary">Start talking <span className="arrow" aria-hidden>→</span></Magnetic>

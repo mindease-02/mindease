@@ -450,3 +450,108 @@ body:has(> .world) { background: var(--bg, #07080b); }
 .world .note-row .go { top: auto; bottom: 7px; transform: none; }
 .world .note-row .go:hover { transform: translateX(2px); }
 .world .note-row .go:disabled { transform: none; }
+
+/* =====================================================================
+   CLAYMORPHISM (dark) + MOTION CHOREOGRAPHY
+   Surfaces are soft, extruded, tactile: an inner top-left highlight, a
+   deep inner bottom-right shade, a long soft drop shadow, big radii, and
+   a squash on press. Inputs are pressed in. Everything still lives inside
+   the film frame (bars, vignette, grain, rays, flare).
+   ===================================================================== */
+.world {
+  --clay-hi: rgba(255,255,255,.10);
+  --clay-lo: rgba(0,0,0,.55);
+  --clay-r: 28px;
+}
+.world .clay, .world .device, .world .feat-visual, .world .cta, .world .theme-frame, .world .card,
+.world .mood, .world .float-card, .world form.glass, .world .setup-panel, .world .techniques, .world .offer,
+.world .bubble-ai, .world .bubble-proactive, .world .composer, .world .clay-sm, .world .device .line.ori {
+  background: linear-gradient(145deg, color-mix(in srgb, var(--surface) 88%, white 4%), color-mix(in srgb, var(--surface) 92%, black 8%));
+  border: 1px solid rgba(255,255,255,.06);
+  box-shadow: inset 2px 2px 6px var(--clay-hi), inset -8px -10px 22px var(--clay-lo), 0 40px 80px -40px rgba(0,0,0,.95), 0 0 0 1px rgba(0,0,0,.4);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  transition: transform .6s var(--ease), box-shadow .6s var(--ease), background .4s;
+}
+.world .device, .world .feat-visual, .world .theme-frame, .world .cta { border-radius: 34px; }
+.world .mood, .world .card { border-radius: var(--clay-r); }
+.world .float-card, .world .offer, .world .techniques { border-radius: 22px; }
+.world .bubble-ai, .world .bubble-proactive { border-radius: 24px 24px 24px 8px; }
+.world .bubble-user { background: linear-gradient(145deg, #f5f1ea, #ddd6cb); color: #1c1a17; border-radius: 24px 24px 8px 24px; border: 0; box-shadow: inset 2px 2px 4px rgba(255,255,255,.9), inset -6px -8px 16px rgba(0,0,0,.18), 0 30px 60px -30px rgba(0,0,0,.9); }
+.world .bubble-proactive { background: linear-gradient(145deg, color-mix(in srgb, var(--color-primary) 22%, var(--surface)), color-mix(in srgb, var(--color-primary) 10%, var(--surface))); }
+/* raised → lift on hover, squash on press */
+.world .mood:hover, .world .card:hover, .world .float-card:hover, .world .feat-visual:hover, .world .device:hover { transform: translateY(-4px); box-shadow: inset 2px 2px 6px var(--clay-hi), inset -8px -10px 22px var(--clay-lo), 0 56px 90px -40px rgba(0,0,0,.95), 0 0 0 1px rgba(0,0,0,.4); }
+.world .mood:active { transform: translateY(0) scale(.98); box-shadow: inset 6px 6px 14px var(--clay-lo), inset -2px -2px 6px var(--clay-hi); }
+/* pressed-in inputs */
+.world .field, .world .clay-input, .world textarea, .world select.field, .world .composer textarea {
+  background: color-mix(in srgb, var(--bg) 70%, var(--surface)); border: 1px solid rgba(0,0,0,.5);
+  box-shadow: inset 6px 6px 14px rgba(0,0,0,.55), inset -2px -2px 6px rgba(255,255,255,.06);
+}
+.world .field:focus, .world .clay-input:focus, .world textarea:focus { box-shadow: inset 6px 6px 14px rgba(0,0,0,.55), inset -2px -2px 6px rgba(255,255,255,.06), 0 0 0 3px color-mix(in srgb, var(--color-ring) 40%, transparent); }
+/* clay pills */
+.world .btn, .world .clay-btn, .world .t-tab, .world .offer-opt, .world .device-foot .ctl, .world .nav-links a[aria-current="true"] {
+  box-shadow: inset 1.5px 1.5px 4px var(--clay-hi), inset -4px -5px 12px var(--clay-lo), 0 16px 30px -16px rgba(0,0,0,.9);
+  border-color: rgba(255,255,255,.06);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--surface) 85%, white 5%), var(--surface));
+}
+.world .btn:active, .world .clay-btn:active, .world .offer-opt:active, .world .t-tab:active { transform: scale(.97); box-shadow: inset 5px 5px 12px var(--clay-lo), inset -1px -1px 4px var(--clay-hi); }
+.world .btn-primary, .world .clay-btn-primary, .world .note-row .go {
+  background: linear-gradient(145deg, var(--coral-2), var(--accent-mid) 60%, var(--accent-deep));
+  box-shadow: inset 2px 2px 5px rgba(255,255,255,.45), inset -6px -8px 16px rgba(0,0,0,.35), 0 24px 50px -18px rgba(var(--accent-rgb),.75);
+  position: relative; overflow: hidden;
+}
+.world .btn-primary::after, .world .clay-btn-primary::after { content: ""; position: absolute; inset: -40% -60%; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.35) 50%, transparent 60%); transform: translateX(-120%); transition: transform .9s var(--ease); pointer-events: none; }
+.world .btn-primary:hover::after, .world .clay-btn-primary:hover::after { transform: translateX(120%); }
+.world .btn-primary:active { transform: scale(.97); box-shadow: inset 6px 6px 14px rgba(0,0,0,.4), inset -1px -1px 4px rgba(255,255,255,.3); }
+/* glass stays only where the film needs transparency */
+.world .nav.scrolled, .world .nav-links, .world .mobile-menu { backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%); }
+
+/* ---- Motion ----------------------------------------------------------- */
+.world .progress { position: fixed; left: 0; top: 0; height: 3px; width: 100%; z-index: 80; transform-origin: left; background: linear-gradient(90deg, var(--coral-2), var(--color-secondary)); box-shadow: 0 0 12px rgba(var(--accent-rgb),.6); pointer-events: none; }
+/* aurora drift behind everything */
+.world .atmos::before { background-size: 160% 160%, 160% 160%, 100% 100%; animation: aurora 24s ease-in-out infinite alternate; }
+@keyframes aurora { 0% { background-position: 0% 0%, 100% 100%, 0 0; } 100% { background-position: 100% 30%, 0% 60%, 0 0; } }
+/* page settle: a slow push-in on the entry pages */
+.world .shot { position: relative; overflow: hidden; }
+.world .shot > .container, .world .shot > div { animation: settle 1.6s var(--ease) both; }
+@keyframes settle { from { transform: scale(1.035); opacity: 0; } to { transform: none; opacity: 1; } }
+.world .entry .rays { inset: -10% -20% auto auto; width: 80%; }
+/* typing indicator */
+.world .device .line.typing { display: inline-flex; gap: 5px; padding: 14px 16px; }
+.world .device .line.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-2); animation: dots 1.1s ease-in-out infinite; }
+.world .device .line.typing i:nth-child(2) { animation-delay: .15s; } .world .device .line.typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes dots { 0%, 80%, 100% { transform: translateY(0); opacity: .5; } 40% { transform: translateY(-4px); opacity: 1; } }
+.world .device .line { animation: pop .55s var(--ease) both; }
+@keyframes pop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+/* wheel draws in; chips float; gates tick */
+.world .feat-visual { transform: translateY(calc(var(--py, 0) * -18px)); }
+.world .feat-visual:hover { transform: translateY(calc(var(--py, 0) * -18px - 4px)); }
+.world .feat-visual svg.wheel polygon { transform-origin: 160px 160px; animation: grow 1.4s var(--ease) both; }
+.world .feat-visual svg.wheel polygon + polygon { animation-delay: .25s; }
+.world .in .feat-visual svg.wheel { animation: slowspin 60s linear infinite; }
+@keyframes grow { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes slowspin { to { transform: rotate(360deg); } }
+.world .chip-mem { animation: hover 8s ease-in-out infinite; }
+.world .chip-mem:nth-child(2) { animation-delay: 1.3s; } .world .chip-mem:nth-child(3) { animation-delay: 2.6s; } .world .chip-mem:nth-child(4) { animation-delay: 3.9s; }
+.world .gate svg path { stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw .6s var(--ease) forwards; animation-delay: calc(var(--d, 0ms) + .3s); }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.world .feat-visual .line.ori { animation: breathe-p 6s ease-in-out infinite; }
+@keyframes breathe-p { 0%,100% { transform: none; } 50% { transform: translateY(-3px); } }
+/* mood tiles: rising entrance handled by data-stagger; selected one pulses */
+.world .mood[aria-pressed="true"] { animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { box-shadow: inset 2px 2px 6px var(--clay-hi), inset -8px -10px 22px var(--clay-lo), 0 0 0 0 rgba(var(--accent-rgb),.45); } 50% { box-shadow: inset 2px 2px 6px var(--clay-hi), inset -8px -10px 22px var(--clay-lo), 0 0 0 14px rgba(var(--accent-rgb),0); } }
+.world .mood .dot { transition: transform .5s var(--ease); }
+.world .mood:hover .dot { transform: translateZ(20px) scale(1.15); }
+/* chat bubbles pop in */
+.world .bubble-ai, .world .bubble-user, .world .bubble-proactive { animation: pop .5s var(--ease) both; }
+/* footer columns + feature lists stagger */
+.world .foot > div { animation: pop .8s var(--ease) both; }
+.world .foot > div:nth-child(2) { animation-delay: .1s; } .world .foot > div:nth-child(3) { animation-delay: .2s; } .world .foot > div:nth-child(4) { animation-delay: .3s; }
+.world .feat ul li { opacity: 0; transform: translateX(-8px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+.world .feat.in ul li { opacity: 1; transform: none; }
+.world .feat.in ul li:nth-child(2) { transition-delay: .12s; } .world .feat.in ul li:nth-child(3) { transition-delay: .24s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .world .atmos::before, .world .chip-mem, .world .feat-visual svg.wheel, .world .feat-visual .line.ori, .world .mood[aria-pressed="true"], .world .shot > .container, .world .shot > div, .world .foot > div { animation: none !important; }
+  .world .feat-visual { transform: none; }
+  .world .feat ul li { opacity: 1; transform: none; }
+}

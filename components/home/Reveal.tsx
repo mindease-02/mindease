@@ -7,6 +7,8 @@ export default function Reveal({ children, as: Tag = "div", className = "", ...r
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
+    // Children of [data-stagger] become reveal targets with rising delays.
+    root.querySelectorAll<HTMLElement>("[data-stagger]").forEach((g) => Array.from(g.children).forEach((c, i) => { const el = c as HTMLElement; if (!el.hasAttribute("data-reveal")) { el.setAttribute("data-reveal", ""); el.style.setProperty("--d", `${i * 90}ms`); } }));
     const targets = [root, ...Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"))].filter((n) => n.hasAttribute("data-reveal"));
     if (!targets.length) return;
     // Anything already on screen reveals at once - no dependence on the observer

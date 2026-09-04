@@ -18,7 +18,7 @@ export default async function MoodPage() {
         <Link href="/" className="display no-underline" style={{ color: "var(--ink)", fontSize: "1.35rem" }}>MindEase</Link>
         <Link href="/chat" className="btn" style={{ padding: "10px 18px" }}>Skip to chat</Link>
       </div></header>
-      <Reveal as="main" className="entry"><MoodPicker name={session.name} /></Reveal>
+      <Reveal as="main" className="entry shot"><div className="rays" aria-hidden /><MoodPicker name={session.name} /></Reveal>
     </div>
   );
 }

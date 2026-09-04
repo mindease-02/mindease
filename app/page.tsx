@@ -5,6 +5,7 @@ import Nav from "@/components/home/Nav";
 import Hero from "@/components/home/Hero";
 import { Cta, Demo, FeatureRows, Footer, Story } from "@/components/home/Sections";
 import ThemeInit from "@/components/home/ThemeInit";
+import ScrollProgress from "@/components/home/ScrollProgress";
 
 export default async function Home() {
   const session = await currentSession();
@@ -13,6 +14,7 @@ export default async function Home() {
     <div className={`world ${display.variable} ${body.variable}`}>
       <ThemeInit />
       <div className="atmos" aria-hidden /><div className="vignette" aria-hidden /><div className="grain" aria-hidden /><div className="bars" aria-hidden><span /><span /></div>
+      <ScrollProgress />
       <a href="#main" className="skip">Skip to content</a>
       <Nav chatHref={chatHref} signedIn={!!session} />
       <main id="main" tabIndex={-1}>

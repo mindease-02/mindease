@@ -17,7 +17,7 @@ export default async function LoginPage() {
         <Link href="/" className="display no-underline" style={{ color: "var(--ink)", fontSize: "1.35rem" }}>MindEase</Link>
         <Link href="/" className="btn" style={{ padding: "10px 18px" }}>← Back</Link>
       </div></header>
-      <Reveal as="main" className="entry"><div data-reveal style={{ width: "100%", display: "grid", placeItems: "center" }}><LoginForm /></div></Reveal>
+      <Reveal as="main" className="entry shot"><div className="rays" aria-hidden /><div data-reveal style={{ width: "100%", display: "grid", placeItems: "center" }}><LoginForm /></div></Reveal>
     </div>
   );
 }
