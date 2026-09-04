@@ -51,8 +51,11 @@ export function verifySession(token: string | undefined): Session | null {
 
 export async function currentSession(): Promise<Session | null> {
   if (supabaseConfigured()) {
+    // cookies() must be called outside the try: Next throws a control-flow error
+    // here during prerendering to mark the route dynamic, and swallowing it
+    // would freeze the page as a logged-out static shell.
+    const sb = await serverClient();
     try {
-      const sb = await serverClient();
       const { data } = await sb.auth.getUser();
       const u = data.user;
       if (!u) return null;
