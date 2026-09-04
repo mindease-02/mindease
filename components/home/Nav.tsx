@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Magnetic from "./Magnetic";
 import { PxMenu, PxRemove, PxArrow } from "./pixelIcons";
 
-const LINKS = [["#demo", "See it"], ["#features", "What it does"], ["#story", "Why"], ["#start", "Start"]];
+const LINKS = [["#demo", "Experience"], ["#features", "What it does"], ["#story", "Why"], ["#start", "Start"]];
 
 export default function Nav({ chatHref, signedIn, name }: { chatHref: string; signedIn: boolean; name?: string }) {
   async function signOut() { await fetch("/api/auth/logout", { method: "POST" }).catch(() => {}); window.location.href = "/login"; }
@@ -31,7 +31,7 @@ export default function Nav({ chatHref, signedIn, name }: { chatHref: string; si
             <span className="display" style={{ fontSize: ".95rem" }}>MindEase</span>
           </Link>
           <nav className="nav-links glass" aria-label="Primary">
-            {LINKS.map(([h, l]) => <a key={h} href={h} aria-current={active === h ? "true" : undefined}>{l}</a>)}
+            {LINKS.map(([h, l]) => <a key={h} href={h} aria-current={active === h ? "true" : undefined} className="swap"><span data-t={l}>{l}</span></a>)}
           </nav>
           <div className="nav-cta">
             {signedIn && <button type="button" className="linkish nav-signout" onClick={signOut} title={name ? `Signed in as ${name}` : "Signed in"}>Sign out</button>}

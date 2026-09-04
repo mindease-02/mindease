@@ -785,3 +785,45 @@ body:has(> .world) { background: var(--bg, #07080b); }
   .world .sheet-list .bar { border-color: #111; background: #eee; } .world .sheet-list .bar i { background: #111; }
   .world .sticker { background: #eee; color: #111; box-shadow: none; transform: none; border-color: #111; }
 }
+
+/* =====================================================================
+   THE EXPERIENCE - a sticky full-frame stage, chapters of type top and
+   bottom, the ball assembling from voxels in the middle.
+   ===================================================================== */
+.world .xp { position: relative; z-index: 1; height: 620vh; }
+.world .xp-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; display: grid; place-items: center; touch-action: pan-y; cursor: grab; }
+.world .xp-scene { position: absolute; inset: 0; }
+.world .xp-scene canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+.world .xp-scene .scene-mask { -webkit-mask-image: radial-gradient(60% 60% at 50% 50%, #000 40%, transparent 100%); mask-image: radial-gradient(60% 60% at 50% 50%, #000 40%, transparent 100%); }
+.world .xp-top, .world .xp-bottom { position: absolute; left: 0; right: 0; text-align: center; font-size: clamp(1.4rem, 5.4vw, 4.6rem); line-height: 1; white-space: nowrap; pointer-events: none; letter-spacing: .02em; text-shadow: 6px 6px 0 rgba(0,0,0,.6); }
+.world .xp-top { top: clamp(84px, 12vh, 120px); }
+.world .xp-bottom { bottom: clamp(56px, 10vh, 100px); color: var(--coral-2); }
+.world .xp-top .ch, .world .xp-bottom .ch { display: inline-block; }
+.world .xp-side { position: absolute; top: 50%; transform: translateY(-50%); font-family: var(--font-heading), monospace; font-size: .66rem; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-2); writing-mode: vertical-rl; pointer-events: none; }
+.world .xp-side.l { left: 24px; transform: translateY(-50%) rotate(180deg); }
+.world .xp-side.r { right: 24px; }
+.world .xp-sub { position: absolute; left: 50%; bottom: clamp(140px, 22vh, 220px); transform: translateX(-50%); max-width: 32rem; text-align: center; color: var(--ink-2); font-size: 1rem; line-height: 1.5; margin: 0; padding: 0 20px; pointer-events: none; }
+.world .xp-cta { position: absolute; left: 50%; bottom: clamp(150px, 24vh, 240px); transform: translateX(-50%); }
+.world .xp-dots { position: absolute; right: 24px; bottom: 24px; display: flex; gap: 6px; }
+.world .xp-dots i { width: 8px; height: 8px; background: var(--line-2); }
+.world .xp-dots i.on { background: var(--coral-2); }
+.world .xp-hint { position: absolute; left: 24px; bottom: 24px; font-family: var(--font-heading), monospace; font-size: .62rem; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-3); }
+.world .xp .fallback-orb { position: absolute; left: 50%; top: 50%; width: min(60vw, 320px); }
+.world .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 720px) {
+  .world .xp { height: 520vh; }
+  .world .xp-top, .world .xp-bottom { font-size: 1.35rem; white-space: normal; padding: 0 16px; line-height: 1.25; }
+  .world .xp-top { top: 84px; } .world .xp-bottom { bottom: 120px; }
+  .world .xp-side { display: none; }
+  .world .xp-sub { bottom: 180px; font-size: .9rem; }
+  .world .xp-cta { bottom: 190px; }
+}
+@media (prefers-reduced-motion: reduce) { .world .xp { height: auto; } .world .xp-stage { position: relative; } }
+
+/* text-swap hover on nav links (the label slides up and its twin slides in) */
+.world .nav-links a.swap { overflow: hidden; }
+.world .nav-links a.swap > span { display: inline-block; position: relative; transition: transform .45s var(--ease); }
+.world .nav-links a.swap > span::after { content: attr(data-t); position: absolute; left: 0; top: 100%; color: var(--coral-2); }
+.world .nav-links a.swap:hover > span { transform: translateY(-100%); }
+/* thin centred loader line, like a projector start */
+.world .progress { left: 50%; width: 60vw; transform-origin: center; transform: translateX(-50%) scaleX(var(--p, 0)); }

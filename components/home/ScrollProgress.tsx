@@ -10,5 +10,5 @@ export default function ScrollProgress() {
     f(); window.addEventListener("scroll", f, { passive: true }); window.addEventListener("resize", f);
     return () => { window.removeEventListener("scroll", f); window.removeEventListener("resize", f); cancelAnimationFrame(raf); };
   }, []);
-  return <div className="progress" aria-hidden style={{ transform: `scaleX(${p})` }} />;
+  return <div className="progress" aria-hidden style={{ ["--p" as string]: p }} />;
 }
