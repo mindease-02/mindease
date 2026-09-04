@@ -30,37 +30,25 @@ export default function LoginForm() {
   }
 
   return (
-    <form onSubmit={submit} className="clay w-full max-w-md p-7 sm:p-8">
-      <label className="block text-sm text-clay-muted" htmlFor="who">What should Ori call you?</label>
-      <input id="who" className="clay-input mt-2" placeholder="a name, an email, anything" autoFocus
-        value={identifier} onChange={(e) => setIdentifier(e.target.value)} maxLength={120} autoComplete="off" />
-      <p className="mt-2 text-xs text-clay-muted">No password. Whatever you type here is your key - use the same thing next time to pick up where you left off.</p>
+    <form onSubmit={submit} className="glass w-full" style={{ maxWidth: 520, padding: 32 }} aria-labelledby="login-title">
+      <div className="steps-ind" aria-label="Step 1 of 3"><i className="on" /><i /><i /><span>Step 1 of 3 · sign in</span></div>
+      <h1 id="login-title" className="display" style={{ fontSize: "clamp(2rem, 4vw, 2.8rem)", margin: "12px 0 18px" }}>What should Ori call you?</h1>
+      <label htmlFor="who" className="label">Your name, or anything you&apos;ll remember</label>
+      <input id="who" className="field" placeholder="e.g. Priya, or a nickname" autoFocus autoComplete="username"
+        value={identifier} onChange={(e) => setIdentifier(e.target.value)} maxLength={120} aria-describedby="who-help" />
+      <p id="who-help" className="muted" style={{ fontSize: ".8rem", marginTop: 8, fontWeight: 300 }}>No password. Whatever you type here is your key — use the same thing next time to pick up where you left off.</p>
 
-      <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-[20px] bg-clay-bg-deep p-4 shadow-clay-in">
-        <input type="checkbox" className="mt-1 accent-clay-coral" checked={proactive} onChange={(e) => setProactive(e.target.checked)} />
-        <span className="text-sm">
-          <span className="font-medium">Let Ori check in on me unprompted.</span>
-          <span className="mt-1 block text-xs leading-relaxed text-clay-muted">
-            Mornings, isolated evenings, long silences, and real downward trends. Never in your quiet hours (22:30-08:00 by default), at most twice a day, and it stops if you don't answer. Every check-in says what prompted it. You can change all of this later.
-          </span>
-        </span>
+      <label className="check" style={{ marginTop: 22 }}>
+        <input type="checkbox" checked={proactive} onChange={(e) => setProactive(e.target.checked)} />
+        <span><b>Let Ori check in on me unprompted.</b><span>Mornings, isolated evenings, long silences, real downward trends. Never in quiet hours, at most twice a day, and it stops if you don&apos;t answer.</span></span>
+      </label>
+      <label className="check" style={{ marginTop: 10 }}>
+        <input type="checkbox" checked={adult} onChange={(e) => setAdult(e.target.checked)} required />
+        <span><b>I&apos;m 18 or over, and I understand what this is.</b><span>Software, not a therapist or a crisis service. It keeps short memories and mood estimates you can read, export and delete.</span></span>
       </label>
 
-      <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-[20px] bg-clay-bg-deep p-4 shadow-clay-in">
-        <input type="checkbox" className="mt-1 accent-clay-coral" checked={adult} onChange={(e) => setAdult(e.target.checked)} />
-        <span className="text-sm">
-          <span className="font-medium">I&apos;m 18 or over, and I understand what this is.</span>
-          <span className="mt-1 block text-xs leading-relaxed text-clay-muted">
-            Ori is software, not a therapist or a crisis service, and can&apos;t diagnose or treat anything. It keeps short memories and mood estimates about you, which you can read, export and delete at any time.
-          </span>
-        </span>
-      </label>
-
-      {error && <p className="mt-4 text-sm text-clay-coral">{error}</p>}
-      <button className="clay-btn-primary mt-6 w-full" disabled={busy || !identifier.trim() || !adult}>{busy ? "Opening…" : "Continue"}</button>
-      <p className="mt-4 text-center text-[11px] leading-relaxed text-clay-muted">
-        Ori is software, not a therapist. If you're in crisis, use a helpline - the app shows them automatically.
-      </p>
+      {error && <p role="alert" style={{ color: "var(--coral-2)", fontSize: ".9rem", marginTop: 14 }}>{error}</p>}
+      <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 22 }} disabled={busy || !identifier.trim() || !adult} aria-busy={busy}>{busy ? "Opening…" : "Continue"} <span className="arrow" aria-hidden>→</span></button>
     </form>
   );
 }

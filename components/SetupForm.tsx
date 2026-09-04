@@ -39,7 +39,7 @@ export default function SetupForm({ name, tz }: { name: string; tz: string }) {
 
   return (
     <div className="container" style={{ maxWidth: 720 }}>
-      <div className="eyebrow" data-reveal>One more thing, {name}</div>
+      <div className="steps-ind" data-reveal aria-label="Step 3 of 3"><i className="on" /><i className="on" /><i className="on" /><span>Step 3 of 3 · how Ori should behave, {name}</span></div>
       <h1 className="display" data-reveal style={{ fontSize: "clamp(2.4rem, 5.5vw, 4.2rem)", margin: "14px 0 0", ["--d" as string]: "60ms" }}>How should Ori behave?</h1>
       <p className="muted" data-reveal style={{ fontWeight: 300, marginTop: 14, maxWidth: "36rem", lineHeight: 1.6, ["--d" as string]: "120ms" }}>Thirty seconds, once. Everything here can be changed later in the Mirror.</p>
 

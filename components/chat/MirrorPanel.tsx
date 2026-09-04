@@ -54,7 +54,7 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
           <h2 className="display text-xl">The Mirror</h2>
           <p className="text-xs text-clay-muted">What Ori has of you. Yours to read, change and delete.</p>
         </div>
-        <button className="clay-btn px-3 py-2" onClick={onClose} aria-label="close">✕</button>
+        <button className="clay-btn px-3 py-2" onClick={onClose} aria-label="Close the Mirror"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M6 6l12 12M18 6 6 18" /></svg></button>
       </header>
       <nav className="flex gap-1 px-5 pb-3">
         {(["you", "memory", "settings"] as const).map((t) => (

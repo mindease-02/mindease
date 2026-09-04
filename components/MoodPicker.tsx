@@ -27,7 +27,7 @@ export default function MoodPicker({ name }: { name: string }) {
 
   return (
     <div className="container" style={{ maxWidth: 920 }}>
-      <div className="eyebrow" data-reveal>Before we start</div>
+      <div className="steps-ind" data-reveal aria-label="Step 2 of 3"><i className="on" /><i className="on" /><i /><span>Step 2 of 3 · how you're arriving</span></div>
       <h1 className="display" data-reveal style={{ fontSize: "clamp(2.6rem, 6vw, 4.8rem)", margin: "14px 0 0", ["--d" as string]: "60ms" }}>How are you arriving, {name}?</h1>
       <p className="muted" data-reveal style={{ fontWeight: 300, marginTop: 14, maxWidth: "36rem", lineHeight: 1.6, ["--d" as string]: "120ms" }}>Tap one. It gives Ori a sense of what to hold, and you can be wrong about it.</p>
       <div className={`moods ${busy ? "busy" : ""}`} role="group" aria-label="Mood" data-reveal style={{ ["--d" as string]: "180ms" }}>
@@ -40,7 +40,8 @@ export default function MoodPicker({ name }: { name: string }) {
         ))}
       </div>
       <form data-reveal className="note-row" style={{ ["--d" as string]: "260ms" }} onSubmit={(e) => { e.preventDefault(); go(mood, note); }}>
-        <input className="field" value={note} onChange={(e) => setNote(e.target.value.slice(0, 200))} placeholder="Or say it in your own words…" aria-label="Say it in your own words" disabled={busy} />
+        <label htmlFor="own-words" className="label">Or say it in your own words</label>
+        <input id="own-words" className="field" value={note} onChange={(e) => setNote(e.target.value.slice(0, 200))} placeholder="e.g. exam on Monday and I can\'t focus" disabled={busy} />
         <button type="submit" className="go" aria-label="Go to the chat" disabled={busy || !note.trim()}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
         </button>

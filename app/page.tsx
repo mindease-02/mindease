@@ -3,7 +3,7 @@ import { currentSession } from "@/lib/auth";
 import { body, display } from "@/components/home/fonts";
 import Nav from "@/components/home/Nav";
 import Hero from "@/components/home/Hero";
-import { Cta, Features, Footer, Stats, Story } from "@/components/home/Sections";
+import { Cta, Demo, FeatureRows, Footer, Story } from "@/components/home/Sections";
 import ThemeInit from "@/components/home/ThemeInit";
 
 export default async function Home() {
@@ -13,12 +13,13 @@ export default async function Home() {
     <div className={`world ${display.variable} ${body.variable}`}>
       <ThemeInit />
       <div className="atmos" aria-hidden /><div className="vignette" aria-hidden /><div className="grain" aria-hidden /><div className="bars" aria-hidden><span /><span /></div>
+      <a href="#main" className="skip">Skip to content</a>
       <Nav chatHref={chatHref} signedIn={!!session} />
-      <main>
+      <main id="main" tabIndex={-1}>
         <Hero chatHref={chatHref} />
-        <Features />
+        <Demo />
+        <FeatureRows />
         <Story />
-        <Stats />
         <Cta chatHref={chatHref} />
       </main>
       <Footer />

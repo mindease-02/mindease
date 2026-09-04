@@ -3,15 +3,20 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Magnetic from "./Magnetic";
 
-const LINKS = [["#features", "What it does"], ["#story", "Why"], ["#start", "Start"]];
+const LINKS = [["#demo", "See it"], ["#features", "What it does"], ["#story", "Why"], ["#start", "Start"]];
 
 export default function Nav({ chatHref, signedIn }: { chatHref: string; signedIn: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [active, setActive] = useState<string>("");
   useEffect(() => {
     const f = () => setScrolled(window.scrollY > 24);
     f(); window.addEventListener("scroll", f, { passive: true });
-    return () => window.removeEventListener("scroll", f);
+    // Scroll-spy: mark the section in view so the nav shows where you are.
+    const secs = LINKS.map(([h]) => document.querySelector<HTMLElement>(h)).filter(Boolean) as HTMLElement[];
+    const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) setActive("#" + e.target.id); }, { rootMargin: "-40% 0px -55% 0px" });
+    secs.forEach((el) => io.observe(el));
+    return () => { window.removeEventListener("scroll", f); io.disconnect(); };
   }, []);
   useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [open]);
 
@@ -24,7 +29,7 @@ export default function Nav({ chatHref, signedIn }: { chatHref: string; signedIn
             <span className="display" style={{ fontSize: "1.35rem", letterSpacing: "-0.01em" }}>MindEase</span>
           </Link>
           <nav className="nav-links glass" aria-label="Primary">
-            {LINKS.map(([h, l]) => <a key={h} href={h}>{l}</a>)}
+            {LINKS.map(([h, l]) => <a key={h} href={h} aria-current={active === h ? "true" : undefined}>{l}</a>)}
           </nav>
           <div className="nav-cta">
             <Magnetic href={chatHref} className="btn-primary" >{signedIn ? "Open chat" : "Talk to Ori"} <span className="arrow">→</span></Magnetic>
