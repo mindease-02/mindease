@@ -27,12 +27,13 @@ const SCRIPT: { who: "you" | "ori"; text: string; cap?: [string, string] }[] = [
 
 export function Demo() {
   const [step, setStep] = useState(0);
-  const [playing, setPlaying] = useState(true);
+  const [playing, setPlaying] = useState(false);
+  const [started, setStarted] = useState(false);
   const [typing, setTyping] = useState(false);
   const reduced = useRef(false);
   useEffect(() => {
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced.current) { setStep(SCRIPT.length); setPlaying(false); }
+    if (reduced.current) { setStep(SCRIPT.length); setPlaying(false); setStarted(true); }
   }, []);
   useEffect(() => {
     if (!playing || step >= SCRIPT.length) { setTyping(false); return; }
@@ -63,6 +64,13 @@ export function Demo() {
         <div className="demo">
           <div ref={host} className="device" data-reveal role="region" aria-label="Replayed example conversation">
             <div className="device-head"><span className="dot" aria-hidden />Ori <span className="muted">· example, replayed</span></div>
+            {!started && (
+              <button type="button" className="demo-play" onClick={() => { setStarted(true); setPlaying(true); }} aria-label="Play the example conversation">
+                <span className="demo-play-ico">{I.play}</span>
+                <b>PLAY</b>
+                <span>the example conversation</span>
+              </button>
+            )}
             <div className="device-body" aria-live="polite">
               {SCRIPT.map((l, i) => (
                 <div key={i} style={{ display: "contents" }}>
@@ -75,8 +83,8 @@ export function Demo() {
             <div className="device-foot">
               <div className="prog" aria-hidden>{SCRIPT.map((_, i) => <i key={i} className={i < step ? "on" : ""} />)}</div>
               <div style={{ display: "flex", gap: 8 }}>
-                {!done && <button className="ctl" onClick={() => setPlaying((p) => !p)} aria-pressed={playing}>{playing ? I.pause : I.play}<span>{playing ? "Pause" : "Play"}</span></button>}
-                {(done || step > 0) && <button className="ctl" onClick={() => { setStep(0); setPlaying(true); }}>{I.replay}<span>Replay</span></button>}
+                {!done && started && <button className="ctl" onClick={() => setPlaying((p) => !p)} aria-pressed={playing}>{playing ? I.pause : I.play}<span>{playing ? "Pause" : "Play"}</span></button>}
+                {(done || step > 0) && <button className="ctl" onClick={() => { setStep(0); setStarted(true); setPlaying(true); }}>{I.replay}<span>Replay</span></button>}
               </div>
             </div>
           </div>

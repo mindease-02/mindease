@@ -92,7 +92,7 @@ export default function Experience({ chatHref }: { chatHref: string }) {
         <h1 className="sr-only">{c.top} {c.bottom}</h1>
         <div key={`l${chapter}`} className="xp-side l">{c.left}</div>
         <div key={`r${chapter}`} className="xp-side r">{c.right}</div>
-        {c.sub && <p key={`s${chapter}`} className="xp-sub">{c.sub}</p>}
+        {c.sub && <p key={`s${chapter}`} className="xp-sub"><span className="xp-sub-k">{String(chapter + 1).padStart(2, "0")} / {String(CHAPTERS.length).padStart(2, "0")}</span>{c.sub}</p>}
         {chapter === CHAPTERS.length - 1 && <div key="cta" className="xp-cta"><Magnetic href={chatHref} className="btn-primary btn-sticker">Start talking <PxArrow className="pxicon" /></Magnetic></div>}
         <div className="xp-dots" aria-hidden>{CHAPTERS.map((_, i) => <i key={i} className={i === chapter ? "on" : ""} />)}</div>
         <div className="xp-hint" aria-hidden>{chapter < CHAPTERS.length - 1 ? "scroll" : ""}</div>

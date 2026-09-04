@@ -836,3 +836,19 @@ html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 .world .xp { height: 560vh; }
 @media (max-width: 720px) { .world .xp { height: 480vh; } }
+
+/* chapter caption: a readable pixel panel under the top line */
+.world .xp-sub { top: clamp(150px, 23vh, 230px); bottom: auto; max-width: 36rem; padding: 12px 16px 12px 16px; background: color-mix(in srgb, var(--bg) 88%, var(--surface)); border: 2px solid var(--px-edge); box-shadow: 6px 6px 0 rgba(0,0,0,.6); color: var(--ink); font-size: 1.02rem; line-height: 1.5; text-align: left; display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; }
+.world .xp-sub-k { font-family: var(--font-heading), monospace; font-size: .62rem; letter-spacing: .14em; color: var(--coral-2); padding-top: 4px; white-space: nowrap; }
+.world .xp-side { font-size: .72rem; color: var(--ink); background: color-mix(in srgb, var(--bg) 80%, transparent); padding: 8px 4px; border: 2px solid var(--px-edge); }
+.world .xp-cta { bottom: clamp(150px, 24vh, 240px); }
+@media (max-width: 720px) { .world .xp-sub { top: 150px; font-size: .9rem; max-width: calc(100% - 32px); } }
+
+/* press-to-play box on the example chat */
+.world .device { position: relative; }
+.world .demo-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3; width: min(72%, 300px); aspect-ratio: 1.15; display: grid; place-content: center; gap: 8px; text-align: center; background: var(--surface); border: 3px solid var(--px-edge); box-shadow: inset 4px 4px 0 rgba(255,255,255,.08), inset -4px -4px 0 rgba(0,0,0,.45), 10px 10px 0 rgba(0,0,0,.6); color: var(--ink); cursor: pointer; font-family: var(--font-heading), monospace; letter-spacing: .12em; text-transform: uppercase; font-size: .7rem; animation: breathe-p 3s ease-in-out infinite; }
+.world .demo-play b { font-family: var(--font-display), monospace; font-size: clamp(1.2rem, 3vw, 1.8rem); color: var(--coral-2); letter-spacing: 0; }
+.world .demo-play-ico { display: grid; place-items: center; width: 72px; height: 72px; margin: 0 auto; background: var(--accent-mid); color: var(--on-accent); border: 3px solid var(--px-edge); box-shadow: 4px 4px 0 var(--px-edge); font-size: 34px; }
+.world .demo-play:hover { transform: translate(-50%, -52%); }
+.world .demo-play:active { transform: translate(-50%, -48%); box-shadow: inset 4px 4px 0 rgba(0,0,0,.45); }
+.world .device:has(.demo-play) .device-body { opacity: .25; filter: blur(1px); }
