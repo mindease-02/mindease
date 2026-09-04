@@ -10,11 +10,11 @@ export default function AxisWheel({ weather, climate, size = 220 }: { weather: O
   };
   const poly = (o: Octant) => OCTANT_AXES.map((ax, i) => pt(i, Math.max(0.04, o[ax])).join(",")).join(" ");
   return (
-    <svg viewBox={`0 0 ${size} ${size}`} width="100%" style={{ maxWidth: size }} role="img" aria-label="eight-axis emotion wheel">
+    <svg viewBox={`0 0 ${size} ${size}`} width="100%" style={{ maxWidth: size }} role="img" aria-label="eight-axis emotion wheel" shapeRendering="crispEdges">
       {[0.25, 0.5, 0.75, 1].map((k) => <circle key={k} cx={c} cy={c} r={r * k} fill="none" stroke="currentColor" strokeOpacity={0.18} strokeWidth={1} />)}
       {OCTANT_AXES.map((ax, i) => { const [x, y] = pt(i, 1); return <line key={ax} x1={c} y1={c} x2={x} y2={y} stroke="currentColor" strokeOpacity={0.18} strokeWidth={1} />; })}
       {climate && <polygon points={poly(climate)} fill="rgba(126,200,216,.25)" stroke="#7ec8d8" strokeWidth={1.5} />}
-      <polygon points={poly(weather)} fill="rgba(232,145,122,.35)" stroke="#e8917a" strokeWidth={2} strokeLinejoin="round" />
+      <polygon points={poly(weather)} fill="rgba(232,145,122,.35)" stroke="#e8917a" strokeWidth={2} strokeLinejoin="miter" />
       {OCTANT_AXES.map((ax, i) => { const [x, y] = pt(i, 1.17); return <text key={ax} x={x} y={y} fontSize={10} textAnchor="middle" dominantBaseline="middle" fill="currentColor" fillOpacity={0.6}>{ax}</text>; })}
     </svg>
   );
