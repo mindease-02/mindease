@@ -55,14 +55,15 @@ export function applyPalette(p: Palette, persist = true) {
   const vars = paletteVars(p);
   document.querySelectorAll<HTMLElement>(".world").forEach((el) => { for (const [k, v] of Object.entries(vars)) el.style.setProperty(k, v); el.dataset.palette = p.id; });
   document.body.style.background = p.bg;
-  if (persist) { try { localStorage.setItem(THEME_KEY, p.id); } catch { /* private mode */ } }
+  // Session-only: a mood picked today should not recolour the site forever.
+  if (persist) { try { sessionStorage.setItem(THEME_KEY, p.id); localStorage.removeItem(THEME_KEY); } catch { /* private mode */ } }
   window.dispatchEvent(new CustomEvent(THEME_EVENT, { detail: p }));
 }
 
 export function currentPalette(): Palette {
   if (typeof document === "undefined") return PALETTES[0];
   let id: string | null = null;
-  try { id = localStorage.getItem(THEME_KEY); } catch { /* ignore */ }
+  try { id = sessionStorage.getItem(THEME_KEY); localStorage.removeItem(THEME_KEY); } catch { /* ignore */ }
   return PALETTES.find((p) => p.id === id) ?? PALETTES[0];
 }
 
