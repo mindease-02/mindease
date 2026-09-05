@@ -847,3 +847,55 @@ html { scroll-behavior: smooth; }
 .world .mood .dot { border-radius: 50%; }
 .world .xp-sub { background: color-mix(in srgb, var(--bg) 78%, var(--surface)); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 .world .xp-side { border: 0; background: transparent; }
+
+/* ---- soft mode: the rest of the pages (mood, login, reset, summary) ---- */
+.world .mood { border-radius: 18px !important; }
+.world .mood b { font-size: 1.05rem; font-weight: 600; }
+.world .mood[aria-pressed="true"] { border-color: rgba(var(--accent-rgb),.6) !important; box-shadow: 0 30px 60px -30px rgba(var(--accent-rgb),.6) !important; }
+.world .chip-mem, .world .clay-chip, .world .check { border-radius: 999px !important; border: 1px solid rgba(255,255,255,.10); box-shadow: none; }
+.world .chip-mem .k, .world .clay-chip { font-family: var(--font-body), "Pixelify Sans", monospace; text-transform: none; letter-spacing: .02em; font-size: .78rem; }
+.world .gate b, .world .label { font-weight: 600; }
+.world .skip, .world .chip-mem .x { border-radius: 999px !important; }
+.world .progress { height: 3px; }
+.world .device-foot .prog i, .world .steps-ind i { height: 3px; }
+.world .thin-scroll::-webkit-scrollbar-thumb { border: 0; border-radius: 999px; background: rgba(255,255,255,.14); }
+.world .no-print .display, .world .summary .display { font-family: var(--font-body), "Pixelify Sans", monospace; font-weight: 700; }
+.world .sheet-table th { text-transform: none; letter-spacing: 0; font-weight: 600; }
+
+/* ---- soft mode: chat page. Same rules, higher specificity to undo the
+        full-pixel chat block above. The ball stays as it is. ---- */
+.world.chat-world { --px: 14px; }
+.world.chat-world::after { display: none; }
+.world.chat-world .chat-head { border-bottom: 1px solid rgba(255,255,255,.08); background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.world.chat-world .chat-head .display, .world.chat-world aside .display { font-family: var(--font-body), "Pixelify Sans", monospace; font-weight: 700; font-size: 1.15rem; }
+.world.chat-world .chat-head .text-\[11px\], .world.chat-world footer p, .world.chat-world .text-\[11px\].text-clay-muted, .world.chat-world .composer textarea::placeholder, .world.chat-world aside nav button, .world.chat-world .clay-sm h3, .world.chat-world .clay-chip, .world.chat-world .clay-btn, .world.chat-world .clay-btn-primary, .world.chat-world .offer-opt, .world.chat-world .t-tab, .world.chat-world .t-ring span, .world.chat-world .t-list b { font-family: var(--font-body), "Pixelify Sans", monospace; text-transform: none; letter-spacing: .02em; }
+.world.chat-world .chat-head .text-\[11px\], .world.chat-world footer p, .world.chat-world .text-\[11px\].text-clay-muted { font-size: .78rem; }
+.world.chat-world .composer textarea::placeholder { font-size: 1rem; }
+.world.chat-world .clay-btn, .world.chat-world .clay-btn-primary, .world.chat-world .offer-opt, .world.chat-world .t-tab { font-size: .9rem; font-weight: 600; border-radius: 999px !important; }
+.world.chat-world aside nav button { font-size: .82rem; font-weight: 600; border-radius: 999px !important; border: 1px solid transparent; }
+.world.chat-world aside nav button.bg-clay-slate { border-color: transparent; box-shadow: 0 10px 24px -14px rgba(var(--accent-rgb),.7); }
+.world.chat-world .clay-sm h3 { font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.world.chat-world .rounded-full, .world.chat-world [class*="rounded-full"] { border-radius: 999px !important; }
+.world.chat-world .rounded-2xl, .world.chat-world [class*="rounded-2xl"], .world.chat-world [class*="rounded-xl"] { border-radius: var(--px) !important; }
+.world.chat-world .bubble-ai, .world.chat-world .bubble-proactive { border-radius: var(--px) var(--px) var(--px) 6px !important; box-shadow: 0 18px 44px -26px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.06); }
+.world.chat-world .bubble-user { border-radius: var(--px) var(--px) 6px var(--px) !important; box-shadow: 0 16px 40px -24px rgba(0,0,0,.8); }
+.world.chat-world .bubble-ai::before, .world.chat-world .bubble-proactive::before, .world.chat-world .bubble-user::before { display: none; }
+.world.chat-world .bubble-ai, .world.chat-world .bubble-user, .world.chat-world .bubble-proactive { animation: popsoft .5s var(--ease) both; }
+@keyframes popsoft { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+.world.chat-world .composer { border-radius: 22px !important; border: 1px solid rgba(255,255,255,.10); box-shadow: 0 24px 60px -30px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.06); }
+.world.chat-world .composer textarea { border-radius: 16px !important; }
+.world.chat-world .clay-btn-primary { box-shadow: 0 14px 34px -14px rgba(var(--accent-rgb),.75), inset 0 1px 0 rgba(255,255,255,.35); }
+.world.chat-world .clay-btn-primary:active, .world.chat-world .clay-btn:active { transform: translateY(1px) scale(.98); box-shadow: 0 6px 16px -10px rgba(0,0,0,.8); }
+.world.chat-world aside { border-left: 1px solid rgba(255,255,255,.08); box-shadow: -24px 0 60px rgba(0,0,0,.45); }
+.world.chat-world .clay-sm { border-radius: var(--px) !important; }
+.world.chat-world .clay-chip { border-radius: 999px !important; border: 1px solid rgba(255,255,255,.10); font-size: .78rem; box-shadow: none; }
+.world.chat-world [role="switch"] { border-radius: 999px !important; border: 1px solid rgba(255,255,255,.12); box-shadow: inset 0 2px 6px rgba(0,0,0,.4); }
+.world.chat-world [role="switch"] > span { border-radius: 50% !important; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
+.world.chat-world .offer, .world.chat-world .techniques { border-radius: var(--px) !important; }
+.world.chat-world .offer-opt span { font-size: .84rem; font-weight: 400; }
+.world.chat-world .t-ring { border-radius: 50% !important; border: 1px solid rgba(255,255,255,.12); transition-timing-function: var(--ease); box-shadow: 0 24px 60px -30px rgba(0,0,0,.85), inset 0 0 0 6px rgba(var(--accent-rgb),.28); }
+.world.chat-world .t-ring span { font-size: .95rem; font-weight: 600; }
+.world.chat-world .t-list b { border-radius: 10px !important; border: 1px solid rgba(255,255,255,.12); box-shadow: none; font-size: .85rem; font-weight: 700; }
+.world.chat-world svg polygon, .world.chat-world svg path, .world.chat-world svg circle, .world.chat-world svg line { shape-rendering: auto; stroke-linejoin: round; stroke-linecap: round; }
+.world.chat-world .thin-scroll::-webkit-scrollbar { width: 8px; }
+.world.chat-world .thin-scroll::-webkit-scrollbar-thumb { border: 0; border-radius: 999px; background: rgba(255,255,255,.14); }
