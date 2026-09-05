@@ -35,7 +35,7 @@ export default function Scene3D({ pointer, drag, lite = false, story }: { pointe
     renderer.setSize(el.clientWidth, el.clientHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 0.82;
     renderer.shadowMap.enabled = !lite;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     el.appendChild(renderer.domElement);
@@ -57,16 +57,16 @@ export default function Scene3D({ pointer, drag, lite = false, story }: { pointe
     // as light, not as texture. Threshold high enough that the body stays matte.
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    if (!lite) composer.addPass(new UnrealBloomPass(new THREE.Vector2(el.clientWidth, el.clientHeight), 0.42, 0.65, 0.82));
+    if (!lite) composer.addPass(new UnrealBloomPass(new THREE.Vector2(el.clientWidth, el.clientHeight), 0.22, 0.55, 0.92));
     composer.addPass(new OutputPass());
 
     // Lighting: warm key, cool rim, soft fill. The environment does the reflections.
-    const key = new THREE.DirectionalLight(new THREE.Color(pal0.accent2).lerp(new THREE.Color(0xffffff), 0.6), 2.2);
+    const key = new THREE.DirectionalLight(new THREE.Color(pal0.accent2).lerp(new THREE.Color(0xffffff), 0.6), 1.7);
     key.position.set(3, 4, 3); key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024); key.shadow.radius = 6; key.shadow.bias = -0.0005;
     scene.add(key);
-    const rim = new THREE.DirectionalLight(pal0.cool, 1.6); rim.position.set(-4, 1.5, -3); scene.add(rim);
-    scene.add(new THREE.AmbientLight(0x1b1e2a, 1.2));
+    const rim = new THREE.DirectionalLight(pal0.cool, 1.1); rim.position.set(-4, 1.5, -3); scene.add(rim);
+    scene.add(new THREE.AmbientLight(0x1b1e2a, 0.8));
 
     const group = new THREE.Group(); scene.add(group);
 
@@ -86,7 +86,7 @@ export default function Scene3D({ pointer, drag, lite = false, story }: { pointe
     // Follow the site palette when the orb in "why it exists" changes it.
     const onTheme = (e: Event) => {
       const pal = (e as CustomEvent<Palette>).detail;
-      coral.color.set(pal.accent); coral.sheenColor.set(pal.accent2); (vox.material as THREE.MeshPhysicalMaterial).color.set(pal.accent);
+      coral.color.set(pal.accent); coral.sheenColor.set(pal.accent2); (vox.material as THREE.MeshPhysicalMaterial).color.set(pal.accent).multiplyScalar(0.72);
       satMat.color.set(pal.cool); satMat.emissive.set(pal.cool).multiplyScalar(0.25);
       rim.color.set(pal.cool); key.color.set(pal.accent2).lerp(new THREE.Color(0xffffff), 0.6);
       (scene.background as THREE.Color).set(pal.bg2); (scene.fog as THREE.FogExp2).color.set(pal.bg2);
@@ -101,7 +101,7 @@ export default function Scene3D({ pointer, drag, lite = false, story }: { pointe
     // Voxels: the ball is made of little parts. Each has a scattered start and a
     // target on the sphere; formations re-target them (sphere / ring / cloud / spiral).
     const N_VOX = lite ? 420 : 900;
-    const vox = new THREE.InstancedMesh(new THREE.BoxGeometry(0.11, 0.11, 0.11), new THREE.MeshPhysicalMaterial({ color: pal0.accent, roughness: 0.35, metalness: 0.1, clearcoat: 0.6 }), N_VOX);
+    const vox = new THREE.InstancedMesh(new THREE.BoxGeometry(0.11, 0.11, 0.11), new THREE.MeshPhysicalMaterial({ color: new THREE.Color(pal0.accent).multiplyScalar(0.72), roughness: 0.55, metalness: 0.05, clearcoat: 0.3 }), N_VOX);
     vox.castShadow = false; group.add(vox);
     const start = new Float32Array(N_VOX * 3), targ = new Float32Array(N_VOX * 3), form = new Float32Array(N_VOX * 3);
     const rnd = (seed: number) => { let x = Math.sin(seed * 9999) * 10000; return x - Math.floor(x); };
@@ -134,7 +134,7 @@ export default function Scene3D({ pointer, drag, lite = false, story }: { pointe
     const pos = new Float32Array(N * 3);
     for (let i = 0; i < N; i++) { pos[i * 3] = (Math.random() - 0.5) * 12; pos[i * 3 + 1] = (Math.random() - 0.5) * 8; pos[i * 3 + 2] = (Math.random() - 0.5) * 6 - 1; }
     const pGeo = new THREE.BufferGeometry(); pGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.025, transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending }));
+    const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.025, transparent: true, opacity: 0.35, depthWrite: false, blending: THREE.AdditiveBlending }));
     scene.add(particles);
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
