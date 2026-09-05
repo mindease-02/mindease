@@ -796,3 +796,54 @@ html { scroll-behavior: smooth; }
 .world .demo-play:hover { transform: none; translate: -50% -52%; }
 .world .demo-play:active { transform: none; translate: -50% -48%; }
 @keyframes play-breathe { 0%, 100% { scale: 1; } 50% { scale: 1.03; } }
+
+/* =====================================================================
+   SOFT MODE - the pixel identity, dialled back. Softer pixel type, thin
+   edges, rounded corners, real shadows, no scanlines. Lean and optimistic.
+   ===================================================================== */
+.world { --px: 12px; --px-edge: rgba(255,255,255,.10); --ink-2: #b4b3bc; --ink-3: #8a8b96; }
+.world::after { display: none; }                       /* no scanlines */
+.world .grain { opacity: .05; }
+.world .vignette { background: radial-gradient(120% 90% at 50% 45%, transparent 62%, rgba(0,0,0,.45) 100%); }
+/* type: Pixelify everywhere except the logo */
+.world .display, .world h1, .world h2, .world blockquote.display, .world .xp-top, .world .xp-bottom, .world .theme-frame .label .emotion, .world .wordmark .big, .world .demo-play b, .world .pre-word { font-family: var(--font-body), "Pixelify Sans", monospace; font-weight: 700; letter-spacing: 0; text-shadow: 0 6px 24px rgba(0,0,0,.45); }
+.world .nav .display, .world .foot .display { font-family: var(--font-display), "Press Start 2P", monospace; font-weight: 400; text-shadow: none; }
+.world .hero h1 { font-size: clamp(2.4rem, 6.8vw, 5.6rem); line-height: 1.08; }
+.world .xp-top, .world .xp-bottom { font-size: clamp(1.8rem, 6.6vw, 5.6rem); line-height: 1.05; text-shadow: 0 8px 30px rgba(0,0,0,.5); }
+.world .sec-head h2, .world .cta h2, .world .feat h3, .world .story blockquote { font-size: clamp(1.7rem, 4.4vw, 3.4rem); line-height: 1.15; }
+.world h3, .world h4, .world h5, .world .btn, .world .clay-btn, .world .clay-btn-primary, .world .eyebrow, .world .steps-ind, .world .nav-links a, .world .label, .world .chip-mem .k, .world .t-tab, .world .offer-opt b, .world .mood b, .world .float-card .k, .world .device-head, .world .device-foot .ctl, .world .foot h5, .world .gate b, .world .xp-side, .world .xp-sub-k, .world .xp-hint, .world .marquee, .world .sticker, .world .sec-head .eyebrow, .world .feat .eyebrow, .world .story .eyebrow, .world .demo-play, .world .flank, .world .sheet-table th, .world .nav-signout { font-family: var(--font-body), "Pixelify Sans", monospace; letter-spacing: .04em; }
+.world .btn, .world .clay-btn, .world .clay-btn-primary { text-transform: none; font-size: .95rem; font-weight: 600; letter-spacing: .01em; }
+.world .eyebrow, .world .steps-ind, .world .xp-side, .world .marquee, .world .sticker, .world .sec-head .eyebrow, .world .feat .eyebrow, .world .story .eyebrow { font-size: .72rem; letter-spacing: .12em; }
+/* surfaces: thin edges, rounded, soft shadows */
+.world .clay, .world .device, .world .feat-visual, .world .cta, .world .theme-frame, .world .card, .world .mood, .world .float-card, .world form.glass, .world .techniques, .world .offer, .world .bubble-ai, .world .bubble-proactive, .world .composer, .world .clay-sm, .world .device .line.ori, .world .xp-sub, .world .demo-play, .world .nav-links, .world .mobile-menu {
+  border: 1px solid rgba(255,255,255,.10) !important; border-radius: var(--px) !important;
+  box-shadow: 0 24px 60px -30px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.06) !important;
+  background: var(--surface);
+}
+.world .bubble-user { border: 0 !important; border-radius: var(--px) var(--px) 6px var(--px) !important; box-shadow: 0 16px 40px -24px rgba(0,0,0,.8) !important; }
+.world .bubble-ai, .world .device .line.ori { border-radius: var(--px) var(--px) var(--px) 6px !important; }
+.world .btn, .world .clay-btn, .world .t-tab, .world .offer-opt, .world .device-foot .ctl, .world .burger, .world .nav-links a { border: 1px solid rgba(255,255,255,.12) !important; border-radius: 999px !important; box-shadow: 0 10px 24px -16px rgba(0,0,0,.8) !important; background: var(--surface-2); }
+.world .btn-primary, .world .clay-btn-primary, .world .note-row .go { border: 0 !important; border-radius: 999px !important; background: linear-gradient(135deg, var(--coral-2), var(--accent-mid) 60%, var(--accent-deep)); box-shadow: 0 14px 34px -14px rgba(var(--accent-rgb),.75), inset 0 1px 0 rgba(255,255,255,.35) !important; }
+.world .note-row .go { border-radius: 999px !important; }
+.world .field, .world .clay-input, .world textarea, .world select.field, .world .composer textarea { border: 1px solid rgba(255,255,255,.12) !important; border-radius: var(--px) !important; box-shadow: inset 0 2px 8px rgba(0,0,0,.35) !important; background: rgba(255,255,255,.04); }
+.world .field:focus, .world .clay-input:focus, .world textarea:focus { box-shadow: inset 0 2px 8px rgba(0,0,0,.35), 0 0 0 3px color-mix(in srgb, var(--color-ring) 40%, transparent) !important; }
+.world .sticker, .world .sec-head .eyebrow, .world .feat .eyebrow, .world .story .eyebrow, .world .steps-ind { transform: none; border: 1px solid rgba(255,255,255,.12); box-shadow: none; background: var(--surface-2); color: var(--ink); border-radius: 999px; padding: 6px 12px; }
+.world .nav-cta .btn-primary { transform: none; }
+.world .btn-sticker { transform: none; }
+.world .nav.scrolled { background: color-mix(in srgb, var(--bg) 70%, transparent); border-bottom: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.world .nav-links { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background: rgba(255,255,255,.04) !important; }
+.world .bars span { background: var(--bg); clip-path: none; animation: wipe .9s var(--ease) .2s both; }
+.world .band::before, .world .band::after { height: 24px; clip-path: none; border-radius: 24px 24px 0 0; }
+.world .band::after { border-radius: 0 0 24px 24px; }
+.world .band { border-radius: 0; }
+.world .marquee { border-top: 1px solid rgba(255,255,255,.08); border-bottom: 1px solid rgba(255,255,255,.08); background: transparent; }
+.world .marquee span i { border-radius: 50%; width: 6px; height: 6px; }
+.world .xp-dots i, .world .device-foot .prog i, .world .steps-ind i, .world .screen-prog i { border-radius: 999px; }
+.world .theme-frame .swatches i, .world .device .line.typing i { border-radius: 50%; }
+.world .pre-orb { animation-duration: 2s; }
+.world .wordmark .big { text-shadow: 0 10px 40px rgba(0,0,0,.6); color: var(--coral-2); }
+.world .t-ring { border-radius: 50% !important; }
+.world .icon, .world .demo-copy .list svg, .world .feat .icon, .world .t-list b, .world .step i { border-radius: 12px !important; }
+.world .mood .dot { border-radius: 50%; }
+.world .xp-sub { background: color-mix(in srgb, var(--bg) 78%, var(--surface)); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.world .xp-side { border: 0; background: transparent; }
