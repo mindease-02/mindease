@@ -852,3 +852,23 @@ html { scroll-behavior: smooth; }
 .world .demo-play:hover { transform: translate(-50%, -52%); }
 .world .demo-play:active { transform: translate(-50%, -48%); box-shadow: inset 4px 4px 0 rgba(0,0,0,.45); }
 .world .device:has(.demo-play) .device-body { opacity: .25; filter: blur(1px); }
+
+/* Experience captions: a subtitle strip along the bottom, headline lifted above it */
+.world .xp-bottom { bottom: clamp(118px, 19vh, 180px); }
+.world .xp-sub { top: auto; bottom: 52px; left: 24px; right: 24px; transform: none; max-width: none; margin: 0; padding: 12px 16px; display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; text-align: left; background: color-mix(in srgb, var(--bg) 90%, var(--surface)); border: 2px solid var(--px-edge); box-shadow: 6px 6px 0 rgba(0,0,0,.6); color: var(--ink); font-size: 1rem; line-height: 1.5; pointer-events: auto; }
+.world .xp-sub-k { padding-top: 0; }
+.world .xp-sub-t { max-width: 60ch; }
+.world .xp-cta { position: static; transform: none; }
+.world .xp-dots { bottom: 18px; }
+.world .xp-hint { bottom: 18px; }
+@media (max-width: 720px) {
+  .world .xp-bottom { bottom: 190px; }
+  .world .xp-sub { left: 12px; right: 12px; bottom: 44px; grid-template-columns: auto 1fr; font-size: .9rem; padding: 10px 12px; gap: 10px; }
+  .world .xp-cta { grid-column: 1 / -1; }
+}
+
+/* PLAY box: centre with the individual translate property so the breathing animation cannot cancel it */
+.world .demo-play { transform: none; translate: -50% -50%; animation: play-breathe 3s ease-in-out infinite; }
+.world .demo-play:hover { transform: none; translate: -50% -52%; }
+.world .demo-play:active { transform: none; translate: -50% -48%; }
+@keyframes play-breathe { 0%, 100% { scale: 1; } 50% { scale: 1.03; } }

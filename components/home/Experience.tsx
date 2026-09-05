@@ -17,12 +17,12 @@ import type { Drag, Story } from "./Scene3D";
 const Scene3D = dynamic(() => import("./Scene3D"), { ssr: false, loading: () => null });
 
 const CHAPTERS: { top: string; bottom: string; left: string; right: string; formation: number; sub?: string }[] = [
-  { top: "SOMEONE WHO", bottom: "NOTICES.", left: "an ai companion", right: "not a therapist", formation: 0, sub: "It pays attention to how you're doing — and checks in when it matters." },
-  { top: "IT READS MORE", bottom: "THAN WORDS", left: "eight axes", right: "tone · rhythm · words", formation: 2, sub: "Loneliness, dread, relief — from what you write, and how you write it." },
-  { top: "IT REMEMBERS", bottom: "YOU", left: "names · plans · past", right: "yours to forget", formation: 3, sub: "So a reply says “Maya”, not “a friend”." },
-  { top: "IT CHECKS IN,", bottom: "CAREFULLY", left: "quiet hours learned", right: "two a day, at most", formation: 1, sub: "Four detectors watch the pattern. Two must agree before it writes first." },
-  { top: "A BRIDGE, NOT", bottom: "A DESTINATION", left: "needs you less", right: "over time", formation: 0, sub: "The more you lean on it, the more it points you back toward people." },
-  { top: "TELL IT HOW", bottom: "YOU'RE ARRIVING", left: "pick a mood", right: "no password", formation: 0 },
+  { top: "SOMEONE WHO", bottom: "NOTICES.", left: "an ai companion", right: "not a therapist", formation: 0, sub: "Ori is an AI companion. It notices how you're doing from the way you talk, and checks in when it matters." },
+  { top: "IT READS MORE", bottom: "THAN WORDS", left: "eight emotions", right: "tone · rhythm · words", formation: 2, sub: "It reads eight emotions in what you write - and, only if you allow it, your tone of voice and typing rhythm." },
+  { top: "IT REMEMBERS", bottom: "YOU", left: "names · plans · past", right: "yours to forget", formation: 3, sub: "It remembers the people and plans you mention, so next week it can ask how the interview went." },
+  { top: "IT CHECKS IN,", bottom: "CAREFULLY", left: "quiet hours learned", right: "two a day, at most", formation: 1, sub: "It only writes first when there's a real reason - never at night, and at most twice a day." },
+  { top: "A BRIDGE, NOT", bottom: "A DESTINATION", left: "needs you less", right: "over time", formation: 0, sub: "It's built to need you less over time. The more you lean on it, the more it points you back to people." },
+  { top: "TELL IT HOW", bottom: "YOU'RE ARRIVING", left: "pick a mood", right: "no password", formation: 0, sub: "Pick how you're arriving and start talking. No password needed." },
 ];
 
 export default function Experience({ chatHref }: { chatHref: string }) {
@@ -92,8 +92,11 @@ export default function Experience({ chatHref }: { chatHref: string }) {
         <h1 className="sr-only">{c.top} {c.bottom}</h1>
         <div key={`l${chapter}`} className="xp-side l">{c.left}</div>
         <div key={`r${chapter}`} className="xp-side r">{c.right}</div>
-        {c.sub && <p key={`s${chapter}`} className="xp-sub"><span className="xp-sub-k">{String(chapter + 1).padStart(2, "0")} / {String(CHAPTERS.length).padStart(2, "0")}</span>{c.sub}</p>}
-        {chapter === CHAPTERS.length - 1 && <div key="cta" className="xp-cta"><Magnetic href={chatHref} className="btn-primary btn-sticker">Start talking <PxArrow className="pxicon" /></Magnetic></div>}
+        <div key={`s${chapter}`} className="xp-sub" role="note">
+          <span className="xp-sub-k">{String(chapter + 1).padStart(2, "0")} / {String(CHAPTERS.length).padStart(2, "0")}</span>
+          <span className="xp-sub-t">{c.sub}</span>
+          {chapter === CHAPTERS.length - 1 && <span className="xp-cta"><Magnetic href={chatHref} className="btn-primary">Start talking <PxArrow className="pxicon" /></Magnetic></span>}
+        </div>
         <div className="xp-dots" aria-hidden>{CHAPTERS.map((_, i) => <i key={i} className={i === chapter ? "on" : ""} />)}</div>
         <div className="xp-hint" aria-hidden>{chapter < CHAPTERS.length - 1 ? "scroll" : ""}</div>
       </div>
