@@ -7,7 +7,7 @@
  *
  * Reduced motion: every helper short-circuits to the final state.
  */
-import { animate, createTimeline, onScroll, stagger, createSpring, utils, type JSAnimation } from "animejs";
+import { animate, onScroll, stagger, createSpring, utils, type JSAnimation } from "animejs";
 
 export const reduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const EASE = "outExpo";
@@ -75,17 +75,3 @@ export function enterPage(root: HTMLElement) {
   return animate(root, { opacity: [0, 1], scale: [1.035, 1], duration: 1500, ease: EASE });
 }
 
-/** Hero opening: one timeline so the eyebrow, words, lede, buttons, stage and stickers land in order. */
-export function heroTimeline(parts: { eyebrow?: Element | null; words: NodeListOf<Element>; lede?: Element | null; ctas?: Element | null; stage?: Element | null; cards: NodeListOf<Element> | Element[] }) {
-  const finish = () => { [parts.eyebrow, parts.lede, parts.ctas, parts.stage, ...Array.from(parts.cards)].forEach((el) => { if (el) { (el as HTMLElement).style.opacity = "1"; (el as HTMLElement).style.transform = "none"; } }); Array.from(parts.words).forEach((w) => { (w as HTMLElement).style.transform = "none"; }); };
-  if (reduced()) { finish(); return; }
-  const tl = createTimeline({ defaults: { ease: EASE } });
-  if (parts.eyebrow) tl.add(parts.eyebrow, { opacity: [0, 1], translateY: [16, 0], duration: 700 }, 0);
-  tl.add(Array.from(parts.words), { translateY: ["110%", "0%"], duration: 1100, delay: stagger(60) }, 120);
-  if (parts.lede) tl.add(parts.lede, { opacity: [0, 1], translateY: [24, 0], duration: 900 }, 520);
-  if (parts.ctas) tl.add(parts.ctas, { opacity: [0, 1], translateY: [24, 0], duration: 900 }, 680);
-  if (parts.stage) tl.add(parts.stage, { opacity: [0, 1], translateY: [40, 0], scale: [0.96, 1], duration: 1300 }, 300);
-  const cards = Array.from(parts.cards) as HTMLElement[];
-  cards.forEach((el, i) => { const rot = Number(el.dataset.rot ?? 0); tl.add(el, { opacity: [0, 1], scale: [0.6, 1], rotate: [rot - 12, rot], duration: 900, ease: createSpring({ stiffness: 110, damping: 12 }) }, 900 + i * 110); });
-  return tl;
-}

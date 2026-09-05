@@ -3,7 +3,8 @@ import { useState } from "react";
 import type { UserView } from "@/lib/pipeline/userView";
 import AxisWheel from "./AxisWheel";
 import Sparkline from "./Sparkline";
-import { PxRemove, PxDownload, PxBin, PxUser } from "../home/pixelIcons";
+import { PxRemove } from "../home/pixelIcons";
+import type { usePush } from "../hooks/usePush";
 
 interface Props {
   mirror: UserView | null;
@@ -11,6 +12,7 @@ interface Props {
   onSettings: (body: Record<string, unknown>) => Promise<void>;
   onLogout: () => void;
   busy: boolean;
+  push: ReturnType<typeof usePush>;
 }
 
 function Section({ title, children, hint }: { title: string; hint?: string; children: React.ReactNode }) {
@@ -29,11 +31,10 @@ function Section({ title, children, hint }: { title: string; hint?: string; chil
  * switches. The detector maths, gate verdicts and safety log exist but are not
  * a thing a person needs in front of them while talking.
  */
-export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, busy }: Props) {
+export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, busy, push }: Props) {
   const [tab, setTab] = useState<"you" | "memory">("you");
   if (!mirror) return null;
   const m = mirror;
-  const c = m.consent;
 
   return (
     <aside className="fixed inset-y-0 right-0 z-30 flex w-full max-w-md flex-col bg-clay-bg shadow-[-12px_0_30px_rgba(0,0,0,.5)]">
@@ -68,7 +69,7 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
             <Section title="Screening" hint="Short checks doctors use, when the pattern warrants one. A range, not a diagnosis.">
               {m.screenings.length ? (
                 <ul className="space-y-1 text-sm">{m.screenings.map((x) => <li key={x.at}><b>{x.name}</b> ({x.domain}) · {new Date(x.at).toLocaleDateString()} · {x.score}/{x.max} · <span className="text-clay-coral">{x.band}</span></li>)}</ul>
-              ) : <p className="text-xs text-clay-muted">None yet. Ori offers one when it's warranted; you can also ask for "the mood check", "the anxiety check" or "the sleep check" in the chat.</p>}
+              ) : <p className="text-xs text-clay-muted">None yet. Ori offers one when it&apos;s warranted; you can also ask for &quot;the mood check&quot;, &quot;the anxiety check&quot; or &quot;the sleep check&quot; in the chat.</p>}
               {m.signals.length > 0 && (
                 <ul className="mt-3 space-y-1 text-xs text-clay-muted">{m.signals.slice(0, 4).map((sg) => <li key={sg.domain}><span className="text-clay-ink">Consistent with {sg.domain}</span> · {sg.evidence}</li>)}</ul>
               )}
@@ -111,6 +112,9 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
           <div className="mt-3 flex flex-wrap gap-2">
             <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: 3 })}>Give me 3 days of space</button>
             {m.pausedUntil && m.pausedUntil > Date.now() && <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: null })}>Unpause</button>}
+            {push.supported && push.enabled && (push.subscribed
+              ? <button className="clay-btn px-3 py-1.5 text-xs" onClick={() => push.unsubscribe()}>Stop notifying me when the tab is closed</button>
+              : <button className="clay-btn px-3 py-1.5 text-xs" onClick={async () => { const err = await push.subscribe(); if (err) alert(err); }}>Notify me when the tab is closed</button>)}
           </div>
         </Section>
         <Section title="Your data">

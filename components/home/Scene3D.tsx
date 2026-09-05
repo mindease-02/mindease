@@ -104,7 +104,7 @@ export default function Scene3D({ pointer, drag, lite = false, story }: { pointe
     const vox = new THREE.InstancedMesh(new THREE.BoxGeometry(0.11, 0.11, 0.11), new THREE.MeshPhysicalMaterial({ color: new THREE.Color(pal0.accent).multiplyScalar(0.72), roughness: 0.55, metalness: 0.05, clearcoat: 0.3 }), N_VOX);
     vox.castShadow = false; group.add(vox);
     const start = new Float32Array(N_VOX * 3), targ = new Float32Array(N_VOX * 3), form = new Float32Array(N_VOX * 3);
-    const rnd = (seed: number) => { let x = Math.sin(seed * 9999) * 10000; return x - Math.floor(x); };
+    const rnd = (seed: number) => { const x = Math.sin(seed * 9999) * 10000; return x - Math.floor(x); };
     for (let i = 0; i < N_VOX; i++) {
       // fibonacci sphere targets at radius 1.42 (just outside the body)
       const k = i + 0.5, phi = Math.acos(1 - 2 * k / N_VOX), th = Math.PI * (1 + Math.sqrt(5)) * k;

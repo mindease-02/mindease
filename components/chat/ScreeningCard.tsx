@@ -20,9 +20,9 @@ export default function ScreeningCard({ offer, onDone, onDismiss }: { offer: { i
   if (!item) return (
     <div className="offer bubble-ai" role="group" aria-label="Ori is offering a screening">
       <p className="offer-q">{offer.intro}</p>
-      <p className="muted" style={{ fontSize: ".8rem", margin: "0 0 10px" }}>Why now: {offer.reason}. It's a screening, not a diagnosis, and you can stop at any question.</p>
+      <p className="muted" style={{ fontSize: ".8rem", margin: "0 0 10px" }}>Why now: {offer.reason}. It&apos;s a screening, not a diagnosis, and you can stop at any question.</p>
       <div className="offer-opts">
-        <button type="button" className="offer-opt" disabled={busy} onClick={start}><b>Okay, let's do it</b><span>{offer.instrument.toUpperCase().replace("PHQ9", "PHQ-9").replace("GAD7", "GAD-7")} · two minutes</span></button>
+        <button type="button" className="offer-opt" disabled={busy} onClick={start}><b>Okay, let&apos;s do it</b><span>{offer.instrument.toUpperCase().replace("PHQ9", "PHQ-9").replace("GAD7", "GAD-7")} · two minutes</span></button>
         <button type="button" className="offer-opt dim" disabled={busy} onClick={decline}><b>Not now</b><span>ask me again in a couple of weeks</span></button>
       </div>
     </div>

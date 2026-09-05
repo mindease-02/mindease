@@ -258,7 +258,7 @@ export default function ChatApp({ name }: { name: string }) {
         </p>
       </footer>
 
-      {showMirror && <MirrorPanel mirror={mirror} onClose={() => setShowMirror(false)} onSettings={settings} onLogout={logout} busy={busy} />}
+      {showMirror && <MirrorPanel mirror={mirror} onClose={() => setShowMirror(false)} onSettings={settings} onLogout={logout} busy={busy} push={push} />}
       {toast && <div className="clay-dark fixed bottom-24 left-1/2 z-40 -translate-x-1/2 px-4 py-2 text-sm">{toast}</div>}
     </div>
   );

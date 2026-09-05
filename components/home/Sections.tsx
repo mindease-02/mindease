@@ -6,7 +6,7 @@ import { bindLift, bindParallax, popIn } from "@/lib/motion";
 import Magnetic from "./Magnetic";
 import ThemeOrb from "./ThemeOrb";
 
-import { PxEye, PxBrain, PxBell, PxShield, PxPlay, PxRefresh, PxCheck, PxHand, PxArrow, PxHeart, PxStar, PxMoon, PxMessage, PxSun } from "./pixelIcons";
+import { PxEye, PxBrain, PxBell, PxShield, PxPlay, PxRefresh, PxCheck, PxHand, PxArrow, PxHeart, PxStar, PxMoon, PxMessage } from "./pixelIcons";
 /* Streamline "Pixel - Free" icons (CC BY 4.0). */
 const I = {
   eye: <PxEye className="pxicon" />, memory: <PxBrain className="pxicon" />, bell: <PxBell className="pxicon" />, shield: <PxShield className="pxicon" />,
@@ -90,7 +90,7 @@ export function Demo() {
           </div>
           <div className="demo-copy" data-reveal style={{ ["--d" as string]: "120ms" }}>
             <h3>Every reply has a reason you can read.</h3>
-            <p>The captions under Ori's lines are the real fields the app produces on every turn. Open the Mirror in the chat and you'll see yours.</p>
+            <p>The captions under Ori&apos;s lines are the real fields the app produces on every turn. Open the Mirror in the chat and you&apos;ll see yours.</p>
             <div className="list" data-stagger>
               <div>{I.eye}<div><b>Read</b><p>Intensity, eight emotional axes, nuanced states, what you seem to need.</p></div></div>
               <div>{I.shield}<div><b>Check the gap</b><p>When words and tone disagree, Ori lowers its confidence and asks. It never overrides you.</p></div></div>
@@ -246,7 +246,7 @@ export function Footer() {
         <div className="foot">
           <div>
             <div className="display" style={{ fontSize: "1.6rem" }}>MindEase</div>
-            <p className="muted" style={{ maxWidth: "24rem", fontWeight: 300, lineHeight: 1.6, marginTop: 10 }}>Ori is software, and says so. If you're in crisis, call a helpline — the app shows real Indian lines automatically, and never invents a number.</p>
+            <p className="muted" style={{ maxWidth: "24rem", fontWeight: 300, lineHeight: 1.6, marginTop: 10 }}>Ori is software, and says so. If you&apos;re in crisis, call a helpline — the app shows real Indian lines automatically, and never invents a number.</p>
           </div>
           <div><h5>Product</h5><a href="#demo">See it</a><a href="#features">What it does</a><a href="#story">Why</a><a href="#start">Start</a></div>
           <div><h5>Crisis lines · India</h5><a href="https://telemanas.mohfw.gov.in" target="_blank" rel="noreferrer">Tele-MANAS · 14416</a><a href="tel:18005990019">Kiran · 1800-599-0019</a><a href="https://www.vandrevalafoundation.com" target="_blank" rel="noreferrer">Vandrevala · +91 9999 666 555</a><a href="tel:112">Emergency · 112</a></div>

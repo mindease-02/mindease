@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { regionFor } from "@/lib/util/region";
 import { PxArrow } from "./home/pixelIcons";
 import { useRouter } from "next/navigation";
 
@@ -22,9 +23,7 @@ export default function LoginForm() {
     e.preventDefault();
     setBusy(true); setError(null); setNotice(null);
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    // Time zone beats browser locale: many phones in India run en-US, and the region picks the helplines.
-    const TZ_REGION: Record<string, string> = { "Asia/Kolkata": "IN", "Asia/Calcutta": "IN" };
-    const region = TZ_REGION[timeZone] ?? ((navigator.language.split("-")[1] ?? "").toUpperCase() || undefined);
+    const region = regionFor(timeZone, navigator.language);
     try {
       if (!ACCOUNTS) {
         const r = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ identifier, timeZone, region }) });

@@ -5,7 +5,7 @@ import { useEffect } from "react";
 export default function ScrollTitle() {
   useEffect(() => {
     const base = "MindEase";
-    const map: [string, string][] = [["#story", "why"], ["#features", "what it does"], ["#demo", "a conversation"], [".hero", "noticing"]];
+    const map: [string, string][] = [["#story", "why"], ["#features", "what it does"], ["#demo", "a conversation"], [".xp", "noticing"]];
     const els = map.map(([sel, t]) => [document.querySelector<HTMLElement>(sel), t] as const).filter(([e]) => e) as [HTMLElement, string][];
     let raf = 0;
     const f = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => {

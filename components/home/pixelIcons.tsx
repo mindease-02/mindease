@@ -1,4 +1,3 @@
-/* eslint-disable */
 // Generated from Streamline "Pixel - Free" (CC BY 4.0, https://www.streamlinehq.com/icons/pixel). Do not edit by hand.
 import type { SVGProps } from "react";
 

@@ -37,7 +37,7 @@ export default async function SummaryPage() {
       </div></header>
       <main className="container sheet" id="main">
         <div className="sticker alt">Screening summary · not a diagnosis</div>
-        <h1 className="display" style={{ fontSize: "clamp(1.4rem, 3vw, 2.2rem)", margin: "14px 0 6px" }}>{session.name}'s summary from MindEase</h1>
+        <h1 className="display" style={{ fontSize: "clamp(1.4rem, 3vw, 2.2rem)", margin: "14px 0 6px" }}>{session.name}&apos;s summary from MindEase</h1>
         <p className="muted">Prepared {fmt(now)} from {days} days of conversation. Everything below is a screening signal, produced by software; only a clinician can assess or diagnose. Bring this to a doctor, a psychologist, or Tele-MANAS if it helps you explain.</p>
 
         <h2 className="display sheet-h">Screening scores</h2>

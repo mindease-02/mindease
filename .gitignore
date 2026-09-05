@@ -9,3 +9,7 @@ training/.cache
 next-env.d.ts
 .env*
 .claude/skills/
+
+# Generated documents (delivered separately; too large for git)
+docs/*.pptx
+docs/*.pdf

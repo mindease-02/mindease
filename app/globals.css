@@ -30,9 +30,7 @@ body {
     @apply bg-clay-bg-deep rounded-[22px] shadow-clay-in;
   }
   .clay-peach { @apply bg-clay-peach rounded-clay shadow-clay; }
-  .clay-sage  { @apply bg-clay-sage rounded-clay shadow-clay; }
   .clay-haze  { @apply bg-clay-haze rounded-clay shadow-clay; }
-  .clay-amber { @apply bg-clay-amber rounded-clay shadow-clay; }
   .clay-dark  { @apply bg-clay-slate text-clay-surface rounded-clay shadow-clay-dark; }
 
   .clay-btn {
@@ -44,11 +42,6 @@ body {
     @apply clay-btn bg-clay-coral text-white;
     box-shadow: 4px 4px 10px rgba(89,70,55,.22), -3px -3px 8px rgba(255,255,255,.55),
                 inset 1px 1px 2px rgba(255,255,255,.35), inset -2px -2px 4px rgba(120,50,30,.25);
-  }
-  .clay-btn-dark {
-    @apply clay-btn bg-clay-slate text-clay-surface;
-    box-shadow: 4px 4px 10px rgba(0,0,0,.3), -3px -3px 8px rgba(255,255,255,.25),
-                inset 1px 1px 2px rgba(255,255,255,.1), inset -2px -2px 4px rgba(0,0,0,.35);
   }
   .clay-input {
     @apply w-full rounded-[20px] bg-clay-bg-deep px-5 py-3 text-clay-ink placeholder:text-clay-muted

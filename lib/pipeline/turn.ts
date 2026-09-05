@@ -94,7 +94,7 @@ const TECHNIQUE_COOLDOWN = 45 * 60_000;
  * message, or the read is hot and intense. Never during a serious-risk turn
  * (the card takes over), and not more than once per cooldown.
  */
-function decideTechniqueOffer(state: UserState, analysis: AffectAnalysis, risk: RiskAssessment, now: number): TurnResult["techniqueOffer"] | undefined {
+export function decideTechniqueOffer(state: UserState, analysis: AffectAnalysis, risk: RiskAssessment, now: number): TurnResult["techniqueOffer"] | undefined {
   if (atLeast(risk.tier, "active")) return undefined;
   if (state.lastTechniqueOfferAt && now - state.lastTechniqueOfferAt < TECHNIQUE_COOLDOWN) return undefined;
   const axes = analysis.axes as unknown as Record<string, number>;
@@ -118,7 +118,7 @@ function decideTechniqueOffer(state: UserState, analysis: AffectAnalysis, risk: 
 }
 
 /** Same opener, or a question already asked in the last few replies. */
-function isRepetitive(reply: string, recent: string[]): boolean {
+export function isRepetitive(reply: string, recent: string[]): boolean {
   const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
   const opener = (t: string) => norm(t).split(" ").slice(0, 3).join(" ");
   const qs = (t: string) => t.split(/(?<=\?)/).map((q) => norm(q)).filter((q) => q.length > 12);

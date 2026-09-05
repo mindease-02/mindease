@@ -21,7 +21,6 @@ import { supabaseStoreConfigured } from "../supabase";
 import type { Store, UserState } from "./types";
 
 declare global {
-  // eslint-disable-next-line no-var
   var __mindeaseStore: Store | undefined;
 }
 

@@ -2,7 +2,6 @@ import "./home.css";
 import { currentSession } from "@/lib/auth";
 import { body, display, heading } from "@/components/home/fonts";
 import Nav from "@/components/home/Nav";
-import Hero from "@/components/home/Hero";
 import Experience from "@/components/home/Experience";
 import { Cta, Demo, FeatureRows, Footer, Story } from "@/components/home/Sections";
 import ThemeInit from "@/components/home/ThemeInit";
@@ -11,9 +10,6 @@ import Preloader from "@/components/home/Preloader";
 import ScrollTitle from "@/components/home/ScrollTitle";
 import Marquee from "@/components/home/Marquee";
 import { TICKER } from "@/lib/ticker";
-
-// The original hero is kept in the codebase; the Experience above carries the opening now.
-void Hero;
 
 export default async function Home() {
   const session = await currentSession();

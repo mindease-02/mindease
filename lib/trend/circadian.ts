@@ -19,7 +19,7 @@
  * 03:00, and a population baseline would say they are.
  */
 import { circularMeanHours, hourOfDayLocal } from "../util/time";
-import { mean, stdev } from "../util/stats";
+import { mean } from "../util/stats";
 
 export interface RhythmFeatures {
   /** Hours the activity centre-of-mass has shifted later vs baseline. Signed. */

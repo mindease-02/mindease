@@ -24,7 +24,7 @@ import type { LinguisticMarkers } from "../affect/types";
 import { mean } from "../util/stats";
 import { DAY } from "../util/time";
 import { ageEwma, momentum, type EwmaState } from "./ewma";
-import { emptyCusum, type CusumState } from "./cusum";
+import { type CusumState } from "./cusum";
 import { rhythmFeatures, withdrawalScore, type RhythmFeatures, type TimestampSeries } from "./circadian";
 import { mannKendall, MIN_POINTS, NO_TREND, type TrendTest } from "./mannKendall";
 
