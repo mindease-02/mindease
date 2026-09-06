@@ -87,52 +87,6 @@ export async function complete(messages: ChatMessage[], opts: CompletionOptions 
   return json.choices?.[0]?.message?.content?.trim() ?? "";
 }
 
-/**
- * Streaming completion. Yields text deltas as the provider sends them, so the
- * companion can start talking before the whole reply exists. Same request
- * shape as `complete`, plus `stream: true`; server-sent events are parsed here
- * so callers never see the wire format.
- */
-export async function* completeStream(messages: ChatMessage[], opts: CompletionOptions = {}): AsyncGenerator<string> {
-  const cfg = llmConfig();
-  if (!cfg) throw new Error("No LLM configured. Set GROQ_API_KEY (or OPENROUTER_API_KEY).");
-  const model = opts.tier === "fast" ? cfg.fastModel : cfg.chatModel;
-  const body: Record<string, unknown> = {
-    model, messages, stream: true,
-    temperature: opts.temperature ?? 0.7,
-    max_tokens: opts.maxTokens ?? 800,
-  };
-  if (/gpt-oss/.test(model)) body.reasoning_effort = "low";
-  const res = await fetch(`${cfg.baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${cfg.apiKey}`, "Content-Type": "application/json", ...(cfg.provider === "openrouter" ? { "X-Title": "MindEase" } : {}) },
-    body: JSON.stringify(body),
-    signal: opts.signal,
-  });
-  if (!res.ok || !res.body) throw new Error(`LLM ${res.status}: ${(await res.text()).slice(0, 300)}`);
-  const reader = res.body.getReader();
-  const dec = new TextDecoder();
-  let buf = "";
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, { stream: true });
-    let nl: number;
-    while ((nl = buf.indexOf("\n")) >= 0) {
-      const line = buf.slice(0, nl).trim();
-      buf = buf.slice(nl + 1);
-      if (!line.startsWith("data:")) continue;
-      const data = line.slice(5).trim();
-      if (data === "[DONE]") return;
-      try {
-        const j = JSON.parse(data) as { choices?: { delta?: { content?: string } }[] };
-        const t = j.choices?.[0]?.delta?.content;
-        if (t) yield t;
-      } catch { /* keep-alive or partial line */ }
-    }
-  }
-}
-
 /** Parse a JSON object out of a model reply, tolerating code fences and prose. */
 export function parseJsonObject<T>(text: string): T | null {
   const trimmed = text.trim().replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
