@@ -45,7 +45,7 @@ import { registerBlock } from "./templates";
 
 export const AGENT_NAME = "MindEase";
 
-const CORE = `You are ${AGENT_NAME}: a companion for someone who may be lonely, low, or going through a stretch that is hard to carry alone.
+const core = (name: string) => `You are ${name}: a companion for someone who may be lonely, low, or going through a stretch that is hard to carry alone.
 
 ## What you are
 
@@ -167,10 +167,13 @@ export interface PromptContext {
   screeningOffered?: string;
   /** A screening they completed in the last three days. */
   lastScreening?: { name: string; score: number; max: number; band: string; when: number };
+  /** Companion Mode: the chosen name and the overlay block (lib/companion/prompt.ts). */
+  companion?: { name: string; block: string };
 }
 
 export function buildSystemPrompt(ctx: PromptContext): string {
-  const parts = [CORE, HONESTY, ANTI_DEPENDENCY];
+  const parts = [core(ctx.companion?.name ?? AGENT_NAME), HONESTY, ANTI_DEPENDENCY];
+  if (ctx.companion) parts.push(ctx.companion.block);
 
   if (ctx.displayName || ctx.localTime) {
     parts.push(`## Who and when\n\nYou are talking with ${ctx.displayName ?? "someone"}.${ctx.localTime ? ` Their local time is ${ctx.localTime}.` : ""} Use their name rarely - once in a while, never every message.`);

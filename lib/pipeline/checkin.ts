@@ -20,6 +20,8 @@ import { mean } from "../util/stats";
 import { sendPush } from "../push";
 import { lifestylePatterns } from "../lifestyle/patterns";
 import { autoTune } from "../lifestyle/autoTune";
+import { getCompanionStore } from "../companion/store";
+import { companionBlock } from "../companion/prompt";
 
 export interface CheckinResult {
   decision: ProactiveDecision;
@@ -84,11 +86,21 @@ export async function evaluateUser(userId: string, opts: { now?: number; force?:
       state.cadenceLog = { ...state.cadenceLog, [kind]: localDayKey(now, state.timeZone) };
     }
   }
-  if (state.consent.storeTranscript) state.messages = [...state.messages, message].slice(-120);
+  const companion = state.companionMode?.active ? state.companionMode : null;
+  if (companion) {
+    // Companion Mode: the check-in belongs to the companion's transcript, not the main chat's.
+    try {
+      const cs = getCompanionStore();
+      const profile = await cs.getProfile(userId);
+      if (profile?.privacy.storeHistory) await cs.addMessages(userId, profile.id, [{ role: "assistant", content: message.content, createdAt: now, proactive: true, kind }]);
+    } catch (err) { console.warn("[checkin] companion transcript:", (err as Error).message); }
+  } else if (state.consent.storeTranscript) {
+    state.messages = [...state.messages, message].slice(-120);
+  }
   await store.pushOutbox(userId, message);
   // Second consent: OS notification only if they turned it on and the tab is likely closed.
   if (state.consent.pushNotifications && state.push.length && now - state.lastUserMessageAt > 20 * 60_000) {
-    const { dead } = await sendPush(state.push, { title: "MindEase", body: message.content.slice(0, 140), url: "/chat" });
+    const { dead } = await sendPush(state.push, { title: companion?.name ?? "MindEase", body: message.content.slice(0, 140), url: companion ? "/companion/chat" : "/chat" });
     if (dead.length) state.push = state.push.filter((p) => !dead.includes(p.endpoint));
   }
   await store.put(state);
@@ -105,14 +117,28 @@ async function composeCheckin(
     ...anchors(state.memories, 2),
   ].filter((m, i, arr) => arr.findIndex((x) => x.id === m.id) === i);
 
+  // Companion Mode: write the check-in in the companion's voice, from its own memories and transcript.
+  let companion: { name: string; block: string } | undefined;
+  let history = state.messages.slice(-8).map((m) => ({ role: m.role, content: m.content }));
+  if (state.companionMode?.active) {
+    try {
+      const cs = getCompanionStore();
+      const profile = await cs.getProfile(state.userId);
+      if (profile) {
+        const mems = profile.privacy.remember ? await cs.listMemories(state.userId, profile.id) : [];
+        companion = { name: profile.name, block: companionBlock(profile, state.displayName, mems) };
+        history = (await cs.listMessages(state.userId, profile.id, 8)).map((m) => ({ role: m.role, content: m.content }));
+      }
+    } catch (err) { console.warn("[checkin] companion profile:", (err as Error).message); }
+  }
   const system = buildSystemPrompt({
     trend, dependency, region: state.region,
     allowBehaviouralSignals: state.consent.allowBehaviouralSignals,
     proactive: { kind, rationale: decision.rationale },
-    memories, octant: state.octant, analysis: undefined,
+    memories: companion ? [] : memories, octant: state.octant, analysis: undefined,
     displayName: state.displayName, localTime: localTimeString(now, state.timeZone),
+    companion,
   });
-  const history = state.messages.slice(-8).map((m) => ({ role: m.role, content: m.content }));
 
   let content: string;
   if (llmConfig()) {

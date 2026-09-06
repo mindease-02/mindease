@@ -123,6 +123,8 @@ export interface UserState {
   screenings?: Screening[];
   /** Last time a screening was offered, to avoid re-asking every turn. */
   lastScreeningOfferAt?: number;
+  /** Companion Mode: set while the person is using their companion, so check-ins are written in its voice and land on its page. */
+  companionMode?: { active: boolean; companionId: string; name: string; since: number };
 }
 
 export interface Store {

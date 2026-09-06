@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Orb from "../Orb";
-import { PxMirror, PxSound, PxMic, PxMicoff, PxSend } from "../home/pixelIcons";
+import { PxMirror, PxSound, PxMic, PxMicoff, PxSend, PxUser } from "../home/pixelIcons";
 import CrisisCard from "./CrisisCard";
 import MirrorPanel from "./MirrorPanel";
 import Techniques from "./Techniques";
@@ -214,6 +214,7 @@ export default function ChatApp({ name }: { name: string }) {
         </div>
         <div className="ml-auto flex items-center gap-2">
           <button onClick={() => setSpeak((s) => !s)} className={`clay-btn px-3 py-2 text-xs ${speak ? "bg-clay-peach" : ""}`} title="Read replies aloud"><PxSound className="pxicon" /> {speak ? "voice on" : "voice off"}</button>
+          <a href="/companion" className="clay-btn px-3 py-2 text-xs" title="Talk to a companion you shape yourself"><PxUser className="pxicon" /> Companion</a>
           <button onClick={() => setShowMirror(true)} className="clay-btn px-3 py-2 text-xs"><PxMirror className="pxicon" /> Mirror</button>
         </div>
       </header>

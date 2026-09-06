@@ -29,7 +29,7 @@ import { updateEwma } from "../trend/ewma";
 import { updateCusum, rebaseline } from "../trend/cusum";
 import { assessDependency, type DependencyAssessment } from "../dependency";
 import { analyzeAffect, type AffectAnalysis } from "../llm/analyze";
-import { complete, llmConfig } from "../llm";
+import { complete, completeStream, llmConfig } from "../llm";
 import { addMemories, anchors, markRecalled, retrieve } from "../memory";
 import { extractMemories } from "../memory/extract";
 import { pickReminiscence } from "../memory/reminiscence";
@@ -49,6 +49,14 @@ export interface TurnInput {
   face?: FaceFeatures;
   /** Messages the client is holding but the server may not (no transcript storage). */
   clientContext?: { role: "user" | "assistant"; content: string }[];
+  /**
+   * Companion Mode. The reply is written as the chosen companion, the transcript
+   * and memories go to the companion tables instead of the main chat, and the
+   * reply streams through `onToken` as it is generated. Mood, trend, risk and
+   * reliance still update the shared state - the companion is a face on the
+   * same pipeline, not a way around it.
+   */
+  companion?: { name: string; block: string; onToken?: (delta: string) => void };
 }
 
 export interface TurnResult {
@@ -213,11 +221,11 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
 
   // 3. Model analysis (wider vocabulary, ESCAPE split, theory of mind), with the
   //    lexical read as its fallback. Runs alongside memory extraction.
-  const context = (state.consent.storeTranscript ? state.messages : (input.clientContext ?? []))
+  const context = (state.consent.storeTranscript && !input.companion ? state.messages : (input.clientContext ?? []))
     .slice(-10).map((m) => ({ role: m.role, content: m.content }));
   const [analysis, extracted] = await Promise.all([
     analyzeAffect(text, context, { vad: snapshot.vad, octant: octantFromVAD(snapshot.vad) }, now),
-    extractMemories(text, now),
+    input.companion ? Promise.resolve([]) : extractMemories(text, now),
   ]);
 
   // Fuse: the model's inferred feeling is another observation of the same latent.
@@ -242,7 +250,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     screeningOffer = decideScreening(state, now);
   }
   if (screeningOffer) state.lastScreeningOfferAt = now;
-  const recentReplies = state.messages.filter((m) => m.role === "assistant").slice(-6).map((m) => m.content);
+  const recentReplies = (input.companion ? (input.clientContext ?? []) : state.messages).filter((m) => m.role === "assistant").slice(-6).map((m) => m.content);
 
   // Incongruence calibration: was last turn's flag confirmed or denied? Then the
   // streak - the prompt only gets to mention a mismatch once it has held for two turns.
@@ -285,9 +293,11 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   const dependency = assessDependency(state.history, recentUserText, now);
 
   // 6. Memory: retrieve for this turn, then merge what was just learned.
+  // In Companion Mode the companion's own memories arrive in its prompt block;
+  // the main chat's memories stay in the main chat.
   const query = [text, ...analysis.mentions].join(" ");
-  const retrieved = retrieve(state.memories, query, 6, now).map((r) => r.item);
-  const anchor = anchors(state.memories, 3).filter((a) => !retrieved.some((r) => r.id === a.id));
+  const retrieved = input.companion ? [] : retrieve(state.memories, query, 6, now).map((r) => r.item);
+  const anchor = input.companion ? [] : anchors(state.memories, 3).filter((a) => !retrieved.some((r) => r.id === a.id));
   const memoriesUsed = [...retrieved, ...anchor];
   state.memories = markRecalled(state.memories, memoriesUsed.map((m) => m.id), now);
 
@@ -310,6 +320,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     techniqueOffered: !!techniqueOffer,
     screeningOffered: screeningOffer ? INSTRUMENTS[screeningOffer.instrument].name : undefined,
     lastScreening: (() => { const d = (state.screenings ?? []).filter((x) => x.completedAt && now - x.completedAt! < 3 * DAY).sort((a, b) => b.completedAt! - a.completedAt!)[0]; return d ? { name: INSTRUMENTS[d.instrument].name, score: d.score!, max: INSTRUMENTS[d.instrument].max, band: d.band!, when: d.completedAt! } : undefined; })(),
+    companion: input.companion ? { name: input.companion.name, block: input.companion.block } : undefined,
   });
   const history = context.slice(-16).map((m) => ({ role: m.role, content: m.content }));
   let reply: string;
@@ -317,9 +328,21 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   if (configured) {
     try {
       const msgs = [{ role: "system" as const, content: system }, ...history, { role: "user" as const, content: text }];
-      reply = tidy(await complete(msgs, { tier: "chat", temperature: analysis.intensity > 0.7 ? 0.5 : 0.75, maxTokens: 420 }));
+      const temperature = analysis.intensity > 0.7 ? 0.5 : 0.75;
+      if (input.companion?.onToken) {
+        // Streamed: tokens go to the client as they arrive. The repetition guard
+        // cannot rewrite what has already been shown, so it is skipped here.
+        let acc = "";
+        for await (const delta of completeStream(msgs, { tier: "chat", temperature, maxTokens: 420 })) {
+          acc += delta;
+          input.companion.onToken(delta);
+        }
+        reply = tidy(acc);
+      } else {
+        reply = tidy(await complete(msgs, { tier: "chat", temperature, maxTokens: 420 }));
+      }
       // Repetition guard: same opener or a question already asked → one rewrite with the draft shown.
-      if (isRepetitive(reply, recentReplies)) {
+      if (!input.companion?.onToken && isRepetitive(reply, recentReplies)) {
         const redo = await complete([...msgs, { role: "system" as const, content: `Your draft repeated how you have opened before, or re-asked a question you already asked:\n"${reply}"\nWrite a different reply: a new first word, a new shape, and no question you have asked in this conversation. Keep it as short.` }],
           { tier: "chat", temperature: 0.9, maxTokens: 420 });
         reply = tidy(redo);
@@ -336,7 +359,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   state.memories = addMemories(state.memories, extracted, MEMORY_LIMIT);
   const userMsg: StoredMessage = { role: "user", content: text, at: now };
   const aiMsg: StoredMessage = { role: "assistant", content: reply, at: Date.now() };
-  if (state.consent.storeTranscript) state.messages = [...state.messages, userMsg, aiMsg].slice(-MESSAGE_LIMIT);
+  if (state.consent.storeTranscript && !input.companion) state.messages = [...state.messages, userMsg, aiMsg].slice(-MESSAGE_LIMIT);
   state.lastUserMessageAt = now;
   await store.put(state);
 
