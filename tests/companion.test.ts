@@ -44,7 +44,7 @@ test("settings are clamped and unknown values fall back to the avatar default", 
 });
 
 test("companion block carries the name, style and boundaries, and the persona keeps its core", () => {
-  const s = { ...defaultSettings("divya"), name: "Kit", conversation: { ...defaultSettings("divya").conversation, emojis: "none" as const } };
+  const s = { ...defaultSettings("ahalya"), name: "Kit", conversation: { ...defaultSettings("ahalya").conversation, emojis: "none" as const } };
   const block = companionBlock(s, "Sam", [{ id: "m1", userId: "u", companionId: "c", memory: "Their cat is called Biscuit.", kind: "fact", importance: 0.4, createdAt: 0, updatedAt: 0 }]);
   assert.match(block, /You are Kit/);
     assert.match(block, /No emojis at all/);

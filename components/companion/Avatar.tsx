@@ -42,19 +42,25 @@ const PORTRAIT_EXPR: Record<Expression, { tilt: number; lift: number; bright: nu
 
 /**
  * A generated portrait, kept alive the same way the drawn face is: one rAF
- * loop writing a transform and a filter - breathing, a slow sway, a lean
- * toward the pointer, a small bob while speaking, and an eased tilt/light
- * change per expression. The image itself never changes, so nothing here can
- * push it into the uncanny valley.
+ * loop, no React re-render per frame. The wrapper gets a transform and a
+ * filter (breathing, a slow sway, a lean toward the pointer, a bob while
+ * speaking, an eased tilt/light per expression). When the portrait carries
+ * face landmarks, the image is drawn on a canvas and two things are painted
+ * over it each frame: eyelids in the portrait's own skin tone for blinks, and
+ * a jaw drop with a mouth interior that opens with the speech level, so the
+ * mouth actually moves while talking. Small amplitudes on purpose.
  */
 function PortraitAvatar({ look, expression = "neutral", speaking = false, level, intensity = "normal", gaze = true, size = "100%", className = "", intro = false }: AvatarProps) {
-  const img = useRef<HTMLImageElement>(null);
-  const st = useRef({ tilt: 0, lift: 0, bright: 1, sat: 1, scale: 1, gx: 0, gy: 0, tx: 0, ty: 0, lvl: 0, t0: 0 });
+  const wrap = useRef<HTMLSpanElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const st = useRef({ tilt: 0, lift: 0, bright: 1, sat: 1, scale: 1, gx: 0, gy: 0, tx: 0, ty: 0, lvl: 0, open: 0, blink: 0, nextBlink: 0, blinkAt: 0, t0: 0 });
   const props = useRef({ expression, speaking, level, intensity, gaze });
   props.current = { expression, speaking, level, intensity, gaze };
+  // Cards and chips get a still image: ten animated canvases on the picker would be wasted work.
+  const live = intensity !== "low" && !!look.face;
 
   useEffect(() => {
-    const el = img.current; if (!el) return;
+    const el = wrap.current; if (!el) return;
     const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const onMove = (e: PointerEvent) => {
       const r = el.getBoundingClientRect();
@@ -63,10 +69,57 @@ function PortraitAvatar({ look, expression = "neutral", speaking = false, level,
       st.current.tx = Math.max(-1, Math.min(1, x * 1.6)); st.current.ty = Math.max(-1, Math.min(1, y * 1.6));
     };
     window.addEventListener("pointermove", onMove);
+
+    // Offscreen copy of the square crop the CSS would have shown (object-position 50% 18%), plus landmarks in crop pixels.
+    let off: HTMLCanvasElement | null = null;
+    let S = 0;
+    let lm: { eyes: [number, number][]; eyeW: number; mouth: [number, number]; mouthW: number; talk: number; skin: string[] } | null = null;
+    const cv = canvas.current;
+    if (live && cv && look.portrait && look.face) {
+      const im = new Image();
+      im.decoding = "async";
+      im.onload = () => {
+        const w = im.naturalWidth, h = im.naturalHeight;
+        S = Math.min(w, h);
+        const sx = (w - S) / 2, sy = (h - S) * 0.18;
+        off = document.createElement("canvas"); off.width = S; off.height = S;
+        const octx = off.getContext("2d")!;
+        octx.drawImage(im, sx, sy, S, S, 0, 0, S, S);
+        const f = look.face!;
+        const P = (pt: [number, number]): [number, number] => [pt[0] * w - sx, pt[1] * h - sy];
+        const eyes = f.eyes.map(P);
+        const eyeW = f.eyeW * w;
+        // Skin for the lids: four samples around each eye (corners, under, above), take the median by
+        // brightness so a brow, a lash or a highlight can't pick the colour.
+        const skin = eyes.map(([ex, ey]) => {
+          const pts: [number, number][] = [[ex - eyeW * 1.5, ey + eyeW * 0.2], [ex + eyeW * 1.5, ey + eyeW * 0.2], [ex, ey + eyeW * 0.95], [ex, ey - eyeW * 0.85]];
+          const cols = pts.map(([x, y]) => { const d = octx.getImageData(Math.round(Math.max(0, Math.min(S - 1, x))), Math.round(Math.max(0, Math.min(S - 1, y))), 1, 1).data; return [d[0], d[1], d[2]] as const; })
+            .sort((a, b) => (a[0] * 0.3 + a[1] * 0.59 + a[2] * 0.11) - (b[0] * 0.3 + b[1] * 0.59 + b[2] * 0.11));
+          const c = cols[2];
+          return `rgb(${c[0]},${c[1]},${c[2]})`;
+        });
+        lm = { eyes, eyeW, mouth: P(f.mouth), mouthW: f.mouthW * w, talk: f.talk ?? 1, skin };
+      };
+      im.src = look.portrait;
+    }
+
+    const fit = () => {
+      if (!cv) return;
+      const r = el.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const px = Math.max(1, Math.round(r.width * dpr));
+      if (cv.width !== px) { cv.width = px; cv.height = px; }
+    };
+    const ro = live && cv ? new ResizeObserver(fit) : null;
+    ro?.observe(el);
+
     let raf = 0;
     const loop = (t: number) => {
-      const s = st.current, pr = props.current;
-      if (!s.t0) s.t0 = t;
+      const s = st.current, pr = { ...props.current };
+      // Dev-only: lets a test force the talking state without a voice (window.__cmpForceSpeaking = true).
+      const dbg = process.env.NODE_ENV !== "production" ? (window as unknown as { __cmpForceSpeaking?: boolean; __cmpForceBlink?: number }) : null;
+      if (dbg?.__cmpForceSpeaking) { pr.speaking = true; pr.level = undefined; }
+      if (!s.t0) { s.t0 = t; s.nextBlink = t + 1200 + Math.random() * 2500; }
       const sec = (t - s.t0) / 1000;
       const amt = reduced ? 0 : pr.intensity === "low" ? 0.5 : pr.intensity === "high" ? 1.5 : 1;
       const target = PORTRAIT_EXPR[pr.expression];
@@ -74,23 +127,90 @@ function PortraitAvatar({ look, expression = "neutral", speaking = false, level,
       s.tilt += (target.tilt - s.tilt) * k; s.lift += (target.lift - s.lift) * k; s.bright += (target.bright - s.bright) * k; s.sat += (target.sat - s.sat) * k; s.scale += (target.scale - s.scale) * k;
       const wantX = pr.gaze ? s.tx : 0, wantY = pr.gaze ? s.ty : 0;
       s.gx += (wantX - s.gx) * 0.05; s.gy += (wantY - s.gy) * 0.05;
-      const lvlTarget = pr.speaking ? (pr.level ?? (0.35 + 0.35 * Math.abs(Math.sin(sec * 9)) * (0.6 + 0.4 * Math.sin(sec * 2.3)))) : 0;
-      s.lvl += (lvlTarget - s.lvl) * 0.25;
+      // Speech level: the analyser's when there is one, otherwise a syllable-ish pattern.
+      const lvlTarget = pr.speaking ? (pr.level ?? (0.3 + 0.7 * Math.abs(Math.sin(sec * 8.5)) * (0.55 + 0.45 * Math.sin(sec * 2.1 + 1)))) : 0;
+      s.lvl += (lvlTarget - s.lvl) * (lvlTarget > s.lvl ? 0.45 : 0.25);
+      const openTarget = pr.speaking ? Math.min(1, Math.max(0, s.lvl * 1.5 - 0.05)) : 0;
+      s.open += (openTarget - s.open) * 0.5;
+      // Blinks: a quick close, a slightly slower open, on a natural random interval.
+      if (t >= s.nextBlink && !s.blinkAt) { s.blinkAt = t; s.nextBlink = t + 2200 + Math.random() * 3800 + (pr.expression === "thoughtful" ? 1500 : 0); }
+      if (s.blinkAt) { const e = t - s.blinkAt; s.blink = e < 70 ? e / 70 : e < 150 ? 1 - (e - 70) / 80 : 0; if (e >= 150) { s.blinkAt = 0; s.blink = 0; } }
+      if (dbg?.__cmpForceBlink != null) s.blink = dbg.__cmpForceBlink;
+
       const breathe = Math.sin(sec * 1.1) * 0.006 * amt;
       const sway = Math.sin(sec * 0.45) * 0.7 * amt;
-      const bob = Math.sin(sec * 0.7) * 1.5 * amt + s.lvl * -3;
-      el.style.transform = `translate(${s.gx * 5 * amt}px, ${s.lift + bob + s.gy * 3 * amt}px) rotate(${s.tilt * (0.5 + 0.5 * amt) + sway}deg) scale(${(s.scale + breathe) * 1}, ${(s.scale + breathe * 1.6) * 1})`;
+      const bob = Math.sin(sec * 0.7) * 1.5 * amt + s.open * -2.5;
+      el.style.transform = `translate(${s.gx * 5 * amt}px, ${s.lift + bob + s.gy * 3 * amt}px) rotate(${s.tilt * (0.5 + 0.5 * amt) + sway}deg) scale(${s.scale + breathe}, ${s.scale + breathe * 1.6})`;
       el.style.filter = `brightness(${s.bright.toFixed(3)}) saturate(${s.sat.toFixed(3)})`;
+
+      if (cv && off && lm) {
+        const ctx = cv.getContext("2d")!;
+        const sc = cv.width / S;
+        ctx.setTransform(sc, 0, 0, sc, 0, 0);
+        ctx.drawImage(off, 0, 0);
+        // Mouth: shift the jaw strip down and paint the opening between the lips.
+        const [mx, my] = lm.mouth; const mw = lm.mouthW;
+        // A small drop: real jaws barely move in speech, and a wide strip would show its seam on the cheeks.
+        const d = s.open * mw * 0.32 * lm.talk;
+        if (d > 0.4) {
+          // Lower lip and chin move as a soft bump: a grid of tiles whose downward shift fades to nothing at
+          // the sides and the bottom, so nothing has a hard edge. Drawn bottom-up so the most-shifted rows paint last.
+          const W = mw * 2.8, H = mw * 2.0, x0 = mx - W / 2, y0 = my - mw * 0.1, cols = 16, rows = 8;
+          const tw = W / cols, th = H / rows;
+          for (let j = rows - 1; j >= 0; j--) {
+            const v = (j + 0.5) / rows;
+            const fy = v < 0.35 ? 1 : Math.cos(((v - 0.35) / 0.65) * Math.PI / 2) ** 2;
+            for (let i = 0; i < cols; i++) {
+              const u = ((i + 0.5) / cols) * 2 - 1;
+              const fx = Math.cos(u * Math.PI / 2) ** 2;
+              const shift = d * fx * fy;
+              if (shift < 0.15) continue;
+              ctx.drawImage(off, x0 + i * tw, y0 + j * th, tw + 0.5, th + 0.5, x0 + i * tw, y0 + j * th + shift, tw + 0.5, th + 0.5);
+            }
+          }
+          const rx = mw * (0.55 + 0.2 * s.open), ry = d * 0.6 + 0.5;
+          ctx.save();
+          ctx.beginPath(); ctx.ellipse(mx, my + d * 0.5, rx, ry, 0, 0, Math.PI * 2); ctx.clip();
+          const g = ctx.createLinearGradient(0, my - ry, 0, my + d + ry);
+          g.addColorStop(0, "#1c0b0e"); g.addColorStop(0.55, "#3a161b"); g.addColorStop(1, "#26100f");
+          ctx.fillStyle = g; ctx.fillRect(mx - rx, my - ry, rx * 2, ry * 2 + d);
+          if (s.open > 0.35 && lm.talk >= 0.6) {
+            // Upper teeth: a soft, slightly warm strip under the top lip, rounded at the ends.
+            const th = Math.max(1, d * 0.28), tw = rx * 1.3;
+            ctx.fillStyle = "rgba(222,206,196,0.72)";
+            ctx.beginPath(); ctx.roundRect(mx - tw / 2, my + d * 0.06, tw, th, th / 2); ctx.fill();
+          }
+          ctx.restore();
+        }
+        // Eyelids: the portrait's own skin, a curved lid coming down over each eye, with a lash line at its edge.
+        if (s.blink > 0.02) {
+          lm.eyes.forEach(([ex, ey], i) => {
+            const ew = lm!.eyeW, rx = ew * 1.0, ry = ew * 0.6;
+            const lidY = ey - ry + s.blink * ry * 2.05;
+            ctx.save();
+            ctx.beginPath(); ctx.ellipse(ex, ey, rx, ry, 0, 0, Math.PI * 2); ctx.clip();
+            ctx.beginPath();
+            ctx.moveTo(ex - rx - 2, ey - ry - 2); ctx.lineTo(ex + rx + 2, ey - ry - 2); ctx.lineTo(ex + rx + 2, lidY - ry * 0.4);
+            ctx.quadraticCurveTo(ex, lidY + ry * 0.4, ex - rx - 2, lidY - ry * 0.4); ctx.closePath();
+            ctx.fillStyle = lm!.skin[i]; ctx.fill();
+            ctx.strokeStyle = "rgba(24,12,10,0.6)"; ctx.lineWidth = Math.max(1, ew * 0.09); ctx.lineCap = "round";
+            ctx.beginPath(); ctx.moveTo(ex - rx, lidY - ry * 0.4); ctx.quadraticCurveTo(ex, lidY + ry * 0.4, ex + rx, lidY - ry * 0.4); ctx.stroke();
+            ctx.restore();
+          });
+        }
+      }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("pointermove", onMove); };
-  }, []);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("pointermove", onMove); ro?.disconnect(); };
+  }, [live, look.portrait, look.face]);
 
   return (
-    <span className={`cmp-avatar cmp-portrait ${intro ? "cmp-avatar-intro" : ""} ${className}`} style={{ width: size, height: size }} data-expression={expression} data-speaking={speaking || undefined}>
-      {/* eslint-disable-next-line @next/next/no-img-element -- a plain element: the loop writes transform/filter on it directly and the file is already sized for the stage */}
-      <img ref={img} src={look.portrait} alt="" draggable={false} />
+    <span ref={wrap} className={`cmp-avatar cmp-portrait ${intro ? "cmp-avatar-intro" : ""} ${className}`} style={{ width: size, height: size }} data-expression={expression} data-speaking={speaking || undefined}>
+      {live
+        ? <canvas ref={canvas} aria-hidden />
+        // eslint-disable-next-line @next/next/no-img-element -- a plain element: already sized for the stage, and the live path draws it on a canvas
+        : <img src={look.portrait} alt="" draggable={false} />}
     </span>
   );
 }

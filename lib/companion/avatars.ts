@@ -31,6 +31,21 @@ export interface AvatarLook {
   chain?: boolean;
   /** Generated portrait (public path). When set, the renderer shows and animates this image instead of drawing the face. */
   portrait?: string;
+  /** Where the eyes and mouth sit in the portrait, as fractions of the image width/height, so the renderer can blink and talk. */
+  face?: PortraitFace;
+}
+
+export interface PortraitFace {
+  /** Eye centres [x, y]. */
+  eyes: [[number, number], [number, number]];
+  /** Half-width of an eye, as a fraction of image width. */
+  eyeW: number;
+  /** Mouth centre (the line between the lips). */
+  mouth: [number, number];
+  /** Half-width of the mouth, as a fraction of image width. */
+  mouthW: number;
+  /** Scales the jaw drop while talking (default 1). Lower for a portrait whose mouth is already open in a grin. */
+  talk?: number;
 }
 
 export interface AvatarDefinition {
@@ -62,7 +77,7 @@ export const AVATARS: AvatarDefinition[] = [
     pronouns: "she",
     tagline: "Warm, observant, playful, emotionally intelligent.",
     appearance: "Dark waves tucked behind one ear, a soft round face, and eyes that look like they are already halfway to a smile.",
-    look: { portrait: "/companion/portraits/akshaya.jpg", skin: "#e8b89a", hair: "#2c1f1c", hairStyle: "waves", eyes: "#4a3a2a", accent: "#f0876a", roundness: 0.7, freckles: true, earrings: true },
+    look: { portrait: "/companion/portraits/akshaya.jpg", face: { eyes: [[0.37, 0.347], [0.60, 0.347]], eyeW: 0.06, mouth: [0.485, 0.50], mouthW: 0.075 }, skin: "#e8b89a", hair: "#2c1f1c", hairStyle: "waves", eyes: "#4a3a2a", accent: "#f0876a", roundness: 0.7, freckles: true, earrings: true },
     styles: [
       { id: "everyday", label: "Everyday", look: {} },
       { id: "night", label: "Night in", look: { hairStyle: "bun", earrings: false } },
@@ -82,7 +97,7 @@ export const AVATARS: AvatarDefinition[] = [
     pronouns: "she",
     tagline: "Gentle, steady, a little dreamy, easy to sit with.",
     appearance: "Long dark hair worn down, a calm oval face, a slow warm smile that arrives late and stays.",
-    look: { portrait: "/companion/portraits/miruna.jpg", skin: "#c98d6b", hair: "#1a1414", hairStyle: "long", eyes: "#3a2a22", accent: "#9b6bff", roundness: 0.45, earrings: true },
+    look: { portrait: "/companion/portraits/miruna.jpg", face: { eyes: [[0.365, 0.41], [0.54, 0.41]], eyeW: 0.05, mouth: [0.45, 0.547], mouthW: 0.065 }, skin: "#c98d6b", hair: "#1a1414", hairStyle: "long", eyes: "#3a2a22", accent: "#9b6bff", roundness: 0.45, earrings: true },
     styles: [
       { id: "everyday", label: "Everyday", look: {} },
       { id: "tied", label: "Tied back", look: { hairStyle: "bun" } },
@@ -122,7 +137,7 @@ export const AVATARS: AvatarDefinition[] = [
     pronouns: "he",
     tagline: "Calm, funny, reassuring, slightly sarcastic.",
     appearance: "Short dark hair, a steady face, the kind of half-smile that says he has seen worse and it was fine.",
-    look: { portrait: "/companion/portraits/rishi.jpg", skin: "#c9946f", hair: "#1e1a19", hairStyle: "short", eyes: "#2f3a4a", accent: "#4fc3d6", roundness: 0.35 },
+    look: { portrait: "/companion/portraits/rishi.jpg", face: { eyes: [[0.40, 0.357], [0.605, 0.357]], eyeW: 0.05, mouth: [0.50, 0.51], mouthW: 0.065 }, skin: "#c9946f", hair: "#1e1a19", hairStyle: "short", eyes: "#2f3a4a", accent: "#4fc3d6", roundness: 0.35 },
     styles: [
       { id: "everyday", label: "Everyday", look: {} },
       { id: "glasses", label: "Reading", look: { glasses: true } },
@@ -142,7 +157,7 @@ export const AVATARS: AvatarDefinition[] = [
     pronouns: "he",
     tagline: "Upbeat, practical, loyal, always has a plan B.",
     appearance: "A neat undercut, a broad easy grin, and the look of someone who has already thought about lunch.",
-    look: { portrait: "/companion/portraits/manish.jpg", skin: "#a86a45", hair: "#120f0e", hairStyle: "undercut", eyes: "#241a15", accent: "#4fb37f", roundness: 0.55 },
+    look: { portrait: "/companion/portraits/manish.jpg", face: { eyes: [[0.395, 0.37], [0.61, 0.37]], eyeW: 0.055, mouth: [0.505, 0.53], mouthW: 0.085, talk: 0.45 }, skin: "#a86a45", hair: "#120f0e", hairStyle: "undercut", eyes: "#241a15", accent: "#4fb37f", roundness: 0.55 },
     styles: [
       { id: "everyday", label: "Everyday", look: {} },
       { id: "grown", label: "Grown out", look: { hairStyle: "short" } },
@@ -162,7 +177,7 @@ export const AVATARS: AvatarDefinition[] = [
     pronouns: "he",
     tagline: "Warm, grounded, a good listener with a slow smile.",
     appearance: "Short dark hair, a calm square face, and the kind of steady attention that makes you finish your sentence.",
-    look: { portrait: "/companion/portraits/hemanth.jpg", skin: "#8e5a3c", hair: "#0e0b0a", hairStyle: "short", eyes: "#1c1512", accent: "#3fa7d6", roundness: 0.4 },
+    look: { portrait: "/companion/portraits/hemanth.jpg", face: { eyes: [[0.385, 0.407], [0.605, 0.407]], eyeW: 0.05, mouth: [0.50, 0.583], mouthW: 0.07 }, skin: "#8e5a3c", hair: "#0e0b0a", hairStyle: "short", eyes: "#1c1512", accent: "#3fa7d6", roundness: 0.4 },
     styles: [
       { id: "everyday", label: "Everyday", look: {} },
       { id: "specs", label: "Specs", look: { glasses: true } },
@@ -176,8 +191,8 @@ export const AVATARS: AvatarDefinition[] = [
     interests: ["film scores", "cooking for the family", "morning walks", "cricket on the radio"],
   },
   {
-    id: "divya",
-    name: "Divya",
+    id: "ahalya",
+    name: "Ahalya",
     presentation: "female",
     pronouns: "she",
     tagline: "Energetic, curious, expressive and conversational.",
@@ -242,7 +257,7 @@ export const AVATARS: AvatarDefinition[] = [
     pronouns: "she",
     tagline: "Direct, witty, loyal, a little blunt.",
     appearance: "A sharp bob, a straight gaze, and a grin that shows up when you least expect it.",
-    look: { portrait: "/companion/portraits/priya.jpg", skin: "#f3d6c1", hair: "#5a2b1c", hairStyle: "short", eyes: "#3b5f7a", accent: "#3fa7d6", roundness: 0.45, glasses: false },
+    look: { portrait: "/companion/portraits/priya.jpg", face: { eyes: [[0.365, 0.387], [0.565, 0.387]], eyeW: 0.05, mouth: [0.48, 0.563], mouthW: 0.05 }, skin: "#f3d6c1", hair: "#5a2b1c", hairStyle: "short", eyes: "#3b5f7a", accent: "#3fa7d6", roundness: 0.45, glasses: false },
     styles: [
       { id: "everyday", label: "Everyday", look: {} },
       { id: "specs", label: "Specs", look: { glasses: true } },
