@@ -716,16 +716,19 @@ body:has(> .world) { background: var(--bg, #07080b); }
    ===================================================================== */
 .world .xp { position: relative; z-index: 1; height: 620vh; }
 /* ------------------------------------------------------------- Title card */
-.world .title-card { position: relative; z-index: 1; min-height: 100svh; display: grid; place-items: center; text-align: center; padding: 0 16px; }
-.world .tc-title { display: grid; gap: clamp(10px, 2.4vh, 26px); margin: 0; }
-.world .tc-line { display: block; font-size: clamp(1.6rem, 7vw, 6rem); line-height: 1; letter-spacing: .04em; white-space: nowrap; text-shadow: 6px 6px 0 rgba(0,0,0,.6); }
-.world .tc-x { color: var(--coral-2); font-size: clamp(2.4rem, 11vw, 9rem); }
-.world .tc-line .ch { display: inline-block; opacity: 0; transform: translateY(18px); animation: tc-in .7s var(--ease) forwards; animation-delay: calc(var(--i) * 55ms + 250ms); }
-@keyframes tc-in { to { opacity: 1; transform: none; } }
-.world .tc-hint { position: absolute; left: 50%; bottom: clamp(24px, 5vh, 48px); width: 2px; height: 44px; translate: -50% 0; background: rgba(255,255,255,.18); overflow: hidden; }
-.world .tc-hint span { position: absolute; left: 0; top: -100%; width: 100%; height: 100%; background: var(--coral-2); animation: tc-drop 1.8s ease-in-out infinite; }
-@keyframes tc-drop { 0% { top: -100%; } 60%, 100% { top: 100%; } }
-@media (prefers-reduced-motion: reduce) { .world .tc-line .ch { opacity: 1; transform: none; animation: none; } .world .tc-hint span { animation: none; top: 0; } }
+.world .title-card { position: relative; z-index: 1; min-height: 100svh; display: grid; place-content: center; justify-items: center; text-align: center; padding: 0 24px; overflow: hidden; isolation: isolate; }
+.world .tc-light { position: absolute; left: 50%; top: 50%; width: min(120vw, 1100px); aspect-ratio: 1; translate: -50% -48%; border-radius: 50%; z-index: -1; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(var(--accent2-rgb), .28) 0%, rgba(var(--accent-rgb), .13) 28%, rgba(var(--accent-rgb), 0) 62%);
+  animation: tc-breathe 9s ease-in-out infinite; }
+.world .tc-eyebrow { margin: 0 0 clamp(18px, 3vh, 28px); font-family: var(--font-title-sans), ui-sans-serif, system-ui, sans-serif; font-weight: 500; font-size: .72rem; letter-spacing: .32em; text-transform: uppercase; color: var(--ink-2); opacity: 0; animation: tc-rise 1.1s var(--ease) .1s forwards; }
+.world .tc-title { margin: 0; display: grid; justify-items: center; gap: 0; font-family: var(--font-title), "Iowan Old Style", Georgia, serif; font-weight: 400; letter-spacing: -0.025em; line-height: .92; text-shadow: none; text-transform: none; }
+.world .tc-name { display: block; font-size: clamp(3.8rem, 13vw, 10.5rem); color: var(--ink); opacity: 0; animation: tc-rise 1.3s var(--ease) var(--d) forwards; }
+.world .tc-mark { display: block; margin: clamp(6px, 1.4vh, 16px) 0; font-style: italic; font-size: clamp(2rem, 5.6vw, 4.2rem); line-height: 1; color: var(--coral); text-shadow: 0 0 28px rgba(var(--accent-rgb), .45); opacity: 0; animation: tc-rise 1.3s var(--ease) var(--d) forwards; }
+.world .tc-scroll { position: absolute; left: 50%; bottom: clamp(26px, 5vh, 44px); translate: -50% 0; display: grid; justify-items: center; gap: 10px; font-family: var(--font-title-sans), ui-sans-serif, system-ui, sans-serif; font-size: .62rem; letter-spacing: .28em; text-transform: uppercase; color: var(--ink-3); opacity: 0; animation: tc-rise 1.2s var(--ease) 1.1s forwards; }
+.world .tc-scroll i { display: block; width: 1px; height: 40px; background: linear-gradient(to bottom, var(--ink-3), transparent); }
+@keyframes tc-rise { from { opacity: 0; transform: translateY(22px); filter: blur(10px); } to { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes tc-breathe { 0%, 100% { scale: 1; opacity: .9; } 50% { scale: 1.06; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .world .tc-eyebrow, .world .tc-name, .world .tc-mark, .world .tc-scroll { opacity: 1; animation: none; } .world .tc-light { animation: none; } }
 .world .xp-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; display: grid; place-items: center; touch-action: pan-y; cursor: grab; }
 .world .xp-scene { position: absolute; inset: 0; }
 .world .xp-scene canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }

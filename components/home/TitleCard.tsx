@@ -1,27 +1,20 @@
-/**
- * The opening card of the landing page: a full-viewport title in the same
- * oversized pixel type as the scroll story, letters arriving one by one.
- */
-const LINES: { text: string; className: string }[] = [
-  { text: "PARNEETH", className: "tc-line" },
-  { text: "X", className: "tc-line tc-x" },
-  { text: "RISHI", className: "tc-line" },
-];
+import { titleSans, titleSerif } from "./titleFonts";
 
+/**
+ * The opening card of the landing page. Two names in a refined serif, a
+ * quiet mark between them, warm light behind. Nothing else.
+ */
 export default function TitleCard() {
-  let n = 0;
   return (
-    <section className="title-card" aria-label="Parneeth x Rishi">
-      <h1 className="display tc-title">
-        {LINES.map((l) => (
-          <span key={l.text} className={l.className}>
-            {l.text.split("").map((ch, i) => (
-              <span key={i} className="ch" style={{ ["--i" as string]: n++ }}>{ch}</span>
-            ))}
-          </span>
-        ))}
+    <section className={`title-card ${titleSerif.variable} ${titleSans.variable}`} aria-label="Parneeth and Rishi">
+      <div className="tc-light" aria-hidden />
+      <p className="tc-eyebrow">A collaboration</p>
+      <h1 className="tc-title">
+        <span className="tc-name" style={{ ["--d" as string]: "0ms" }}>Parneeth</span>
+        <span className="tc-mark" style={{ ["--d" as string]: "160ms" }} aria-hidden>×</span>
+        <span className="tc-name" style={{ ["--d" as string]: "260ms" }}>Rishi</span>
       </h1>
-      <div className="tc-hint" aria-hidden><span /></div>
+      <div className="tc-scroll" aria-hidden><span>Scroll</span><i /></div>
     </section>
   );
 }
