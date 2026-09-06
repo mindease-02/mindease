@@ -1,5 +1,5 @@
 /**
- * Ori's presence. Deliberately not a face: a soft, breathing form whose tint
+ * MindEase's presence. Deliberately not a face: a soft, breathing form whose tint
  * follows the eight-axis read. Human enough to feel company, non-human enough
  * that nobody mistakes it for a person - the Jellycat register, not the
  * uncanny one.

@@ -12,7 +12,7 @@ import PrintButton from "@/components/PrintButton";
 
 /**
  * A one-page summary the person can print or show to a clinician: screening
- * scores over time, the behavioural patterns Ori has observed, and helplines.
+ * scores over time, the behavioural patterns MindEase has observed, and helplines.
  * It says, in the first line, that it is not a diagnosis.
  */
 export default async function SummaryPage() {
@@ -48,7 +48,7 @@ export default async function SummaryPage() {
               <tr key={i}><td>{inst.name} <span className="muted">({inst.domain})</span></td><td>{fmt(s.completedAt!)}</td><td>{s.score} / {inst.max}</td><td>{bandFor(inst, s.score!).label}{inst.crisisItem !== undefined && (s.answers[inst.crisisItem] ?? 0) > 0 ? " · item 9 positive" : ""}</td></tr>
             ); })}</tbody>
           </table>
-        ) : <p className="muted">No screenings completed yet. Ori offers one when the pattern warrants it; you can also ask for one in the chat.</p>}
+        ) : <p className="muted">No screenings completed yet. MindEase offers one when the pattern warrants it; you can also ask for one in the chat.</p>}
 
         <h2 className="display sheet-h">Patterns observed (last 14 days)</h2>
         {patterns.length ? (

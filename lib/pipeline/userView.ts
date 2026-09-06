@@ -43,7 +43,7 @@ export function userView(state: UserState, now = Date.now()) {
   const seem = state.octant.initialized ? summarizeOctant(state.octant.weather) : null;
   const states = a?.states.slice(0, 2).map((s) => s.name) ?? [];
   const sentence = !seem
-    ? "Say something and Ori will start to get a sense of you."
+    ? "Say something and MindEase will start to get a sense of you."
     : seem.dominant.length === 0
       ? "Fairly settled, from what it can tell."
       : `Mostly ${seem.dominant[0].axis}${seem.dominant[1] ? ` with some ${seem.dominant[1].axis}` : ""}${seem.dyad ? ` — it reads as ${seem.dyad}` : ""}.`;

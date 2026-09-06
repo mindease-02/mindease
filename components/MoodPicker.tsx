@@ -38,7 +38,7 @@ export default function MoodPicker({ name }: { name: string }) {
     <div className="container" style={{ maxWidth: 920 }}>
       <div className="steps-ind" data-reveal aria-label="Step 2 of 2"><i className="on" /><i className="on" /><span>Step 2 of 2 · how you&apos;re arriving</span></div>
       <h1 className="display" data-reveal style={{ fontSize: "clamp(2.6rem, 6vw, 4.8rem)", margin: "14px 0 0", ["--d" as string]: "60ms" }}>How are you arriving, {name}?</h1>
-      <p className="muted" data-reveal style={{ fontWeight: 300, marginTop: 14, maxWidth: "36rem", lineHeight: 1.6, ["--d" as string]: "120ms" }}>Tap one. It gives Ori a sense of what to hold, and you can be wrong about it.</p>
+      <p className="muted" data-reveal style={{ fontWeight: 300, marginTop: 14, maxWidth: "36rem", lineHeight: 1.6, ["--d" as string]: "120ms" }}>Tap one. It gives MindEase a sense of what to hold, and you can be wrong about it.</p>
       <div ref={grid} className={`moods ${busy ? "busy" : ""}`} role="group" aria-label="Mood" data-stagger>
         {MOODS.map((m) => (
           <button key={m.id} type="button" className="mood" aria-pressed={mood === m.id} disabled={busy} style={{ ["--c" as string]: m.c }}

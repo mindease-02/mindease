@@ -24,7 +24,7 @@ interface Msg { role: "user" | "assistant"; content: string; at: number; proacti
 const POLL_MS = 45_000;
 
 function greeting(name: string, a: { label: string; note?: string } | null): string {
-  if (!a) return `Hey ${name}. I'm Ori — software, I'll say that once so it's said. What's today been like?`;
+  if (!a) return `Hey ${name}. I'm MindEase — software, I'll say that once so it's said. What's today been like?`;
   const by: Record<string, string> = {
     Heavy: `Heavy, then. Okay. You don't have to explain it yet — what's the heaviest bit right now?`,
     Anxious: `Anxious. Alright, let's slow it down a notch. What's the thing your head keeps going back to?`,
@@ -84,7 +84,7 @@ export default function ChatApp({ name }: { name: string }) {
         typing.onPromptShown();
         scroll();
         if (document.hidden && "Notification" in window && Notification.permission === "granted") {
-          new Notification("Ori", { body: j.outbox[j.outbox.length - 1].content.slice(0, 120) });
+          new Notification("MindEase", { body: j.outbox[j.outbox.length - 1].content.slice(0, 120) });
         }
         if (speak) say(j.outbox[j.outbox.length - 1].content);
       }
@@ -209,7 +209,7 @@ export default function ChatApp({ name }: { name: string }) {
       <header className="chat-head flex items-center gap-3 px-4 py-3 sm:px-6">
         <Orb size={40} tint={tint} />
         <div className="leading-tight">
-          <div className="display text-lg">Ori</div>
+          <div className="display text-lg">MindEase</div>
           <div className="text-[11px] text-clay-muted">software &middot; here for {name} &middot; <a href="/mood" className="underline decoration-dotted">change mood</a></div>
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -254,7 +254,7 @@ export default function ChatApp({ name }: { name: string }) {
           <button type="submit" disabled={sending || !input.trim()} className="clay-btn-primary h-12 shrink-0 rounded-full px-5"><PxSend className="pxicon" /> Send</button>
         </form>
         <p className="mx-auto mt-2 max-w-2xl text-center text-[10px] text-clay-muted">
-          {voiceNote ? "voice tone captured · " : ""}{face.active ? "expression on · " : ""}Ori is software, not a therapist. In crisis, use a helpline.
+          {voiceNote ? "voice tone captured · " : ""}{face.active ? "expression on · " : ""}MindEase is software, not a therapist. In crisis, use a helpline.
         </p>
       </footer>
 

@@ -88,7 +88,7 @@ export async function evaluateUser(userId: string, opts: { now?: number; force?:
   await store.pushOutbox(userId, message);
   // Second consent: OS notification only if they turned it on and the tab is likely closed.
   if (state.consent.pushNotifications && state.push.length && now - state.lastUserMessageAt > 20 * 60_000) {
-    const { dead } = await sendPush(state.push, { title: "Ori", body: message.content.slice(0, 140), url: "/chat" });
+    const { dead } = await sendPush(state.push, { title: "MindEase", body: message.content.slice(0, 140), url: "/chat" });
     if (dead.length) state.push = state.push.filter((p) => !dead.includes(p.endpoint));
   }
   await store.put(state);
@@ -122,7 +122,7 @@ async function composeCheckin(
           { role: "user", content: `[system: compose the unprompted ${kind} message now. Output only the message.]` }],
         { tier: "chat", temperature: 0.7, maxTokens: 160 },
       );
-      content = content.replace(/^\s*(Ori|Assistant)\s*:\s*/i, "").trim();
+      content = content.replace(/^\s*(MindEase|Ori|Assistant)\s*:\s*/i, "").trim();
     } catch (err) {
       console.error("[checkin] LLM failed:", (err as Error).message);
       content = defaultCheckin(kind);

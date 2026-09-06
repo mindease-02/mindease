@@ -1,6 +1,6 @@
 "use client";
 /**
- * Ori offering, then running, a validated screener one question at a time.
+ * MindEase offering, then running, a validated screener one question at a time.
  * Frequency options are big tap targets; a progress line shows where you are.
  */
 import { useState } from "react";
@@ -18,7 +18,7 @@ export default function ScreeningCard({ offer, onDone, onDismiss }: { offer: { i
   async function decline() { await call({ action: "decline", instrument: offer.instrument }).catch(() => {}); onDismiss(); }
 
   if (!item) return (
-    <div className="offer bubble-ai" role="group" aria-label="Ori is offering a screening">
+    <div className="offer bubble-ai" role="group" aria-label="MindEase is offering a screening">
       <p className="offer-q">{offer.intro}</p>
       <p className="muted" style={{ fontSize: ".8rem", margin: "0 0 10px" }}>Why now: {offer.reason}. It&apos;s a screening, not a diagnosis, and you can stop at any question.</p>
       <div className="offer-opts">

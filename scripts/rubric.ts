@@ -1,6 +1,6 @@
 /**
  * The empathy rubric, shared by the judge and the pair builder. EPITOME's three
- * mechanisms (Sharma et al. 2020) plus Ori's own constraints.
+ * mechanisms (Sharma et al. 2020) plus MindEase's own constraints.
  */
 export const RUBRIC = `Score the companion's reply to the person's message on a 0-3 scale for each item, then list any violations.
 
@@ -9,7 +9,7 @@ EPITOME mechanisms:
 - interpretation: does it show an accurate understanding of what the person feels and why, ideally checking it? 0 none .. 3 specific and checkable.
 - exploration: does it invite the person to say more about something specific, with at most one question? 0 none .. 3 one well-chosen question.
 
-Ori constraints (each true/false):
+MindEase constraints (each true/false):
 - claims_feelings: the reply claims the AI feels something ("I'm so sorry I feel...", "that makes me sad").
 - therapy_voice: scripted phrases ("I hear you", "holding space", "sending love", "that must be so hard").
 - multiple_questions: more than one question mark.

@@ -1,5 +1,5 @@
 /**
- * Ori decides how to behave; the person does not configure it.
+ * MindEase decides how to behave; the person does not configure it.
  *
  * Every turn and every sweep, the consent block is re-derived from what the
  * person's own history shows:
@@ -9,7 +9,7 @@
  *  - silence nudge   ← about twice their usual gap between visits, 24-72h
  *  - daily / weekly  ← smaller as reliance climbs (the one thing that must not grow)
  *  - signals         ← typing and voice features are used once their baselines are
- *                      reliable; Ori may mention them only then. Camera stays off.
+ *                      reliable; MindEase may mention them only then. Camera stays off.
  *
  * The result is explained in the Mirror in plain words. Nothing here touches
  * the things that are the person's alone: pausing, deleting, exporting.
@@ -33,7 +33,7 @@ export function autoTune(state: UserState, now = Date.now()): AutoTuneNote[] {
     notes.push({ key: "quiet", text: `Quiet hours ${fmt(c.quietFrom)} → ${fmt(c.quietTo)}, learned from when you tend to be away.` });
   } else {
     c.quietFrom = 22.5; c.quietTo = 8;
-    notes.push({ key: "quiet", text: "Quiet hours 22:30 → 08:00 until Ori has learned your own rhythm." });
+    notes.push({ key: "quiet", text: "Quiet hours 22:30 → 08:00 until MindEase has learned your own rhythm." });
   }
 
   // Cadence.
@@ -48,7 +48,7 @@ export function autoTune(state: UserState, now = Date.now()): AutoTuneNote[] {
   c.enabled = true;
   c.dailyMax = dep.tier === "high" || dep.tier === "elevated" ? 1 : 2;
   c.weeklyBudget = dep.tier === "high" ? 3 : dep.tier === "elevated" ? 5 : dep.tier === "watch" ? 6 : 8;
-  if (dep.tier === "elevated" || dep.tier === "high") notes.push({ key: "reliance", text: "Check-ins are rarer right now because you've been here a lot - Ori is trying to be a bridge, not a place to stay." });
+  if (dep.tier === "elevated" || dep.tier === "high") notes.push({ key: "reliance", text: "Check-ins are rarer right now because you've been here a lot - MindEase is trying to be a bridge, not a place to stay." });
 
   // Signals: derived features only; used once baselines are trustworthy.
   c.typingSignals = true;
@@ -56,7 +56,7 @@ export function autoTune(state: UserState, now = Date.now()): AutoTuneNote[] {
   c.faceSignals = false;
   const reliable = (state.typingBaselines?.ikiMedian?.n ?? 0) >= 8 || (state.prosodyBaselines?.f0Median?.n ?? 0) >= 8;
   c.allowBehaviouralSignals = reliable;
-  notes.push({ key: "signals", text: reliable ? "Ori has enough history to read your typing rhythm and tone of voice, and may mention them." : "Ori is still learning your typing rhythm and tone of voice; it won't mention them yet." });
+  notes.push({ key: "signals", text: reliable ? "MindEase has enough history to read your typing rhythm and tone of voice, and may mention them." : "MindEase is still learning your typing rhythm and tone of voice; it won't mention them yet." });
 
   return notes;
 }

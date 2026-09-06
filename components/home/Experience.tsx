@@ -17,7 +17,7 @@ import type { Drag, Story } from "./Scene3D";
 const Scene3D = dynamic(() => import("./Scene3D"), { ssr: false, loading: () => null });
 
 const CHAPTERS: { top: string; bottom: string; left: string; right: string; formation: number; sub?: string }[] = [
-  { top: "SOMEONE WHO", bottom: "NOTICES.", left: "an ai companion", right: "not a therapist", formation: 0, sub: "Ori is an AI companion. It notices how you're doing from the way you talk, and checks in when it matters." },
+  { top: "SOMEONE WHO", bottom: "NOTICES.", left: "an ai companion", right: "not a therapist", formation: 0, sub: "MindEase is an AI companion. It notices how you're doing from the way you talk, and checks in when it matters." },
   { top: "IT READS MORE", bottom: "THAN WORDS", left: "eight emotions", right: "tone · rhythm · words", formation: 2, sub: "It reads eight emotions in what you write - and, only if you allow it, your tone of voice and typing rhythm." },
   { top: "IT REMEMBERS", bottom: "YOU", left: "names · plans · past", right: "yours to forget", formation: 3, sub: "It remembers the people and plans you mention, so next week it can ask how the interview went." },
   { top: "IT CHECKS IN,", bottom: "CAREFULLY", left: "quiet hours learned", right: "two a day, at most", formation: 1, sub: "It only writes first when there's a real reason - never at night, and at most twice a day." },

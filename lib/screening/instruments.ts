@@ -2,7 +2,7 @@
  * Validated screening instruments, verbatim where licensing allows (PHQ-9 and
  * GAD-7 are free to use; ISI items paraphrased). These SCREEN - they do not
  * diagnose. Scores put a person in a range that clinicians use to decide who
- * needs a proper assessment; that is exactly how Ori presents them.
+ * needs a proper assessment; that is exactly how MindEase presents them.
  */
 export type InstrumentId = "phq9" | "gad7" | "isi";
 

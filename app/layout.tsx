@@ -3,7 +3,7 @@ import "./globals.css";
 import { body, display, heading } from "@/components/home/fonts";
 
 export const metadata: Metadata = {
-  title: "MindEase - Ori, a companion that notices",
+  title: "MindEase - a companion that notices",
   description: "A companion that notices when you're drifting down, says so honestly, and works to need you less over time. Not therapy. Not a replacement for people.",
   icons: { icon: "/icon.png" },
 };

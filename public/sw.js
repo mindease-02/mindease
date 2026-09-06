@@ -1,6 +1,6 @@
 /* MindEase service worker: shows unprompted messages as notifications when the tab is closed. */
 self.addEventListener("push", (event) => {
-  let data = { title: "Ori", body: "Something to read when you have a moment.", url: "/chat" };
+  let data = { title: "MindEase", body: "Something to read when you have a moment.", url: "/chat" };
   try { data = { ...data, ...event.data.json() }; } catch { /* keep defaults */ }
   event.waitUntil(self.registration.showNotification(data.title, {
     body: data.body, tag: "mindease-checkin", renotify: false, silent: true,

@@ -35,7 +35,7 @@ export default function Nav({ chatHref, signedIn, name }: { chatHref: string; si
           </nav>
           <div className="nav-cta">
             {signedIn && <button type="button" className="linkish nav-signout" onClick={signOut} title={name ? `Signed in as ${name}` : "Signed in"}>Sign out</button>}
-            <Magnetic href={chatHref} className="btn-primary" >{signedIn ? (name ? `Chat as ${name}` : "Open chat") : "Talk to Ori"} <PxArrow className="pxicon" /></Magnetic>
+            <Magnetic href={chatHref} className="btn-primary" >{signedIn ? (name ? `Chat as ${name}` : "Open chat") : "Talk to MindEase"} <PxArrow className="pxicon" /></Magnetic>
             <button className="burger" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
               {open ? <PxRemove className="pxicon" style={{ fontSize: 20 }} /> : <PxMenu className="pxicon" style={{ fontSize: 20 }} />}
             </button>
@@ -45,7 +45,7 @@ export default function Nav({ chatHref, signedIn, name }: { chatHref: string; si
       {open && (
         <div className="mobile-menu glass" role="dialog" aria-label="Menu">
           {LINKS.map(([h, l]) => <a key={h} href={h} onClick={() => setOpen(false)}>{l}</a>)}
-          <Link href={chatHref} className="btn btn-primary" style={{ justifyContent: "center", marginTop: 6 }} onClick={() => setOpen(false)}>{signedIn ? (name ? `Chat as ${name}` : "Open chat") : "Talk to Ori"}</Link>
+          <Link href={chatHref} className="btn btn-primary" style={{ justifyContent: "center", marginTop: 6 }} onClick={() => setOpen(false)}>{signedIn ? (name ? `Chat as ${name}` : "Open chat") : "Talk to MindEase"}</Link>
           {signedIn && <button type="button" className="btn" style={{ justifyContent: "center" }} onClick={signOut}>Sign out</button>}
         </div>
       )}

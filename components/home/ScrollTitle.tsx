@@ -11,10 +11,10 @@ export default function ScrollTitle() {
     const f = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => {
       const mid = window.innerHeight / 2;
       const hit = els.find(([e]) => { const r = e.getBoundingClientRect(); return r.top <= mid && r.bottom >= mid; });
-      document.title = hit ? `${base} · ${hit[1]}` : `${base} - Ori, a companion that notices`;
+      document.title = hit ? `${base} · ${hit[1]}` : `${base} - a companion that notices`;
     }); };
     f(); window.addEventListener("scroll", f, { passive: true });
-    return () => { window.removeEventListener("scroll", f); cancelAnimationFrame(raf); document.title = `${base} - Ori, a companion that notices`; };
+    return () => { window.removeEventListener("scroll", f); cancelAnimationFrame(raf); document.title = `${base} - a companion that notices`; };
   }, []);
   return null;
 }

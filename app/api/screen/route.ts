@@ -13,7 +13,7 @@ export const runtime = "nodejs";
  *   POST { action: "start", instrument }        → first item
  *   POST { action: "answer", value }             → next item, or the scored result
  *   POST { action: "decline" }                   → closes the offer for the cooldown period
- * The result is written into the transcript as a message from Ori so the
+ * The result is written into the transcript as a message from MindEase so the
  * conversation carries it, and PHQ-9 item 9 routes to the crisis protocol.
  */
 export async function POST(req: Request) {

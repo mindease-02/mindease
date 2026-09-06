@@ -39,7 +39,7 @@ export function Demo() {
     if (!playing || step >= SCRIPT.length) { setTyping(false); return; }
     const next = SCRIPT[step];
     const wait = step === 0 ? 500 : 1500;
-    // Ori "types" for a beat before her line lands; your lines just arrive.
+    // MindEase "types" for a beat before its line lands; your lines just arrive.
     const t1 = setTimeout(() => { if (next.who === "ori") setTyping(true); }, Math.max(0, wait - 900));
     const t2 = setTimeout(() => { setTyping(false); setStep((s) => s + 1); }, next.who === "ori" ? wait + 700 : wait);
     return () => { clearTimeout(t1); clearTimeout(t2); };
@@ -63,7 +63,7 @@ export function Demo() {
         </div>
         <div className="demo">
           <div ref={host} className="device" data-reveal role="region" aria-label="Replayed example conversation">
-            <div className="device-head"><span className="dot" aria-hidden />Ori <span className="muted">· example, replayed</span></div>
+            <div className="device-head"><span className="dot" aria-hidden />MindEase <span className="muted">· example, replayed</span></div>
             {!started && (
               <button type="button" className="demo-play" onClick={() => { setStarted(true); setPlaying(true); }} aria-label="Play the example conversation">
                 <span className="demo-play-ico">{I.play}</span>
@@ -78,7 +78,7 @@ export function Demo() {
                   {i < step && l.cap && <div className="cap in"><b>{l.cap[0]}:</b> {l.cap[1]}</div>}
                 </div>
               ))}
-              {typing && <div className="line ori in typing" aria-label="Ori is typing"><i /><i /><i /></div>}
+              {typing && <div className="line ori in typing" aria-label="MindEase is typing"><i /><i /><i /></div>}
             </div>
             <div className="device-foot">
               <div className="prog" aria-hidden>{SCRIPT.map((_, i) => <i key={i} className={i < step ? "on" : ""} />)}</div>
@@ -90,10 +90,10 @@ export function Demo() {
           </div>
           <div className="demo-copy" data-reveal style={{ ["--d" as string]: "120ms" }}>
             <h3>Every reply has a reason you can read.</h3>
-            <p>The captions under Ori&apos;s lines are the real fields the app produces on every turn. Open the Mirror in the chat and you&apos;ll see yours.</p>
+            <p>The captions under MindEase&apos;s lines are the real fields the app produces on every turn. Open the Mirror in the chat and you&apos;ll see yours.</p>
             <div className="list" data-stagger>
               <div>{I.eye}<div><b>Read</b><p>Intensity, eight emotional axes, nuanced states, what you seem to need.</p></div></div>
-              <div>{I.shield}<div><b>Check the gap</b><p>When words and tone disagree, Ori lowers its confidence and asks. It never overrides you.</p></div></div>
+              <div>{I.shield}<div><b>Check the gap</b><p>When words and tone disagree, MindEase lowers its confidence and asks. It never overrides you.</p></div></div>
               <div>{I.memory}<div><b>Remember</b><p>People, plans and past — retrieved when relevant, shown to you in full.</p></div></div>
             </div>
           </div>
@@ -206,7 +206,7 @@ export function Story() {
             A companion that is <em>always there</em> can quietly become the only one there. We built the opposite.
           </blockquote>
           <p className="body" data-reveal style={{ ["--d" as string]: "200ms", marginTop: 24 }}>
-            Ori measures how much you lean on it. When that climbs, it gets shorter, says so, and points you back toward people. It is software and never pretends otherwise. Success is this mattering less over time.
+            MindEase measures how much you lean on it. When that climbs, it gets shorter, says so, and points you back toward people. It is software and never pretends otherwise. Success is this mattering less over time.
           </p>
         </div>
         <ThemeOrb />
@@ -223,7 +223,7 @@ export function Cta({ chatHref }: { chatHref: string }) {
         <div className="cta" data-reveal>
           <div className="light" /><div className="planet" />
           <h2 className="display"><Words text="Tell it how you're arriving." step={50} /></h2>
-          <p>Pick a mood, say a line if you want, and Ori meets you there. No account, no password — a name is enough.</p>
+          <p>Pick a mood, say a line if you want, and MindEase meets you there. No account, no password — a name is enough.</p>
           <div className="ctas">
             <Magnetic href={chatHref} className="btn-primary">Start talking {I.arrow}</Magnetic>
           </div>
@@ -246,7 +246,7 @@ export function Footer() {
         <div className="foot">
           <div>
             <div className="display" style={{ fontSize: "1.6rem" }}>MindEase</div>
-            <p className="muted" style={{ maxWidth: "24rem", fontWeight: 300, lineHeight: 1.6, marginTop: 10 }}>Ori is software, and says so. If you&apos;re in crisis, call a helpline — the app shows real Indian lines automatically, and never invents a number.</p>
+            <p className="muted" style={{ maxWidth: "24rem", fontWeight: 300, lineHeight: 1.6, marginTop: 10 }}>MindEase is software, and says so. If you&apos;re in crisis, call a helpline — the app shows real Indian lines automatically, and never invents a number.</p>
           </div>
           <div><h5>Product</h5><a href="#demo">See it</a><a href="#features">What it does</a><a href="#story">Why</a><a href="#start">Start</a></div>
           <div><h5>Crisis lines · India</h5><a href="https://telemanas.mohfw.gov.in" target="_blank" rel="noreferrer">Tele-MANAS · 14416</a><a href="tel:18005990019">Kiran · 1800-599-0019</a><a href="https://www.vandrevalafoundation.com" target="_blank" rel="noreferrer">Vandrevala · +91 9999 666 555</a><a href="tel:112">Emergency · 112</a></div>

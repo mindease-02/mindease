@@ -363,7 +363,7 @@ export function localTimeString(at: number, timeZone: string): string {
 }
 
 function tidy(s: string): string {
-  return s.replace(/^\s*(Ori|Assistant)\s*:\s*/i, "").replace(/\n{3,}/g, "\n\n").trim();
+  return s.replace(/^\s*(MindEase|Ori|Assistant)\s*:\s*/i, "").replace(/\n{3,}/g, "\n\n").trim();
 }
 
 function fallbackReply(risk: RiskAssessment, name: string): string {

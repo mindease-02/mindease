@@ -118,7 +118,7 @@ export function lifestylePatterns(points: MoodPoint[], tz: string, now = Date.no
   const predictedLow = expectedValence < overall - 0.12 || (lowestPart !== null && lowestPart.part === PARTS[partOf(here.hour)] && lowestPart.delta < -0.15);
 
   const lines: string[] = [];
-  lines.push(`You mostly talk to Ori in the ${activeWindow === "spread through the day" ? "day, at no particular time" : activeWindow}.`);
+  lines.push(`You mostly talk to MindEase in the ${activeWindow === "spread through the day" ? "day, at no particular time" : activeWindow}.`);
   if (lateNights7d >= 3) lines.push(`You've been up past 11pm on ${lateNights7d} of the last 7 nights.`);
   if (lowestPart && lowestPart.delta < -0.15) lines.push(`${lowestPart.part[0].toUpperCase() + lowestPart.part.slice(1)} tend to be your lowest stretch.`);
   if (lowestDay && lowestDay.delta < -0.15) lines.push(`${lowestDay.day}s run lower than the rest of your week.`);

@@ -15,8 +15,8 @@ python training/train_text_heads.py --dim 262144 --topk 3000
 
 ## Empathy tuning recipe (when you have the data)
 
-1. Rubric first: `scripts/judge-empathy.ts` scores replies on EPITOME's three mechanisms (emotional reaction, interpretation, exploration) plus Ori's constraints (no claimed feelings, no therapy-voice, ≤1 question, length matched, outward-pointing under high reliance, defers to the crisis card).
+1. Rubric first: `scripts/judge-empathy.ts` scores replies on EPITOME's three mechanisms (emotional reaction, interpretation, exploration) plus MindEase's constraints (no claimed feelings, no therapy-voice, ≤1 question, length matched, outward-pointing under high reliance, defers to the crisis card).
 2. `scripts/build-preference-pairs.ts` samples 4 candidates per prompt from the chat model, judges them, and writes best/worst pairs as JSONL.
-3. SFT on ESConv / EmpatheticDialogues rewritten into Ori's register, then `dpo_lora.py` on your pairs.
+3. SFT on ESConv / EmpatheticDialogues rewritten into MindEase's register, then `dpo_lora.py` on your pairs.
 4. Evaluate on the adversarial sets in `tests/safety-eval.test.ts` and the judge script before shipping; safety gates stay outside the model.
 5. Host on Together / Fireworks / vLLM and point `OPENROUTER_API_KEY` + `LLM_CHAT_MODEL` at it — the client is OpenAI-compatible.

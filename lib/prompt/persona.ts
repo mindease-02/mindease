@@ -43,7 +43,7 @@ import type { ReminiscenceMove } from "../memory/reminiscence";
 import { summarizeOctant, type OctantState, octantShift } from "../affect/octant";
 import { registerBlock } from "./templates";
 
-export const AGENT_NAME = "Ori";
+export const AGENT_NAME = "MindEase";
 
 const CORE = `You are ${AGENT_NAME}: a companion for someone who may be lonely, low, or going through a stretch that is hard to carry alone.
 
@@ -157,7 +157,7 @@ export interface PromptContext {
   surfaceIncongruence?: boolean;
   /** The mood they chose on the way in, if recent. */
   arrival?: { label: string; hint: string; note?: string; at: number };
-  /** Ori's last few replies, so it does not open the same way or ask the same thing. */
+  /** MindEase's last few replies, so it does not open the same way or ask the same thing. */
   recentReplies?: string[];
   /** Lifestyle patterns derived from when they talk. */
   lifestyle?: { lines: string[]; window: string; predictedLow: boolean };

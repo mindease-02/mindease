@@ -47,7 +47,7 @@ export default function LoginForm() {
     }
   }
 
-  const title = !ACCOUNTS ? "What should Ori call you?" : mode === "signup" ? "Make an account" : mode === "forgot" ? "Forgot your password?" : "Welcome back";
+  const title = !ACCOUNTS ? "What should MindEase call you?" : mode === "signup" ? "Make an account" : mode === "forgot" ? "Forgot your password?" : "Welcome back";
 
   return (
     <form onSubmit={submit} className="glass w-full" style={{ maxWidth: 520, padding: 32 }} aria-labelledby="login-title">
@@ -65,7 +65,7 @@ export default function LoginForm() {
         <>
           {mode === "signup" && (
             <>
-              <label htmlFor="name" className="label">What should Ori call you?</label>
+              <label htmlFor="name" className="label">What should MindEase call you?</label>
               <input id="name" className="field" placeholder="e.g. Priya" autoComplete="nickname" value={name} onChange={(e) => setName(e.target.value)} maxLength={40} required />
             </>
           )}

@@ -2,7 +2,7 @@
   "name": "mindease",
   "version": "0.2.0",
   "private": true,
-  "description": "Ori - a companion that notices when you are drifting down, says so honestly, and works to need you less over time.",
+  "description": "MindEase - a companion that notices when you are drifting down, says so honestly, and works to need you less over time.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

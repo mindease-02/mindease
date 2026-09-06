@@ -1,6 +1,6 @@
 "use client";
 /**
- * Ori asking, in the flow of the chat, whether a technique would help right
+ * MindEase asking, in the flow of the chat, whether a technique would help right
  * now. Shown only when the pipeline decided it's actually warranted (high
  * intensity anger/anxiety, or arriving that way), never from a menu.
  */
@@ -16,7 +16,7 @@ const OPTIONS: { kind: TechKind; label: string; blurb: string }[] = [
 export default function TechniqueOffer({ reason, suggested, onPick, onDismiss }: { reason: string; suggested: TechKind[]; onPick: (k: TechKind) => void; onDismiss: () => void }) {
   const opts = suggested.length ? OPTIONS.filter((o) => suggested.includes(o.kind)) : OPTIONS;
   return (
-    <div className="offer bubble-ai" role="group" aria-label="Ori is offering a technique">
+    <div className="offer bubble-ai" role="group" aria-label="MindEase is offering a technique">
       <p className="offer-q">{reason}</p>
       <div className="offer-opts">
         {opts.map((o) => (

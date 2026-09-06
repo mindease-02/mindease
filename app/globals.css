@@ -63,7 +63,7 @@ body {
   @apply rounded-[22px] rounded-bl-[8px] bg-clay-peach text-clay-ink px-4 py-3 shadow-clay-sm;
 }
 
-/* The presence orb: Ori's only "face". Deliberately non-human. ------------ */
+/* The presence orb: MindEase's only "face". Deliberately non-human. ------------ */
 .orb {
   border-radius: 9999px;
   background:

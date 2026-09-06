@@ -1,5 +1,5 @@
 /**
- * Generate Ori's reply for each sample prompt through the real system prompt,
+ * Generate MindEase's reply for each sample prompt through the real system prompt,
  * then score it with the rubric. Needs GROQ_API_KEY in .env.local.
  *
  *   npx tsx scripts/judge-empathy.ts            # sample prompts

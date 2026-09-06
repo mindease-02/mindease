@@ -72,7 +72,7 @@ export function scoreScreening(s: Screening): Screening {
   return { ...s, completedAt: Date.now(), score, band: bandFor(inst, score).label };
 }
 
-/** Plain-language result Ori says when the last answer lands. */
+/** Plain-language result MindEase says when the last answer lands. */
 export function resultMessage(s: Screening, region: string | undefined): string {
   const inst = INSTRUMENTS[s.instrument];
   const band = bandFor(inst, s.score ?? 0);
