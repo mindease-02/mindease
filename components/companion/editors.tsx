@@ -41,6 +41,7 @@ export function AvatarPicker({ s, patch }: { s: CompanionSettings; patch: Patch 
 
 export function StylePicker({ s, patch }: { s: CompanionSettings; patch: Patch }) {
   const a = avatarById(s.appearance.avatarId);
+  if (a.look.portrait) return null;
   return (
     <div className="cmp-row">
       {a.styles.map((st) => (

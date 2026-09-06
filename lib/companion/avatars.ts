@@ -1,9 +1,11 @@
 /**
  * Avatar registry. Adding a companion means adding one entry here - the setup
  * flow, the settings page and the renderer all read from this list. Every
- * avatar is an original, non-photographic character drawn procedurally by
- * components/companion/Avatar.tsx from the `look` fields below; there are no
- * image assets and no likenesses of real people.
+ * avatar is an original character: either a generated semi-realistic portrait
+ * under public/companion/portraits (made with Higgsfield Soul 2.0 from a text
+ * prompt, no reference photos, no likeness of anyone real) or, until one
+ * exists, a face drawn procedurally by components/companion/Avatar.tsx from
+ * the `look` fields below.
  */
 import type { Expression, PersonalityConfig, Pronouns } from "./types";
 import { EXPRESSIONS } from "./types";
@@ -27,6 +29,8 @@ export interface AvatarLook {
   stubble?: boolean;
   /** A thin chain at the neck. */
   chain?: boolean;
+  /** Generated portrait (public path). When set, the renderer shows and animates this image instead of drawing the face. */
+  portrait?: string;
 }
 
 export interface AvatarDefinition {
@@ -58,7 +62,7 @@ export const AVATARS: AvatarDefinition[] = [
     pronouns: "she",
     tagline: "Warm, observant, playful, emotionally intelligent.",
     appearance: "Dark waves tucked behind one ear, a soft round face, and eyes that look like they are already halfway to a smile.",
-    look: { skin: "#e8b89a", hair: "#2c1f1c", hairStyle: "waves", eyes: "#4a3a2a", accent: "#f0876a", roundness: 0.7, freckles: true, earrings: true },
+    look: { portrait: "/companion/portraits/akshaya.jpg", skin: "#e8b89a", hair: "#2c1f1c", hairStyle: "waves", eyes: "#4a3a2a", accent: "#f0876a", roundness: 0.7, freckles: true, earrings: true },
     styles: [
       { id: "everyday", label: "Everyday", look: {} },
       { id: "night", label: "Night in", look: { hairStyle: "bun", earrings: false } },
@@ -78,7 +82,7 @@ export const AVATARS: AvatarDefinition[] = [
     pronouns: "she",
     tagline: "Gentle, steady, a little dreamy, easy to sit with.",
     appearance: "Long dark hair worn down, a calm oval face, a slow warm smile that arrives late and stays.",
-    look: { skin: "#c98d6b", hair: "#1a1414", hairStyle: "long", eyes: "#3a2a22", accent: "#9b6bff", roundness: 0.45, earrings: true },
+    look: { portrait: "/companion/portraits/miruna.jpg", skin: "#c98d6b", hair: "#1a1414", hairStyle: "long", eyes: "#3a2a22", accent: "#9b6bff", roundness: 0.45, earrings: true },
     styles: [
       { id: "everyday", label: "Everyday", look: {} },
       { id: "tied", label: "Tied back", look: { hairStyle: "bun" } },
@@ -118,7 +122,7 @@ export const AVATARS: AvatarDefinition[] = [
     pronouns: "he",
     tagline: "Calm, funny, reassuring, slightly sarcastic.",
     appearance: "Short dark hair, a steady face, the kind of half-smile that says he has seen worse and it was fine.",
-    look: { skin: "#c9946f", hair: "#1e1a19", hairStyle: "short", eyes: "#2f3a4a", accent: "#4fc3d6", roundness: 0.35 },
+    look: { portrait: "/companion/portraits/rishi.jpg", skin: "#c9946f", hair: "#1e1a19", hairStyle: "short", eyes: "#2f3a4a", accent: "#4fc3d6", roundness: 0.35 },
     styles: [
       { id: "everyday", label: "Everyday", look: {} },
       { id: "glasses", label: "Reading", look: { glasses: true } },
@@ -138,7 +142,7 @@ export const AVATARS: AvatarDefinition[] = [
     pronouns: "he",
     tagline: "Upbeat, practical, loyal, always has a plan B.",
     appearance: "A neat undercut, a broad easy grin, and the look of someone who has already thought about lunch.",
-    look: { skin: "#a86a45", hair: "#120f0e", hairStyle: "undercut", eyes: "#241a15", accent: "#4fb37f", roundness: 0.55 },
+    look: { portrait: "/companion/portraits/manish.jpg", skin: "#a86a45", hair: "#120f0e", hairStyle: "undercut", eyes: "#241a15", accent: "#4fb37f", roundness: 0.55 },
     styles: [
       { id: "everyday", label: "Everyday", look: {} },
       { id: "grown", label: "Grown out", look: { hairStyle: "short" } },
@@ -158,7 +162,7 @@ export const AVATARS: AvatarDefinition[] = [
     pronouns: "he",
     tagline: "Warm, grounded, a good listener with a slow smile.",
     appearance: "Short dark hair, a calm square face, and the kind of steady attention that makes you finish your sentence.",
-    look: { skin: "#8e5a3c", hair: "#0e0b0a", hairStyle: "short", eyes: "#1c1512", accent: "#3fa7d6", roundness: 0.4 },
+    look: { portrait: "/companion/portraits/hemanth.jpg", skin: "#8e5a3c", hair: "#0e0b0a", hairStyle: "short", eyes: "#1c1512", accent: "#3fa7d6", roundness: 0.4 },
     styles: [
       { id: "everyday", label: "Everyday", look: {} },
       { id: "specs", label: "Specs", look: { glasses: true } },
@@ -238,7 +242,7 @@ export const AVATARS: AvatarDefinition[] = [
     pronouns: "she",
     tagline: "Direct, witty, loyal, a little blunt.",
     appearance: "A sharp bob, a straight gaze, and a grin that shows up when you least expect it.",
-    look: { skin: "#f3d6c1", hair: "#5a2b1c", hairStyle: "short", eyes: "#3b5f7a", accent: "#3fa7d6", roundness: 0.45, glasses: false },
+    look: { portrait: "/companion/portraits/priya.jpg", skin: "#f3d6c1", hair: "#5a2b1c", hairStyle: "short", eyes: "#3b5f7a", accent: "#3fa7d6", roundness: 0.45, glasses: false },
     styles: [
       { id: "everyday", label: "Everyday", look: {} },
       { id: "specs", label: "Specs", look: { glasses: true } },

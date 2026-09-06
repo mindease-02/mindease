@@ -61,7 +61,7 @@ export default function CompanionSettingsPage({ profile, displayName, voiceProvi
           {section === "appearance" && (
             <div className="cmp-stack">
               <div className="cmp-label">Avatar</div><AvatarPicker s={s} patch={patch} />
-              <div className="cmp-label">Style</div><StylePicker s={s} patch={patch} />
+              {!avatarById(s.appearance.avatarId).look.portrait && <><div className="cmp-label">Style</div><StylePicker s={s} patch={patch} /></>}
               <div className="cmp-label">Background</div><BackgroundPicker s={s} patch={patch} />
               <div className="cmp-label">Animation</div>
               <Segmented label="Animation intensity" value={s.appearance.animation} onChange={(v) => patch({ appearance: { ...s.appearance, animation: v } })} options={[{ id: "low", label: "Subtle" }, { id: "normal", label: "Natural" }, { id: "high", label: "Lively" }]} />

@@ -97,7 +97,7 @@ export default function CompanionSetup({ initial, displayName, voiceProvider, ed
               <p className="muted cmp-note">Under 18, or unsure, keeps the companion firmly in a friend role. It never changes what they can help with.</p>
             </div>
           )}
-          {step === "avatar" && <><AvatarPicker s={s} patch={patch} /><div className="cmp-label" style={{ marginTop: 18 }}>Style</div><StylePicker s={s} patch={patch} /></>}
+          {step === "avatar" && <><AvatarPicker s={s} patch={patch} />{!avatar.look.portrait && <><div className="cmp-label" style={{ marginTop: 18 }}>Style</div><StylePicker s={s} patch={patch} /></>}</>}
           {step === "name" && (
             <div className="cmp-stack">
               <input className="field cmp-name" autoFocus maxLength={24} value={s.name} onChange={(e) => patch({ name: e.target.value })} placeholder={avatar.name} aria-label="Companion name" />

@@ -28,6 +28,76 @@ const EXPR: Record<Expression, Params> = {
   surprised:  { browLift: 1,   browTilt: 0.2, browAsym: 0,   eyeOpen: 1.3,  curve: 0.1,  open: 0.5,  tilt: 0,  pupil: 0.85, gazeX: 0,   gazeY: -0.05, blush: 0.25 },
 };
 
+/** Per-expression treatment for a generated portrait: a lean, a tilt, a breath of light. Small on purpose. */
+const PORTRAIT_EXPR: Record<Expression, { tilt: number; lift: number; bright: number; sat: number; scale: number }> = {
+  neutral:    { tilt: 0,    lift: 0,  bright: 1,    sat: 1,    scale: 1 },
+  happy:      { tilt: 1.5,  lift: -2, bright: 1.06, sat: 1.08, scale: 1.01 },
+  curious:    { tilt: 4,    lift: -1, bright: 1.03, sat: 1.02, scale: 1.005 },
+  thoughtful: { tilt: -3,   lift: 1,  bright: 0.97, sat: 0.96, scale: 1 },
+  concerned:  { tilt: -1.5, lift: 2,  bright: 0.92, sat: 0.9,  scale: 0.995 },
+  excited:    { tilt: 2,    lift: -4, bright: 1.1,  sat: 1.12, scale: 1.02 },
+  calm:       { tilt: 0.5,  lift: 1,  bright: 0.99, sat: 0.98, scale: 1 },
+  surprised:  { tilt: 0,    lift: -3, bright: 1.05, sat: 1.02, scale: 1.02 },
+};
+
+/**
+ * A generated portrait, kept alive the same way the drawn face is: one rAF
+ * loop writing a transform and a filter - breathing, a slow sway, a lean
+ * toward the pointer, a small bob while speaking, and an eased tilt/light
+ * change per expression. The image itself never changes, so nothing here can
+ * push it into the uncanny valley.
+ */
+function PortraitAvatar({ look, expression = "neutral", speaking = false, level, intensity = "normal", gaze = true, size = "100%", className = "", intro = false }: AvatarProps) {
+  const img = useRef<HTMLImageElement>(null);
+  const st = useRef({ tilt: 0, lift: 0, bright: 1, sat: 1, scale: 1, gx: 0, gy: 0, tx: 0, ty: 0, lvl: 0, t0: 0 });
+  const props = useRef({ expression, speaking, level, intensity, gaze });
+  props.current = { expression, speaking, level, intensity, gaze };
+
+  useEffect(() => {
+    const el = img.current; if (!el) return;
+    const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const onMove = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect();
+      const x = (e.clientX - (r.left + r.width / 2)) / Math.max(r.width, 1);
+      const y = (e.clientY - (r.top + r.height / 2)) / Math.max(r.height, 1);
+      st.current.tx = Math.max(-1, Math.min(1, x * 1.6)); st.current.ty = Math.max(-1, Math.min(1, y * 1.6));
+    };
+    window.addEventListener("pointermove", onMove);
+    let raf = 0;
+    const loop = (t: number) => {
+      const s = st.current, pr = props.current;
+      if (!s.t0) s.t0 = t;
+      const sec = (t - s.t0) / 1000;
+      const amt = reduced ? 0 : pr.intensity === "low" ? 0.5 : pr.intensity === "high" ? 1.5 : 1;
+      const target = PORTRAIT_EXPR[pr.expression];
+      const k = 0.06;
+      s.tilt += (target.tilt - s.tilt) * k; s.lift += (target.lift - s.lift) * k; s.bright += (target.bright - s.bright) * k; s.sat += (target.sat - s.sat) * k; s.scale += (target.scale - s.scale) * k;
+      const wantX = pr.gaze ? s.tx : 0, wantY = pr.gaze ? s.ty : 0;
+      s.gx += (wantX - s.gx) * 0.05; s.gy += (wantY - s.gy) * 0.05;
+      const lvlTarget = pr.speaking ? (pr.level ?? (0.35 + 0.35 * Math.abs(Math.sin(sec * 9)) * (0.6 + 0.4 * Math.sin(sec * 2.3)))) : 0;
+      s.lvl += (lvlTarget - s.lvl) * 0.25;
+      const breathe = Math.sin(sec * 1.1) * 0.006 * amt;
+      const sway = Math.sin(sec * 0.45) * 0.7 * amt;
+      const bob = Math.sin(sec * 0.7) * 1.5 * amt + s.lvl * -3;
+      el.style.transform = `translate(${s.gx * 5 * amt}px, ${s.lift + bob + s.gy * 3 * amt}px) rotate(${s.tilt * (0.5 + 0.5 * amt) + sway}deg) scale(${(s.scale + breathe) * 1}, ${(s.scale + breathe * 1.6) * 1})`;
+      el.style.filter = `brightness(${s.bright.toFixed(3)}) saturate(${s.sat.toFixed(3)})`;
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("pointermove", onMove); };
+  }, []);
+
+  return (
+    <span className={`cmp-avatar cmp-portrait ${intro ? "cmp-avatar-intro" : ""} ${className}`} style={{ width: size, height: size }} data-expression={expression} data-speaking={speaking || undefined}>
+      <img ref={img} src={look.portrait} alt="" draggable={false} />
+    </span>
+  );
+}
+
+export default function Avatar(props: AvatarProps) {
+  return props.look.portrait ? <PortraitAvatar {...props} /> : <DrawnAvatar {...props} />;
+}
+
 export interface AvatarProps {
   look: AvatarLook;
   expression?: Expression;
@@ -45,7 +115,7 @@ export interface AvatarProps {
   intro?: boolean;
 }
 
-export default function Avatar({ look, expression = "neutral", speaking = false, level, intensity = "normal", gaze = true, size = "100%", className = "", intro = false }: AvatarProps) {
+function DrawnAvatar({ look, expression = "neutral", speaking = false, level, intensity = "normal", gaze = true, size = "100%", className = "", intro = false }: AvatarProps) {
   const svg = useRef<SVGSVGElement>(null);
   const refs = useRef<Record<string, SVGElement | null>>({});
   const state = useRef({ p: { ...EXPR.neutral }, blink: 1, nextBlink: 0, blinkAt: 0, gx: 0, gy: 0, tx: 0, ty: 0, lvl: 0, t0: 0, last: 0 });
