@@ -23,6 +23,10 @@ export interface AvatarLook {
   freckles?: boolean;
   glasses?: boolean;
   earrings?: boolean;
+  moustache?: boolean;
+  stubble?: boolean;
+  /** A thin chain at the neck. */
+  chain?: boolean;
 }
 
 export interface AvatarDefinition {
@@ -193,11 +197,11 @@ export const AVATARS: AvatarDefinition[] = [
     presentation: "male",
     pronouns: "he",
     tagline: "Quiet, thoughtful, patient and reflective.",
-    appearance: "Long hair tied loosely back, a calm narrow face, eyes that take their time.",
-    look: { skin: "#a7714f", hair: "#151313", hairStyle: "long", eyes: "#2a2320", accent: "#9b6bff", roundness: 0.3 },
+    appearance: "Short black hair with a bit of lift on top, a thin moustache and light stubble, a slim chain, and an oval face that takes its time.",
+    look: { skin: "#9a6646", hair: "#141010", hairStyle: "short", eyes: "#1e1613", accent: "#9b6bff", roundness: 0.35, moustache: true, stubble: true, chain: true },
     styles: [
       { id: "everyday", label: "Everyday", look: {} },
-      { id: "down", label: "Hair down", look: { hairStyle: "waves" } },
+      { id: "clean", label: "Clean shave", look: { moustache: false, stubble: false } },
       { id: "specs", label: "Specs", look: { glasses: true } },
     ],
     expressions: EXPRESSIONS,

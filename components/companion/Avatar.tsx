@@ -146,6 +146,7 @@ export default function Avatar({ look, expression = "neutral", speaking = false,
         <path d={`M ${cx - 74} 240 C ${cx - 74} 196 ${cx - 40} 178 ${cx - 22} 172 L ${cx + 22} 172 C ${cx + 40} 178 ${cx + 74} 196 ${cx + 74} 240 Z`} fill={darken(look.accent, 0.55)} opacity=".9" />
         <path d={`M ${cx - 74} 240 C ${cx - 74} 196 ${cx - 40} 178 ${cx - 22} 172 L ${cx + 22} 172 C ${cx + 40} 178 ${cx + 74} 196 ${cx + 74} 240 Z`} fill="url(#cmpPx)" />
         <rect x={cx - 15} y={cy + ry - 14} width={30} height={26} rx={8} fill={shade} />
+        {look.chain && <path d={`M ${cx - 26} ${cy + ry + 4} Q ${cx} ${cy + ry + 30} ${cx + 26} ${cy + ry + 4}`} stroke="#d9c58a" strokeWidth={1.4} fill="none" opacity=".9" />}
       </g>
       <g ref={reg("head")}>
         {hairBack && <path d={hairBack} fill={look.hair} />}
@@ -158,8 +159,8 @@ export default function Avatar({ look, expression = "neutral", speaking = false,
         <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="url(#cmpPx)" />
         <g clipPath="url(#cmpFace)">
           <g ref={reg("blush")} opacity=".3">
-            <ellipse cx={cx - 30} cy={cy + 14} rx={10} ry={5} fill={look.accent} opacity=".45" />
-            <ellipse cx={cx + 30} cy={cy + 14} rx={10} ry={5} fill={look.accent} opacity=".45" />
+            <ellipse cx={cx - 30} cy={cy + 14} rx={10} ry={5} fill="#e0705e" opacity=".4" />
+            <ellipse cx={cx + 30} cy={cy + 14} rx={10} ry={5} fill="#e0705e" opacity=".4" />
           </g>
           {look.freckles && <g fill={darken(look.skin, 0.32)} opacity=".7">{[-30, -24, -18, 18, 24, 30, -26, 26].map((dx, i) => <circle key={i} cx={cx + dx} cy={cy + 12 + (i % 3) * 3} r={1} />)}</g>}
         </g>
@@ -181,9 +182,12 @@ export default function Avatar({ look, expression = "neutral", speaking = false,
         ); })}
         {/* nose */}
         <path d={`M ${cx} ${cy + 4} q -4 10 2 12`} stroke={darken(look.skin, 0.3)} strokeWidth={1.6} fill="none" strokeLinecap="round" />
+        {/* facial hair sits under the mouth layer so the lips read over it */}
+        {look.stubble && <g clipPath="url(#cmpFace)"><ellipse cx={cx} cy={cy + ry * 0.62} rx={rx * 0.86} ry={ry * 0.42} fill={darken(look.hair, 0.05)} opacity=".16" /></g>}
+        {look.moustache && <path d={`M ${cx - 12} ${mouthY - 7} Q ${cx - 6} ${mouthY - 11} ${cx} ${mouthY - 8} Q ${cx + 6} ${mouthY - 11} ${cx + 12} ${mouthY - 7} Q ${cx} ${mouthY - 4} ${cx - 12} ${mouthY - 7} Z`} fill={darken(look.hair, 0.05)} opacity=".85" />}
         {/* mouth */}
-        <path ref={reg("mouth")} d="" fill={darken(look.accent, 0.55)} />
-        <path ref={reg("lip")} d="" stroke={darken(look.accent, 0.35)} strokeWidth={2} fill="none" strokeLinecap="round" />
+        <path ref={reg("mouth")} d="" fill={darken(look.skin, 0.62)} />
+        <path ref={reg("lip")} d="" stroke={darken(look.skin, 0.42)} strokeWidth={2} fill="none" strokeLinecap="round" />
         {hairFront && <path d={hairFront} fill={look.hair} />}
         {hairFront && <path d={hairFront} fill={hairHi} opacity=".12" transform={`translate(-2 -3) scale(.97)`} style={{ transformOrigin: `${cx}px ${cy}px` }} />}
         {look.glasses && <g stroke="#1a1716" strokeWidth={2} fill="rgba(255,255,255,.06)">
