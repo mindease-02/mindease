@@ -715,6 +715,17 @@ body:has(> .world) { background: var(--bg, #07080b); }
    bottom, the ball assembling from voxels in the middle.
    ===================================================================== */
 .world .xp { position: relative; z-index: 1; height: 620vh; }
+/* ------------------------------------------------------------- Title card */
+.world .title-card { position: relative; z-index: 1; min-height: 100svh; display: grid; place-items: center; text-align: center; padding: 0 16px; }
+.world .tc-title { display: grid; gap: clamp(10px, 2.4vh, 26px); margin: 0; }
+.world .tc-line { display: block; font-size: clamp(1.6rem, 7vw, 6rem); line-height: 1; letter-spacing: .04em; white-space: nowrap; text-shadow: 6px 6px 0 rgba(0,0,0,.6); }
+.world .tc-x { color: var(--coral-2); font-size: clamp(2.4rem, 11vw, 9rem); }
+.world .tc-line .ch { display: inline-block; opacity: 0; transform: translateY(18px); animation: tc-in .7s var(--ease) forwards; animation-delay: calc(var(--i) * 55ms + 250ms); }
+@keyframes tc-in { to { opacity: 1; transform: none; } }
+.world .tc-hint { position: absolute; left: 50%; bottom: clamp(24px, 5vh, 48px); width: 2px; height: 44px; translate: -50% 0; background: rgba(255,255,255,.18); overflow: hidden; }
+.world .tc-hint span { position: absolute; left: 0; top: -100%; width: 100%; height: 100%; background: var(--coral-2); animation: tc-drop 1.8s ease-in-out infinite; }
+@keyframes tc-drop { 0% { top: -100%; } 60%, 100% { top: 100%; } }
+@media (prefers-reduced-motion: reduce) { .world .tc-line .ch { opacity: 1; transform: none; animation: none; } .world .tc-hint span { animation: none; top: 0; } }
 .world .xp-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; display: grid; place-items: center; touch-action: pan-y; cursor: grab; }
 .world .xp-scene { position: absolute; inset: 0; }
 .world .xp-scene canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }

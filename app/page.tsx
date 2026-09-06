@@ -9,6 +9,7 @@ import ScrollProgress from "@/components/home/ScrollProgress";
 import Preloader from "@/components/home/Preloader";
 import ScrollTitle from "@/components/home/ScrollTitle";
 import Marquee from "@/components/home/Marquee";
+import TitleCard from "@/components/home/TitleCard";
 import { TICKER } from "@/lib/ticker";
 
 export default async function Home() {
@@ -24,6 +25,7 @@ export default async function Home() {
       <a href="#main" className="skip">Skip to content</a>
       <Nav chatHref={chatHref} signedIn={!!session} name={session?.name} />
       <main id="main" tabIndex={-1}>
+        <TitleCard />
         <Experience chatHref={chatHref} />
         <Marquee items={TICKER} />
         <Demo />
