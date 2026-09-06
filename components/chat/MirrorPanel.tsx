@@ -5,6 +5,7 @@ import AxisWheel from "./AxisWheel";
 import Sparkline from "./Sparkline";
 import { PxRemove } from "../home/pixelIcons";
 import type { usePush } from "../hooks/usePush";
+import { NEARBY_HELP_URL } from "@/lib/safety/resources";
 
 interface Props {
   mirror: UserView | null;
@@ -73,7 +74,7 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
               {m.signals.length > 0 && (
                 <ul className="mt-3 space-y-1 text-xs text-clay-muted">{m.signals.slice(0, 4).map((sg) => <li key={sg.domain}><span className="text-clay-ink">Consistent with {sg.domain}</span> · {sg.evidence}</li>)}</ul>
               )}
-              <a href="/summary" className="clay-btn mt-3 inline-block px-3 py-1.5 text-xs">One-page summary for a clinician</a>
+              <div className="mt-3 flex flex-wrap gap-2"><a href="/summary" className="clay-btn inline-block px-3 py-1.5 text-xs">One-page summary for a clinician</a><a href={NEARBY_HELP_URL} target="_blank" rel="noreferrer" className="clay-btn inline-block px-3 py-1.5 text-xs">Find someone near you</a></div>
             </Section>
             {m.patterns.length > 0 && (
               <Section title="Your patterns" hint="From when you tend to talk, not what you say. Ori uses this to anticipate, not to judge.">

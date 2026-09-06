@@ -1,5 +1,5 @@
 "use client";
-import type { Helpline } from "@/lib/safety/resources";
+import { NEARBY_HELP_URL, type Helpline } from "@/lib/safety/resources";
 
 /** Rendered from hard-coded data only. The model never supplies a number. */
 export default function CrisisCard({ helplines, emergency }: { helplines: Helpline[]; emergency: string }) {
@@ -18,6 +18,7 @@ export default function CrisisCard({ helplines, emergency }: { helplines: Helpli
           </li>
         ))}
       </ul>
+      <p className="mt-3 text-sm text-clay-surface">Not an emergency, but heavy for a while? <a href={NEARBY_HELP_URL} target="_blank" rel="noreferrer" className="underline decoration-clay-peach/40 text-clay-peach">Find someone near you</a>.</p>
       <p className="mt-3 text-[11px] text-clay-haze/70">Ori is software and cannot keep you safe. This card stays until you say you&apos;re okay.</p>
     </div>
   );

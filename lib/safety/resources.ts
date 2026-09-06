@@ -45,6 +45,12 @@ export const EMERGENCY_NUMBERS: Record<string, string> = {
   NZ: "111", DE: "112", FR: "112", ZA: "10111", EU: "112",
 };
 
+/**
+ * "Find someone near you": a map search the browser resolves with the device's
+ * own location. Nothing about the person leaves this app to make it work.
+ */
+export const NEARBY_HELP_URL = "https://www.google.com/maps/search/psychologist+or+counsellor+near+me";
+
 /** Default region when none is known. This deployment serves India first. */
 export const DEFAULT_REGION = "IN";
 
