@@ -76,7 +76,7 @@ export default function CompanionSetup({ initial, displayName, voiceProvider, ed
       <aside className="cmp-setup-stage">
         <div className="cmp-stage-ring" aria-hidden />
         <div className="cmp-stage-face"><Avatar look={look} expression={expression} speaking={voice.speaking} level={voice.level} intensity={s.appearance.animation} intro={step === "meet"} /></div>
-        <div className="cmp-stage-name"><b>{s.name}</b><span>{s.pronouns === "she" ? "she / her" : s.pronouns === "he" ? "he / him" : "they / them"}</span></div>
+        <div className="cmp-stage-name"><b>{s.name}</b><span>{avatar.tagline}</span></div>
       </aside>
 
       <section className="cmp-setup-panel" key={step} data-dir={dir}>
@@ -101,10 +101,6 @@ export default function CompanionSetup({ initial, displayName, voiceProvider, ed
           {step === "name" && (
             <div className="cmp-stack">
               <input className="field cmp-name" autoFocus maxLength={24} value={s.name} onChange={(e) => patch({ name: e.target.value })} placeholder={avatar.name} aria-label="Companion name" />
-              <div className="cmp-label">Pronouns</div>
-              <div className="cmp-seg" role="radiogroup" aria-label="Pronouns">
-                {(["she", "he", "they"] as const).map((p) => <button key={p} type="button" role="radio" aria-checked={s.pronouns === p} className={s.pronouns === p ? "on" : ""} onClick={() => patch({ pronouns: p })}>{p === "she" ? "she / her" : p === "he" ? "he / him" : "they / them"}</button>)}
-              </div>
             </div>
           )}
           {step === "personality" && <><PersonalityEditor s={s} patch={patch} /><div className="cmp-label" style={{ marginTop: 18 }}>Mostly here as</div><RelationshipEditor s={s} patch={patch} /></>}

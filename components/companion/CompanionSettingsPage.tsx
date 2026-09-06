@@ -65,9 +65,8 @@ export default function CompanionSettingsPage({ profile, displayName, voiceProvi
               <div className="cmp-label">Background</div><BackgroundPicker s={s} patch={patch} />
               <div className="cmp-label">Animation</div>
               <Segmented label="Animation intensity" value={s.appearance.animation} onChange={(v) => patch({ appearance: { ...s.appearance, animation: v } })} options={[{ id: "low", label: "Subtle" }, { id: "normal", label: "Natural" }, { id: "high", label: "Lively" }]} />
-              <div className="cmp-label">Name and pronouns</div>
-              <div className="cmp-row"><input className="field" style={{ maxWidth: 240 }} maxLength={24} value={s.name} onChange={(e) => patch({ name: e.target.value })} aria-label="Name" />
-                <Segmented label="Pronouns" value={s.pronouns} onChange={(v) => patch({ pronouns: v })} options={[{ id: "she", label: "she / her" }, { id: "he", label: "he / him" }, { id: "they", label: "they / them" }]} /></div>
+              <div className="cmp-label">Name</div>
+              <input className="field" style={{ maxWidth: 240 }} maxLength={24} value={s.name} onChange={(e) => patch({ name: e.target.value })} aria-label="Name" />
             </div>
           )}
           {section === "personality" && (<div className="cmp-stack"><PersonalityEditor s={s} patch={patch} /><div className="cmp-label">Conversation style</div><ConversationEditor s={s} patch={patch} /><div className="cmp-label">What they call you</div><AddressEditor s={s} patch={patch} displayName={displayName} /></div>)}

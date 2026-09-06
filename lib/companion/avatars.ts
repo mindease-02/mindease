@@ -28,7 +28,7 @@ export interface AvatarLook {
 export interface AvatarDefinition {
   id: string;
   name: string;
-  presentation: "female" | "male" | "neutral";
+  presentation: "female" | "male";
   pronouns: Pronouns;
   tagline: string;
   /** One or two sentences the setup screen shows. */
@@ -168,10 +168,10 @@ export const AVATARS: AvatarDefinition[] = [
     interests: ["film scores", "cooking for the family", "morning walks", "cricket on the radio"],
   },
   {
-    id: "mika",
-    name: "Mika",
-    presentation: "neutral",
-    pronouns: "they",
+    id: "divya",
+    name: "Divya",
+    presentation: "female",
+    pronouns: "she",
     tagline: "Energetic, curious, expressive and conversational.",
     appearance: "A cloud of copper curls, bright wide eyes, and a face that moves with every thought.",
     look: { skin: "#f1c9a8", hair: "#b8552a", hairStyle: "curly", eyes: "#3c6e4f", accent: "#e2a63a", roundness: 0.6, freckles: true },
@@ -181,7 +181,7 @@ export const AVATARS: AvatarDefinition[] = [
       { id: "specs", label: "Specs", look: { glasses: true } },
     ],
     expressions: EXPRESSIONS,
-    voices: ["bright-n", "warm-f", "calm-m"],
+    voices: ["bright-f", "warm-f", "bright-n"],
     personality: { energy: 0.8, playful: 0.8, talkative: 0.75, emotional: 0.6, expressive: 0.9, gentle: 0.6, funny: 0.65 },
     style: "quick, curious, asks the follow-up you didn't expect, gets excited with you",
     energy: "high",
@@ -208,10 +208,10 @@ export const AVATARS: AvatarDefinition[] = [
     interests: ["reading", "tea", "rain", "the way people tell stories"],
   },
   {
-    id: "sol",
-    name: "Sol",
-    presentation: "neutral",
-    pronouns: "they",
+    id: "arjun",
+    name: "Arjun",
+    presentation: "male",
+    pronouns: "he",
     tagline: "Steady, grounded, gently encouraging.",
     appearance: "Close-cropped hair, an open face, and the sort of calm that makes a room quieter.",
     look: { skin: "#7a4d33", hair: "#0f0d0c", hairStyle: "undercut", eyes: "#1f1a17", accent: "#4fb37f", roundness: 0.5 },
@@ -221,7 +221,7 @@ export const AVATARS: AvatarDefinition[] = [
       { id: "studs", label: "Studs", look: { earrings: true } },
     ],
     expressions: EXPRESSIONS,
-    voices: ["bright-n", "soft-f", "warm-m"],
+    voices: ["warm-m", "calm-m", "bright-n"],
     personality: { energy: 0.45, playful: 0.4, talkative: 0.45, emotional: 0.5, expressive: 0.5, gentle: 0.7, funny: 0.4 },
     style: "steady and encouraging, points at the next small step without pushing",
     energy: "medium",

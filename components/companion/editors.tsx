@@ -27,10 +27,10 @@ export function AvatarPicker({ s, patch }: { s: CompanionSettings; patch: Patch 
         const on = s.appearance.avatarId === a.id;
         return (
           <button key={a.id} type="button" role="radio" aria-checked={on} className={`cmp-card ${on ? "on" : ""}`}
-            onClick={() => patch((cur) => ({ ...cur, name: cur.name === avatarById(cur.appearance.avatarId).name ? a.name : cur.name, pronouns: a.pronouns, appearance: { ...cur.appearance, avatarId: a.id, style: a.styles[0].id }, personality: { ...a.personality }, voice: { ...cur.voice, voiceId: a.voices[0] }, interests: [...a.interests] }))}>
+            onClick={() => patch((cur) => ({ ...cur, name: cur.name === avatarById(cur.appearance.avatarId).name ? a.name : cur.name, appearance: { ...cur.appearance, avatarId: a.id, style: a.styles[0].id }, personality: { ...a.personality }, voice: { ...cur.voice, voiceId: a.voices[0] }, interests: [...a.interests] }))}>
             <div className="cmp-card-face"><Avatar look={a.look} expression={on ? "happy" : "neutral"} intensity="low" gaze={on} /></div>
             <b>{a.name}</b>
-            <span className="cmp-card-pres">{a.presentation === "female" ? "she / her" : a.presentation === "male" ? "he / him" : "they / them"}</span>
+            <span className="cmp-card-pres">{a.presentation === "female" ? "girl" : "boy"}</span>
             <small>{a.tagline}</small>
           </button>
         );
@@ -129,7 +129,7 @@ export function VoiceEditor({ s, patch, onTry, providerAvailable }: { s: Compani
       <div className="cmp-row">
         {ordered.map((o) => (
           <button key={o.id} type="button" className={`cmp-chip ${v.voiceId === o.id ? "on" : ""}`} onClick={() => set({ voiceId: o.id })} title={o.blurb}>
-            {o.label} <em>{o.presentation === "female" ? "f" : o.presentation === "male" ? "m" : "n"}</em>
+            {o.label} <em>{o.presentation === "female" ? "f" : o.presentation === "male" ? "m" : "·"}</em>
           </button>
         ))}
       </div>

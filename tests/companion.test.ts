@@ -10,8 +10,9 @@ import { buildSystemPrompt } from "../lib/prompt/persona";
 
 test("avatar registry is internally consistent", () => {
   assert.ok(AVATARS.length >= 4);
-  const presentations = new Set(AVATARS.map((a) => a.presentation));
-  assert.ok(presentations.has("female") && presentations.has("male") && presentations.has("neutral"));
+  assert.equal(AVATARS.length, 10);
+  assert.equal(AVATARS.filter((a) => a.presentation === "female").length, 5);
+  assert.equal(AVATARS.filter((a) => a.presentation === "male").length, 5);
   for (const a of AVATARS) {
     assert.ok(a.expressions.length === EXPRESSIONS.length, `${a.id} supports every expression`);
     for (const v of a.voices) assert.ok(VOICES.some((x) => x.id === v), `${a.id} voice ${v} exists`);
@@ -43,11 +44,10 @@ test("settings are clamped and unknown values fall back to the avatar default", 
 });
 
 test("companion block carries the name, style and boundaries, and the persona keeps its core", () => {
-  const s = { ...defaultSettings("mika"), name: "Kit", conversation: { ...defaultSettings("mika").conversation, emojis: "none" as const } };
+  const s = { ...defaultSettings("divya"), name: "Kit", conversation: { ...defaultSettings("divya").conversation, emojis: "none" as const } };
   const block = companionBlock(s, "Sam", [{ id: "m1", userId: "u", companionId: "c", memory: "Their cat is called Biscuit.", kind: "fact", importance: 0.4, createdAt: 0, updatedAt: 0 }]);
   assert.match(block, /You are Kit/);
-  assert.match(block, /they\/them/);
-  assert.match(block, /No emojis at all/);
+    assert.match(block, /No emojis at all/);
   assert.match(block, /Biscuit/);
   assert.match(block, /bridge, not a destination/);
   for (const p of FORBIDDEN_PHRASES) assert.ok(block.includes(`"${p}"`), `forbids ${p}`);

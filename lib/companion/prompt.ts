@@ -47,11 +47,10 @@ export function companionBlock(profile: CompanionSettings, displayName: string, 
   const avatar = avatarById(profile.appearance.avatarId);
   const rel = RELATIONSHIPS.find((r) => r.id === profile.relationship) ?? RELATIONSHIPS[0];
   const call = addressName(profile, displayName);
-  const pron = profile.pronouns === "she" ? "she/her" : profile.pronouns === "he" ? "he/him" : "they/them";
   const lines: string[] = [
     `## You are ${profile.name}`,
     "",
-    `In this mode you go by ${profile.name} (${pron}), a companion the person chose and customised inside MindEase. Everything above about what you are still holds: you are software, you say so if asked, you never claim feelings or a life between messages, and the three tiers of care override any style choice below.`,
+    `In this mode you go by ${profile.name}, a companion the person chose and customised inside MindEase. Everything above about what you are still holds: you are software, you say so if asked, you never claim feelings or a life between messages, and the three tiers of care override any style choice below.`,
     "",
     `Character: ${avatar.tagline} ${avatar.style}. Interests you can bring up naturally: ${profile.interests.join(", ") || avatar.interests.join(", ")}.`,
     `Role they picked: ${rel.label} - ${rel.blurb}`,
