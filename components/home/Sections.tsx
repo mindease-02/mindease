@@ -6,12 +6,11 @@ import { bindLift, bindParallax, popIn } from "@/lib/motion";
 import Magnetic from "./Magnetic";
 import ThemeOrb from "./ThemeOrb";
 
-import { PxEye, PxBrain, PxBell, PxShield, PxPlay, PxRefresh, PxCheck, PxHand, PxArrow, PxHeart, PxStar, PxMoon, PxMessage } from "./pixelIcons";
-/* Streamline "Pixel - Free" icons (CC BY 4.0). */
+import { PxEye, PxBrain, PxBell, PxShield, PxPlay, PxRefresh, PxCheck, PxHand, PxArrow, PxHeart, PxStar, PxMoon, PxMessage, PxMinus } from "./pixelIcons";
 const I = {
   eye: <PxEye className="pxicon" />, memory: <PxBrain className="pxicon" />, bell: <PxBell className="pxicon" />, shield: <PxShield className="pxicon" />,
   play: <PxPlay className="pxicon" />, pause: <PxHand className="pxicon" />, replay: <PxRefresh className="pxicon" />, check: <PxCheck className="pxicon" />,
-  minus: <svg viewBox="0 0 32 32" className="pxicon" shapeRendering="crispEdges" fill="currentColor" aria-hidden><path d="M6 14h20v4H6z" /></svg>,
+  minus: <PxMinus className="pxicon" />,
   arrow: <PxArrow className="pxicon" />,
 };
 
@@ -240,7 +239,7 @@ export function Footer() {
       <div className="wordmark" aria-hidden>
         <div className="path" />
         <span className="float"><PxHeart /></span><span className="float"><PxStar /></span><span className="float"><PxMoon /></span><span className="float"><PxMessage /></span>
-        <div className="big">MINDEASE</div>
+        <div className="big">MindEase</div>
       </div>
       <div className="container">
         <div className="foot">
@@ -252,7 +251,7 @@ export function Footer() {
           <div><h5>Crisis lines · India</h5><a href="https://telemanas.mohfw.gov.in" target="_blank" rel="noreferrer">Tele-MANAS · 14416</a><a href="tel:18005990019">Kiran · 1800-599-0019</a><a href="https://www.vandrevalafoundation.com" target="_blank" rel="noreferrer">Vandrevala · +91 9999 666 555</a><a href="tel:112">Emergency · 112</a></div>
           <div><h5>Source</h5><a href="https://github.com/mindease-02/mindease" target="_blank" rel="noreferrer">GitHub</a><Link href="/login">Sign in</Link></div>
         </div>
-        <div className="foot-bottom"><span>© {new Date().getFullYear()} MindEase · icons: <a href="https://www.streamlinehq.com/icons/pixel" target="_blank" rel="noreferrer" style={{ display: "inline" }}>Streamline Pixel</a> (CC BY 4.0)</span><span>Not therapy · Not a person · Not private from you</span></div>
+        <div className="foot-bottom"><span>© {new Date().getFullYear()} MindEase · icons: <a href="https://lucide.dev" target="_blank" rel="noreferrer" style={{ display: "inline" }}>Lucide</a> (ISC)</span><span>Not therapy · Not a person · Not private from you</span></div>
       </div>
     </footer>
   );

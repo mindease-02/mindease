@@ -1,12 +1,10 @@
-import { titleSans, titleSerif } from "./titleFonts";
-
 /**
  * The opening card of the landing page. Two names in a refined serif, a
  * quiet mark between them, warm light behind. Nothing else.
  */
 export default function TitleCard() {
   return (
-    <section className={`title-card ${titleSerif.variable} ${titleSans.variable}`} aria-label="Parneeth and Rishi">
+    <section className="title-card" aria-label="Parneeth and Rishi">
       <div className="tc-light" aria-hidden />
       <p className="tc-eyebrow">A collaboration</p>
       <h1 className="tc-title">

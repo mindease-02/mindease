@@ -101,7 +101,7 @@ export default function Scene3D({ pointer, drag, lite = false, story }: { pointe
     // Voxels: the ball is made of little parts. Each has a scattered start and a
     // target on the sphere; formations re-target them (sphere / ring / cloud / spiral).
     const N_VOX = lite ? 420 : 900;
-    const vox = new THREE.InstancedMesh(new THREE.BoxGeometry(0.11, 0.11, 0.11), new THREE.MeshPhysicalMaterial({ color: new THREE.Color(pal0.accent).multiplyScalar(0.72), roughness: 0.55, metalness: 0.05, clearcoat: 0.3 }), N_VOX);
+    const vox = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.07, 1), new THREE.MeshPhysicalMaterial({ color: new THREE.Color(pal0.accent).multiplyScalar(0.8), roughness: 0.35, metalness: 0.05, clearcoat: 0.5 }), N_VOX);
     vox.castShadow = false; group.add(vox);
     const start = new Float32Array(N_VOX * 3), targ = new Float32Array(N_VOX * 3), form = new Float32Array(N_VOX * 3);
     const rnd = (seed: number) => { const x = Math.sin(seed * 9999) * 10000; return x - Math.floor(x); };
