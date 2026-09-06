@@ -89,6 +89,7 @@ function PortraitAvatar({ look, expression = "neutral", speaking = false, level,
 
   return (
     <span className={`cmp-avatar cmp-portrait ${intro ? "cmp-avatar-intro" : ""} ${className}`} style={{ width: size, height: size }} data-expression={expression} data-speaking={speaking || undefined}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- a plain element: the loop writes transform/filter on it directly and the file is already sized for the stage */}
       <img ref={img} src={look.portrait} alt="" draggable={false} />
     </span>
   );
