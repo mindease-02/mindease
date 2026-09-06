@@ -15,7 +15,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pairs", required=True)
     ap.add_argument("--base", default="meta-llama/Llama-3.1-8B-Instruct")
-    ap.add_argument("--out", default="models/ori-dpo-lora")
+    ap.add_argument("--out", default="models/mindease-dpo-lora")
     args = ap.parse_args()
 
     from datasets import Dataset

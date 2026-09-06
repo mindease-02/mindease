@@ -16,13 +16,13 @@ const I = {
 };
 
 /* ------------------------------------------------------------- Product demo */
-const SCRIPT: { who: "you" | "ori"; text: string; cap?: [string, string] }[] = [
+const SCRIPT: { who: "you" | "mindease"; text: string; cap?: [string, string] }[] = [
   { who: "you", text: "i'm fine. just can't sleep. keep thinking about the meeting" },
-  { who: "ori", text: "You've said “fine” and then described a night of not sleeping. Which half should I believe?", cap: ["Read", "masking 0.6 · anxiety 0.7 · need: reflect"] },
+  { who: "mindease", text: "You've said “fine” and then described a night of not sleeping. Which half should I believe?", cap: ["Read", "masking 0.6 · anxiety 0.7 · need: reflect"] },
   { who: "you", text: "ok not fine. i think they're going to let me go" },
-  { who: "ori", text: "Makes sense you're braced for it, after the way last month went. What's the actual evidence, either way?", cap: ["Move", "validate the feeling, not the conclusion · one question"] },
+  { who: "mindease", text: "Makes sense you're braced for it, after the way last month went. What's the actual evidence, either way?", cap: ["Move", "validate the feeling, not the conclusion · one question"] },
   { who: "you", text: "…nothing concrete. one weird look in the meeting" },
-  { who: "ori", text: "One look. That's a small thing to hang a whole night on. Text me tomorrow after you've slept - I'll ask about the look, not the fear.", cap: ["Remembered", "review last month · meeting tomorrow"] },
+  { who: "mindease", text: "One look. That's a small thing to hang a whole night on. Text me tomorrow after you've slept - I'll ask about the look, not the fear.", cap: ["Remembered", "review last month · meeting tomorrow"] },
 ];
 
 export function Demo() {
@@ -40,8 +40,8 @@ export function Demo() {
     const next = SCRIPT[step];
     const wait = step === 0 ? 500 : 1500;
     // MindEase "types" for a beat before its line lands; your lines just arrive.
-    const t1 = setTimeout(() => { if (next.who === "ori") setTyping(true); }, Math.max(0, wait - 900));
-    const t2 = setTimeout(() => { setTyping(false); setStep((s) => s + 1); }, next.who === "ori" ? wait + 700 : wait);
+    const t1 = setTimeout(() => { if (next.who === "mindease") setTyping(true); }, Math.max(0, wait - 900));
+    const t2 = setTimeout(() => { setTyping(false); setStep((s) => s + 1); }, next.who === "mindease" ? wait + 700 : wait);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [playing, step]);
   // Pause when offscreen or hidden (skill: pause media when offscreen).
@@ -78,7 +78,7 @@ export function Demo() {
                   {i < step && l.cap && <div className="cap in"><b>{l.cap[0]}:</b> {l.cap[1]}</div>}
                 </div>
               ))}
-              {typing && <div className="line ori in typing" aria-label="MindEase is typing"><i /><i /><i /></div>}
+              {typing && <div className="line mindease in typing" aria-label="MindEase is typing"><i /><i /><i /></div>}
             </div>
             <div className="device-foot">
               <div className="prog" aria-hidden>{SCRIPT.map((_, i) => <i key={i} className={i < step ? "on" : ""} />)}</div>
@@ -176,7 +176,7 @@ export function FeatureRows({ chatHref = "/login" }: { chatHref?: string }) {
             <ul><li>Every check-in says what prompted it</li><li>“Not useful” makes it rarer</li><li>The more you lean on it, the less it initiates</li></ul>
           </div>
           <div className="feat-visual" aria-hidden>
-            <div className="line ori in" style={{ maxWidth: "100%", opacity: 1, transform: "none", padding: "12px 14px", borderRadius: 16, background: "var(--surface-2)", border: "1px solid var(--color-border)", fontSize: ".9rem" }}>
+            <div className="line mindease in" style={{ maxWidth: "100%", opacity: 1, transform: "none", padding: "12px 14px", borderRadius: 16, background: "var(--surface-2)", border: "1px solid var(--color-border)", fontSize: ".9rem" }}>
               <span style={{ display: "block", fontSize: ".62rem", letterSpacing: ".16em", textTransform: "uppercase", color: "var(--color-accent)", marginBottom: 4 }}>unprompted · because your evenings have been shorter</span>
               Your messages have been getting shorter in the evenings this week. Am I reading that right?
             </div>

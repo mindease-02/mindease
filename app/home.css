@@ -130,7 +130,7 @@ body:has(> .world) { background: var(--bg, #07080b); }
 .world .show { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; margin-top: 56px; }
 .world .msg { position: absolute; max-width: 62%; padding: 14px 16px; border-radius: 18px; font-size: .9rem; line-height: 1.45; transform: translateZ(var(--z, 40px)); transition: transform .8s var(--ease), opacity .8s var(--ease); box-shadow: 0 30px 60px -30px rgba(0,0,0,.9); }
 .world .msg.you { right: 6%; background: #eeece7; color: #1c1a17; border-bottom-right-radius: 6px; }
-.world .msg.ori { left: 6%; background: color-mix(in srgb, var(--bg-2) 85%, transparent); color: var(--ink); border: 1px solid var(--line-2); border-bottom-left-radius: 6px; }
+.world .msg.mindease { left: 6%; background: color-mix(in srgb, var(--bg-2) 85%, transparent); color: var(--ink); border: 1px solid var(--line-2); border-bottom-left-radius: 6px; }
 .world .msg .k { display: block; font-size: .6rem; letter-spacing: .18em; text-transform: uppercase; color: var(--coral-2); margin-bottom: 4px; }
 .world .steps { display: grid; gap: 22px; }
 .world .step { display: grid; grid-template-columns: 44px 1fr; gap: 16px; align-items: start; }
@@ -342,7 +342,7 @@ body:has(> .world) { background: var(--bg, #07080b); }
 .world .device .line { max-width: 84%; padding: 11px 14px; border-radius: 18px; font-size: .92rem; line-height: 1.5; opacity: 0; transform: translateY(8px); transition: opacity .5s var(--ease), transform .6s var(--ease); }
 .world .device .line.in { opacity: 1; transform: none; }
 .world .device .line.you { align-self: flex-end; background: #eeece7; color: #1c1a17; border-bottom-right-radius: 6px; }
-.world .device .line.ori { align-self: flex-start; background: var(--surface-2); color: var(--ink); border: 1px solid var(--color-border); border-bottom-left-radius: 6px; }
+.world .device .line.mindease { align-self: flex-start; background: var(--surface-2); color: var(--ink); border: 1px solid var(--color-border); border-bottom-left-radius: 6px; }
 .world .device .cap { align-self: flex-start; max-width: 84%; margin: -4px 0 2px 6px; padding-left: 10px; border-left: 2px solid var(--color-secondary); font-size: .74rem; line-height: 1.4; color: var(--ink-2); opacity: 0; transition: opacity .5s var(--ease) .2s; }
 .world .device .cap.in { opacity: 1; }
 .world .device .cap b { color: var(--ink); font-weight: 500; }
@@ -405,7 +405,7 @@ body:has(> .world) { background: var(--bg, #07080b); }
 }
 .world .clay, .world .device, .world .feat-visual, .world .cta, .world .theme-frame, .world .card,
 .world .mood, .world form.glass, .world .techniques, .world .offer,
-.world .bubble-ai, .world .bubble-proactive, .world .composer, .world .clay-sm, .world .device .line.ori {
+.world .bubble-ai, .world .bubble-proactive, .world .composer, .world .clay-sm, .world .device .line.mindease {
   background: linear-gradient(145deg, color-mix(in srgb, var(--surface) 88%, white 4%), color-mix(in srgb, var(--surface) 92%, black 8%));
   border: 1px solid rgba(255,255,255,.06);
   box-shadow: inset 2px 2px 6px var(--clay-hi), inset -8px -10px 22px var(--clay-lo), 0 40px 80px -40px rgba(0,0,0,.95), 0 0 0 1px rgba(0,0,0,.4);
@@ -474,7 +474,7 @@ body:has(> .world) { background: var(--bg, #07080b); }
 .world .chip-mem:nth-child(2) { animation-delay: 1.3s; } .world .chip-mem:nth-child(3) { animation-delay: 2.6s; } .world .chip-mem:nth-child(4) { animation-delay: 3.9s; }
 .world .gate svg path { stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw .6s var(--ease) forwards; animation-delay: calc(var(--d, 0ms) + .3s); }
 @keyframes draw { to { stroke-dashoffset: 0; } }
-.world .feat-visual .line.ori { animation: breathe-p 6s ease-in-out infinite; }
+.world .feat-visual .line.mindease { animation: breathe-p 6s ease-in-out infinite; }
 @keyframes breathe-p { 0%,100% { transform: none; } 50% { transform: translateY(-3px); } }
 /* mood tiles: rising entrance handled by data-stagger; selected one pulses */
 .world .mood[aria-pressed="true"] { animation: pulse 1.6s ease-in-out infinite; }
@@ -491,7 +491,7 @@ body:has(> .world) { background: var(--bg, #07080b); }
 .world .feat.in ul li:nth-child(2) { transition-delay: .12s; } .world .feat.in ul li:nth-child(3) { transition-delay: .24s; }
 
 @media (prefers-reduced-motion: reduce) {
-  .world .atmos::before, .world .chip-mem, .world .feat-visual svg.wheel, .world .feat-visual .line.ori, .world .mood[aria-pressed="true"], .world .shot > .container, .world .shot > div, .world .foot > div { animation: none !important; }
+  .world .atmos::before, .world .chip-mem, .world .feat-visual svg.wheel, .world .feat-visual .line.mindease, .world .mood[aria-pressed="true"], .world .shot > .container, .world .shot > div, .world .foot > div { animation: none !important; }
   .world .feat-visual { transform: none; }
   .world .feat ul li { opacity: 1; transform: none; }
 }
@@ -522,7 +522,7 @@ body:has(> .world) { background: var(--bg, #07080b); }
 }
 .world .btn, .world .clay-btn, .world .clay-btn-primary, .world .burger, .world .note-row .go, .world .skip, .world .t-list b, .world .step i, .world .chip-mem .x { border-radius: var(--px) !important; }
 /* pixel clay: 2px edge + stepped block shadow, no blur */
-.world .clay, .world .device, .world .feat-visual, .world .cta, .world .theme-frame, .world .card, .world .mood, .world form.glass, .world .techniques, .world .offer, .world .bubble-ai, .world .bubble-proactive, .world .composer, .world .clay-sm, .world .device .line.ori {
+.world .clay, .world .device, .world .feat-visual, .world .cta, .world .theme-frame, .world .card, .world .mood, .world form.glass, .world .techniques, .world .offer, .world .bubble-ai, .world .bubble-proactive, .world .composer, .world .clay-sm, .world .device .line.mindease {
   background: var(--surface);
   border: 2px solid var(--px-edge);
   box-shadow: inset 4px 4px 0 rgba(255,255,255,.07), inset -4px -4px 0 rgba(0,0,0,.45), 8px 8px 0 rgba(0,0,0,.55);
@@ -815,13 +815,13 @@ html { scroll-behavior: smooth; }
 .world .btn, .world .clay-btn, .world .clay-btn-primary { text-transform: none; font-size: .95rem; font-weight: 600; letter-spacing: .01em; }
 .world .eyebrow, .world .steps-ind, .world .xp-side, .world .marquee, .world .sticker, .world .sec-head .eyebrow, .world .feat .eyebrow, .world .story .eyebrow { font-size: .72rem; letter-spacing: .12em; }
 /* surfaces: thin edges, rounded, soft shadows */
-.world .clay, .world .device, .world .feat-visual, .world .cta, .world .theme-frame, .world .card, .world .mood, .world .float-card, .world form.glass, .world .techniques, .world .offer, .world .bubble-ai, .world .bubble-proactive, .world .composer, .world .clay-sm, .world .device .line.ori, .world .xp-sub, .world .demo-play, .world .nav-links, .world .mobile-menu {
+.world .clay, .world .device, .world .feat-visual, .world .cta, .world .theme-frame, .world .card, .world .mood, .world .float-card, .world form.glass, .world .techniques, .world .offer, .world .bubble-ai, .world .bubble-proactive, .world .composer, .world .clay-sm, .world .device .line.mindease, .world .xp-sub, .world .demo-play, .world .nav-links, .world .mobile-menu {
   border: 1px solid rgba(255,255,255,.10) !important; border-radius: var(--px) !important;
   box-shadow: 0 24px 60px -30px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.06) !important;
   background: var(--surface);
 }
 .world .bubble-user { border: 0 !important; border-radius: var(--px) var(--px) 6px var(--px) !important; box-shadow: 0 16px 40px -24px rgba(0,0,0,.8) !important; }
-.world .bubble-ai, .world .device .line.ori { border-radius: var(--px) var(--px) var(--px) 6px !important; }
+.world .bubble-ai, .world .device .line.mindease { border-radius: var(--px) var(--px) var(--px) 6px !important; }
 .world .btn, .world .clay-btn, .world .t-tab, .world .offer-opt, .world .device-foot .ctl, .world .burger, .world .nav-links a { border: 1px solid rgba(255,255,255,.12) !important; border-radius: 999px !important; box-shadow: 0 10px 24px -16px rgba(0,0,0,.8) !important; background: var(--surface-2); }
 .world .btn-primary, .world .clay-btn-primary, .world .note-row .go { border: 0 !important; border-radius: 999px !important; background: linear-gradient(135deg, var(--coral-2), var(--accent-mid) 60%, var(--accent-deep)); box-shadow: 0 14px 34px -14px rgba(var(--accent-rgb),.75), inset 0 1px 0 rgba(255,255,255,.35) !important; }
 .world .note-row .go { border-radius: 999px !important; }
