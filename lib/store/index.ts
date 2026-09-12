@@ -97,8 +97,20 @@ export function newUserState(
 
 /** Fill in fields added after a user's state was first written. */
 export function migrate(s: UserState): UserState {
+  // Sessions: messages from before sessions existed become one "earlier" session.
+  const sessions = [...(s.sessions ?? [])];
+  const messages = (s.messages ?? []).map((m) => (m.sessionId ? m : { ...m, sessionId: "s0" }));
+  if (messages.some((m) => m.sessionId === "s0") && !sessions.some((x) => x.id === "s0")) {
+    const legacy = messages.filter((m) => m.sessionId === "s0");
+    const firstUser = legacy.find((m) => m.role === "user");
+    sessions.unshift({ id: "s0", title: (firstUser?.content ?? "Earlier conversation").slice(0, 48), startedAt: legacy[0].at, lastAt: legacy[legacy.length - 1].at, count: legacy.length });
+  }
+  const currentSessionId = s.currentSessionId ?? (sessions[0]?.id);
   return {
     ...s,
+    messages,
+    sessions,
+    currentSessionId,
     displayName: s.displayName ?? "you",
     octant: s.octant ?? emptyOctant(),
     memories: s.memories ?? [],

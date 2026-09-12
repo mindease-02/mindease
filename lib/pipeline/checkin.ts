@@ -4,6 +4,9 @@
  * the Mirror panel. It never sends anything itself: it queues a message in the
  * user's outbox, which the client drains and shows as an unprompted turn.
  */
+import { noteMessages } from "../sessions";
+import type { LanguageId } from "../i18n";
+import { MESSAGE_LIMIT } from "../store/types";
 import { assessTrend } from "../trend";
 import { assessDependency } from "../dependency";
 import { scoreOutcome, OUTCOME_LAG_MS, OUTCOME_WINDOW_MS } from "../dependency/objective";
@@ -84,7 +87,7 @@ export async function evaluateUser(userId: string, opts: { now?: number; force?:
       state.cadenceLog = { ...state.cadenceLog, [kind]: localDayKey(now, state.timeZone) };
     }
   }
-  if (state.consent.storeTranscript) state.messages = [...state.messages, message].slice(-120);
+  if (state.consent.storeTranscript) { noteMessages(state, [message]); state.messages = [...state.messages, message].slice(-MESSAGE_LIMIT); }
   await store.pushOutbox(userId, message);
   // Second consent: OS notification only if they turned it on and the tab is likely closed.
   if (state.consent.pushNotifications && state.push.length && now - state.lastUserMessageAt > 20 * 60_000) {
@@ -106,7 +109,7 @@ async function composeCheckin(
   ].filter((m, i, arr) => arr.findIndex((x) => x.id === m.id) === i);
 
   const system = buildSystemPrompt({
-    trend, dependency, region: state.region,
+    trend, dependency, region: state.region, language: state.language as LanguageId | undefined,
     allowBehaviouralSignals: state.consent.allowBehaviouralSignals,
     proactive: { kind, rationale: decision.rationale },
     memories, octant: state.octant, analysis: undefined,

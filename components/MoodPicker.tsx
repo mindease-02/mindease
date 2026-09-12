@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { MOODS, type MoodId } from "@/lib/moods";
 import { applyPalette, paletteById } from "@/lib/theme";
 import { PxArrow } from "./home/pixelIcons";
+import { moodText, t, uiLang } from "@/lib/i18n";
 
-export default function MoodPicker({ name }: { name: string }) {
+export default function MoodPicker({ name, lang = "auto" }: { name: string; lang?: string }) {
   const router = useRouter();
   const [mood, setMood] = useState<MoodId | null>(null);
   const [note, setNote] = useState("");
@@ -36,27 +37,27 @@ export default function MoodPicker({ name }: { name: string }) {
 
   return (
     <div className="container" style={{ maxWidth: 920 }}>
-      <div className="steps-ind" data-reveal aria-label="Step 2 of 2"><i className="on" /><i className="on" /><span>Step 2 of 2 · how you&apos;re arriving</span></div>
-      <h1 className="display" data-reveal style={{ fontSize: "clamp(2.6rem, 6vw, 4.8rem)", margin: "14px 0 0", ["--d" as string]: "60ms" }}>How are you arriving, {name}?</h1>
-      <p className="muted" data-reveal style={{ fontWeight: 300, marginTop: 14, maxWidth: "36rem", lineHeight: 1.6, ["--d" as string]: "120ms" }}>Tap one. It gives MindEase a sense of what to hold, and you can be wrong about it.</p>
+      <div className="steps-ind" data-reveal aria-label="Step 2 of 2"><i className="on" /><i className="on" /><span>{t("step2", lang)}</span></div>
+      <h1 className="display" data-reveal style={{ fontSize: "clamp(2.6rem, 6vw, 4.8rem)", margin: "14px 0 0", ["--d" as string]: "60ms" }}>{t("arriving", lang, { name })}</h1>
+      <p className="muted" data-reveal style={{ fontWeight: 300, marginTop: 14, maxWidth: "36rem", lineHeight: 1.6, ["--d" as string]: "120ms" }}>{t("arrivingSub", lang)}</p>
       <div ref={grid} className={`moods ${busy ? "busy" : ""}`} role="group" aria-label="Mood" data-stagger>
         {MOODS.map((m) => (
           <button key={m.id} type="button" className="mood" aria-pressed={mood === m.id} disabled={busy} style={{ ["--c" as string]: m.c }}
             onClick={() => { if (!armed()) return; setMood(m.id); const pal = paletteById(m.id); if (pal) applyPalette(pal); go(m.id, note); }}>
-            <span className="dot" aria-hidden /><b>{m.label}</b><span>{m.hint}</span>
-            <small>{m.description}</small>
+            <span className="dot" aria-hidden /><b>{moodText(m.id, lang)?.[0] ?? m.label}</b><span>{moodText(m.id, lang)?.[1] ?? m.hint}</span>
+            {uiLang(lang) === "en" && <small>{m.description}</small>}
           </button>
         ))}
       </div>
       <form data-reveal className="note-row" style={{ ["--d" as string]: "260ms" }} onSubmit={(e) => { e.preventDefault(); if (armed()) go(mood, note); }}>
-        <label htmlFor="own-words" className="label">Or say it in your own words</label>
-        <input id="own-words" className="field" value={note} onChange={(e) => setNote(e.target.value.slice(0, 200))} placeholder="e.g. exam on Monday and I can’t focus" disabled={busy} />
-        <button type="submit" className="go" aria-label="Go to the chat" disabled={busy || !note.trim()}>
+        <label htmlFor="own-words" className="label">{t("ownWords", lang)}</label>
+        <input id="own-words" className="field" value={note} onChange={(e) => setNote(e.target.value.slice(0, 200))} placeholder={t("ownWordsPh", lang)} disabled={busy} />
+        <button type="submit" className="go" aria-label={t("goToChat", lang)} disabled={busy || !note.trim()}>
           <PxArrow className="pxicon" style={{ fontSize: 22 }} />
         </button>
       </form>
       {error && <p style={{ color: "var(--coral-2)", marginTop: 12 }}>{error}</p>}
-      {busy && <p className="muted" style={{ marginTop: 12, fontSize: ".9rem" }}>Opening the chat…</p>}
+      {busy && <p className="muted" style={{ marginTop: 12, fontSize: ".9rem" }}>{t("openingChat", lang)}</p>}
     </div>
   );
 }

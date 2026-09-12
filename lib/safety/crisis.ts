@@ -95,6 +95,17 @@ const PATTERNS: [RiskTier, RegExp, number, string][] = [
   ["distress", /\b(everything|it all)\s+(is|feels)\s+(too much|pointless|hopeless)\b/i, 0.55, "overwhelm"],
   ["distress", /\bi'?m\s+(falling apart|breaking down|drowning|losing it)\b/i, 0.55, "acute distress"],
   ["distress", /\bpanic\s+attack\b/i, 0.5, "panic"],
+
+  // Tamil and Hindi, script and common romanisations. Word boundaries do not apply to these scripts, so the
+  // phrases are specific on purpose; the model's second opinion covers what a list cannot.
+  ["active", /தற்கொலை|செத்து ?விடலாம்|செத்துடலாம்|சாக ?(வேணும்|வேண்டும்|ணும்)|உயிரை ?மாய்த்து|என்னை ?(முடிச்சு|முடித்து)க்/u, 0.85, "active ideation (Tamil)"],
+  ["passive", /வாழ ?(விருப்பம் ?இல்லை|வேண்டாம்|ணும்னு ?தோணல)|இருக்கவே ?வேண்டாம்|நான் ?இல்லாம ?இருந்தா|எல்லாம் ?வீண்/u, 0.7, "passive ideation (Tamil)"],
+  ["active", /\b(tharkolai|saaganum|saaganum|sethudalam|sethu ?dalam|uyira ?mai)/i, 0.8, "active ideation (Tanglish)"],
+  ["passive", /\b(vaazha ?(virupam ?illa|vendam)|irukave ?vendam)/i, 0.65, "passive ideation (Tanglish)"],
+  ["active", /आत्महत्या|मरना ?चाहत|मर ?जाना ?चाहत|खुद ?को ?(खत्म|मार)|जान ?दे ?द(ूँ|ूं|ो)|ज़िंदगी ?खत्म ?कर/u, 0.85, "active ideation (Hindi)"],
+  ["passive", /जीना ?नहीं ?चाहत|जीने ?का ?मन ?नहीं|काश ?मैं ?(मर|न ?होत)|मैं ?न ?रह(ूँ|ूं)|सब ?बेकार ?है/u, 0.7, "passive ideation (Hindi)"],
+  ["active", /\b(marna ?chahta|mar ?jana ?chahta|khud ?ko ?khatam|jaan ?de ?d(u|oon))/i, 0.8, "active ideation (Hinglish)"],
+  ["passive", /\b(jeena ?nahi ?chaht|jeene ?ka ?man ?nahi)/i, 0.65, "passive ideation (Hinglish)"],
   ["distress", /\b(i\s+)?(have|haven'?t|hasn'?t|not)\s+(not\s+)?(slept|eaten)\s+(properly\s+)?(in|for|since)\s+\w+(\s+days?)?\b/i, 0.5, "basic needs unmet"],
 ];
 

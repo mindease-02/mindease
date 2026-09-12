@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { regionFor } from "@/lib/util/region";
+import { languageFromLocale } from "@/lib/i18n";
 import { PxArrow } from "./home/pixelIcons";
 import { useRouter } from "next/navigation";
 
@@ -24,9 +25,10 @@ export default function LoginForm() {
     setBusy(true); setError(null); setNotice(null);
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const region = regionFor(timeZone, navigator.language);
+    const language = languageFromLocale(navigator.language);
     try {
       if (!ACCOUNTS) {
-        const r = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ identifier, timeZone, region }) });
+        const r = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ identifier, timeZone, region, language }) });
         const j = await r.json();
         if (!r.ok) throw new Error(j.error ?? "Couldn't sign in.");
         router.push("/mood"); return;
@@ -37,7 +39,7 @@ export default function LoginForm() {
         setNotice("If that address has an account, a reset link is on its way. Check spam too."); setBusy(false); return;
       }
       const url = mode === "signup" ? "/api/auth/signup" : "/api/auth/signin";
-      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password, name, timeZone, region }) });
+      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password, name, timeZone, region, language }) });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? "Couldn't sign in.");
       if (j.needsConfirmation) { setNotice("Almost there - open the confirmation email we just sent, then sign in."); setMode("signin"); setBusy(false); return; }

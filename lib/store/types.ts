@@ -57,6 +57,8 @@ export interface StoredMessage {
   role: "user" | "assistant";
   content: string;
   at: number;
+  /** Which chat session this belongs to (see UserState.sessions). Older messages without one are "s0". */
+  sessionId?: string;
   /** Set on assistant turns that were unprompted. */
   proactive?: boolean;
   /** Which check-in style produced it, for the "not useful" feedback button. */
@@ -123,6 +125,20 @@ export interface UserState {
   screenings?: Screening[];
   /** Last time a screening was offered, to avoid re-asking every turn. */
   lastScreeningOfferAt?: number;
+  /** Reply language: "auto" follows whatever the person writes in. UI strings follow it where translated. */
+  language?: string;
+  /** Chat sessions. Messages carry a sessionId; memory, trend and safety stay global across sessions. */
+  sessions?: ChatSession[];
+  currentSessionId?: string;
+}
+
+export interface ChatSession {
+  id: string;
+  /** First user line, trimmed; editable. */
+  title: string;
+  startedAt: number;
+  lastAt: number;
+  count: number;
 }
 
 export interface Store {
@@ -136,7 +152,8 @@ export interface Store {
 }
 
 export const HISTORY_LIMIT = 900;
-export const MESSAGE_LIMIT = 120;
+export const MESSAGE_LIMIT = 480;
+export const SESSION_LIMIT = 40;
 export const MEMORY_LIMIT = 400;
 export const RISK_LOG_LIMIT = 50;
 export const INCONGRUENCE_LOG_LIMIT = 60;

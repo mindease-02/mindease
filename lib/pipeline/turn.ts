@@ -34,6 +34,8 @@ import { addMemories, anchors, markRecalled, retrieve } from "../memory";
 import { extractMemories } from "../memory/extract";
 import { pickReminiscence } from "../memory/reminiscence";
 import { buildSystemPrompt, AGENT_NAME } from "../prompt/persona";
+import { ensureSession, noteMessages, sessionMessages } from "../sessions";
+import type { LanguageId } from "../i18n";
 import { getStore, migrate, newUserState } from "../store";
 import { HISTORY_LIMIT, MESSAGE_LIMIT, MEMORY_LIMIT, RISK_LOG_LIMIT, INCONGRUENCE_LOG_LIMIT, RATE_LIMIT, type StoredMessage, type UserState } from "../store/types";
 import { DAY, HOUR } from "../util/time";
@@ -137,19 +139,21 @@ export class RateLimitError extends Error {
   constructor(public retryAfterMs: number) { super("Slow down a little - that's a lot of messages in ten minutes."); }
 }
 
-export async function loadOrCreate(userId: string, displayName: string, timeZone?: string, region?: string): Promise<UserState> {
+export async function loadOrCreate(userId: string, displayName: string, timeZone?: string, region?: string, language?: string): Promise<UserState> {
   const store = getStore();
   const existing = await store.get(userId);
   if (existing) {
     const s = migrate(existing);
     if (timeZone && s.timeZone !== timeZone) { s.timeZone = timeZone; s.consent.timeZone = timeZone; }
     if (displayName && s.displayName !== displayName) s.displayName = displayName;
+    if (language && !s.language) s.language = language;
     // Transcript retention: drop message text older than the person's setting.
     const keepFrom = Date.now() - (s.consent.retentionDays || 30) * DAY;
     if (s.messages.some((m) => m.at < keepFrom)) s.messages = s.messages.filter((m) => m.at >= keepFrom);
     return s;
   }
   const fresh = newUserState(userId, displayName, timeZone ?? "UTC", region);
+  if (language) fresh.language = language;
   await store.put(fresh);
   return fresh;
 }
@@ -213,7 +217,8 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
 
   // 3. Model analysis (wider vocabulary, ESCAPE split, theory of mind), with the
   //    lexical read as its fallback. Runs alongside memory extraction.
-  const context = (state.consent.storeTranscript ? state.messages : (input.clientContext ?? []))
+  ensureSession(state, now);
+  const context = (state.consent.storeTranscript ? sessionMessages(state) : (input.clientContext ?? []))
     .slice(-10).map((m) => ({ role: m.role, content: m.content }));
   const [analysis, extracted] = await Promise.all([
     analyzeAffect(text, context, { vad: snapshot.vad, octant: octantFromVAD(snapshot.vad) }, now),
@@ -299,7 +304,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
 
   // 7. Reply.
   const system = buildSystemPrompt({
-    snapshot, trend, dependency, risk, region: state.region,
+    snapshot, trend, dependency, risk, region: state.region, language: state.language as LanguageId | undefined,
     allowBehaviouralSignals: state.consent.allowBehaviouralSignals,
     analysis, octant: state.octant, memories: memoriesUsed, reminiscence,
     displayName: state.displayName, localTime: localTimeString(now, state.timeZone),
@@ -336,7 +341,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   state.memories = addMemories(state.memories, extracted, MEMORY_LIMIT);
   const userMsg: StoredMessage = { role: "user", content: text, at: now };
   const aiMsg: StoredMessage = { role: "assistant", content: reply, at: Date.now() };
-  if (state.consent.storeTranscript) state.messages = [...state.messages, userMsg, aiMsg].slice(-MESSAGE_LIMIT);
+  if (state.consent.storeTranscript) { noteMessages(state, [userMsg, aiMsg]); state.messages = [...state.messages, userMsg, aiMsg].slice(-MESSAGE_LIMIT); }
   state.lastUserMessageAt = now;
   await store.put(state);
 

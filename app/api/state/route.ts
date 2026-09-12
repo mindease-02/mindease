@@ -3,6 +3,7 @@ import { currentSession } from "@/lib/auth";
 import { getStore, migrate } from "@/lib/store";
 import { userView } from "@/lib/pipeline/userView";
 import { loadOrCreate } from "@/lib/pipeline/turn";
+import { ensureSession, listSessions, sessionMessages } from "@/lib/sessions";
 
 export const runtime = "nodejs";
 
@@ -17,5 +18,12 @@ export async function GET(req: Request) {
   const outbox = await store.drainOutbox(session.userId);
   const mirror = url.searchParams.get("mirror") === "1" ? userView(state) : null;
   const arrival = state.arrival && Date.now() - state.arrival.at < 6 * 3600_000 ? state.arrival : null;
-  return NextResponse.json({ name: state.displayName, outbox, mirror, arrival, messages: state.consent.storeTranscript ? state.messages.slice(-60) : [] });
+  const before = state.currentSessionId;
+  ensureSession(state);
+  if (state.currentSessionId !== before) await store.put(state);
+  return NextResponse.json({
+    name: state.displayName, email: session.identifier, language: state.language ?? "auto", outbox, mirror, arrival,
+    messages: state.consent.storeTranscript ? sessionMessages(state).slice(-80) : [],
+    sessions: listSessions(state), currentSessionId: state.currentSessionId ?? null,
+  });
 }

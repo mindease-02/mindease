@@ -42,6 +42,7 @@ import { formatForPrompt } from "../memory";
 import type { ReminiscenceMove } from "../memory/reminiscence";
 import { summarizeOctant, type OctantState, octantShift } from "../affect/octant";
 import { registerBlock } from "./templates";
+import { languageInstruction, type LanguageId } from "../i18n";
 
 export const AGENT_NAME = "MindEase";
 
@@ -167,6 +168,8 @@ export interface PromptContext {
   screeningOffered?: string;
   /** A screening they completed in the last three days. */
   lastScreening?: { name: string; score: number; max: number; band: string; when: number };
+  /** Reply language; "auto" mirrors the person. */
+  language?: LanguageId;
 }
 
 export function buildSystemPrompt(ctx: PromptContext): string {
@@ -175,6 +178,7 @@ export function buildSystemPrompt(ctx: PromptContext): string {
   if (ctx.displayName || ctx.localTime) {
     parts.push(`## Who and when\n\nYou are talking with ${ctx.displayName ?? "someone"}.${ctx.localTime ? ` Their local time is ${ctx.localTime}.` : ""} Use their name rarely - once in a while, never every message.`);
   }
+  parts.push(languageInstruction(ctx.language));
   parts.push(slangBlock());
   if (ctx.lifestyle) parts.push(lifestyleBlock(ctx.lifestyle));
   if (ctx.arrival) parts.push(arrivalBlock(ctx.arrival));

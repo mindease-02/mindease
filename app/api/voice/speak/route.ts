@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "not signed in" }, { status: 401 });
   const key = process.env.ELEVENLABS_API_KEY;
   if (!key) return new Response(null, { status: 204 });
-  const { text } = (await req.json().catch(() => ({}))) as { text?: string };
+  const { text, language } = (await req.json().catch(() => ({}))) as { text?: string; language?: string };
   if (!text) return NextResponse.json({ error: "no text" }, { status: 400 });
   const voice = process.env.ELEVENLABS_VOICE_ID ?? "EXAVITQu4vr4xnSDxMaL";
   const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_64`, {
@@ -18,6 +18,7 @@ export async function POST(req: Request) {
     headers: { "xi-api-key": key, "Content-Type": "application/json" },
     body: JSON.stringify({
       text: text.slice(0, 1200), model_id: "eleven_turbo_v2_5",
+      ...(language && /^[a-z]{2}$/.test(language) ? { language_code: language } : {}),
       voice_settings: { stability: 0.55, similarity_boost: 0.7, style: 0.15, use_speaker_boost: false },
     }),
   });

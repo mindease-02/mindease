@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isLanguage } from "@/lib/i18n";
 import { serverClient, supabaseConfigured } from "@/lib/supabase";
 import { loadOrCreate } from "@/lib/pipeline/turn";
 import { getStore } from "@/lib/store";
@@ -8,7 +9,7 @@ export const runtime = "nodejs";
 /** Create an email + password account. Display name goes into user metadata. */
 export async function POST(req: Request) {
   if (!supabaseConfigured()) return NextResponse.json({ error: "Accounts aren't set up on this server yet." }, { status: 501 });
-  const b = (await req.json().catch(() => ({}))) as { email?: string; password?: string; name?: string; timeZone?: string; region?: string; proactive?: boolean };
+  const b = (await req.json().catch(() => ({}))) as { email?: string; password?: string; name?: string; timeZone?: string; region?: string; language?: string; proactive?: boolean };
   const email = (b.email ?? "").trim().toLowerCase();
   const password = b.password ?? "";
   const name = (b.name ?? "").trim().slice(0, 40) || email.split("@")[0];
@@ -21,7 +22,7 @@ export async function POST(req: Request) {
     // Email confirmation is on in the Supabase project: they must click the link first.
     return NextResponse.json({ ok: true, needsConfirmation: true });
   }
-  const state = await loadOrCreate(data.user!.id, name, b.timeZone, b.region);
+  const state = await loadOrCreate(data.user!.id, name, b.timeZone, b.region, isLanguage(b.language) ? b.language : undefined);
   if (typeof b.proactive === "boolean") { state.consent.enabled = b.proactive; await getStore().put(state); }
   return NextResponse.json({ ok: true, name, userId: data.user!.id, returning: false });
 }

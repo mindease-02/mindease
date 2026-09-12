@@ -14,7 +14,8 @@ export async function POST(req: Request) {
   if (file.size > 20 * 1024 * 1024) return NextResponse.json({ error: "recording too long" }, { status: 413 });
   try {
     const name = (file as File).name || "audio.webm";
-    const text = await transcribe(file, name);
+    const lang = form.get("language"); const language = typeof lang === "string" && /^[a-z]{2}$/.test(lang) ? lang : undefined;
+    const text = await transcribe(file, name, language);
     return NextResponse.json({ text });
   } catch (err) {
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });

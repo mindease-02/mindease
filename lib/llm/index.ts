@@ -100,7 +100,7 @@ export function parseJsonObject<T>(text: string): T | null {
 }
 
 /** Groq-hosted Whisper. Audio never touches any other service. */
-export async function transcribe(file: Blob, filename = "audio.webm"): Promise<string> {
+export async function transcribe(file: Blob, filename = "audio.webm", language?: string): Promise<string> {
   const key = process.env.GROQ_API_KEY;
   if (!key) throw new Error("GROQ_API_KEY is required for speech-to-text.");
   const form = new FormData();
@@ -108,6 +108,7 @@ export async function transcribe(file: Blob, filename = "audio.webm"): Promise<s
   form.append("model", "whisper-large-v3-turbo");
   form.append("response_format", "json");
   form.append("temperature", "0");
+  if (language) form.append("language", language);
   const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}` },
