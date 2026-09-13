@@ -69,6 +69,7 @@ export async function analyzeAffect(
   context: { role: "user" | "assistant"; content: string }[],
   fallback: { vad: VAD; octant: Octant },
   at = Date.now(),
+  language?: string,
 ): Promise<AffectAnalysis> {
   const base: AffectAnalysis = {
     at, source: "fallback", axes: fallback.octant, states: [],
@@ -84,7 +85,7 @@ export async function analyzeAffect(
   try {
     const raw = await complete(
       [
-        { role: "system", content: SYSTEM },
+        { role: "system", content: SYSTEM + (language && language !== "auto" ? `\n\nWrite the "why" sentence in ${language === "ta" ? "Tamil" : language === "hi" ? "Hindi" : language === "te" ? "Telugu" : language === "kn" ? "Kannada" : language === "ml" ? "Malayalam" : "English"}, in its own script; everything else stays as specified.` : "\n\nWrite the \"why\" sentence in the same language and script the person wrote in.") },
         { role: "user", content: `Recent context:\n${ctx || "(none)"}\n\nMessage to analyse:\n"""${text}"""` },
       ],
       { tier: "fast", json: true, temperature: 0.1, maxTokens: 500 },

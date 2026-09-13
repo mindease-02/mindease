@@ -53,10 +53,6 @@ body:has(> .world) { background: var(--bg, #07080b); }
     linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 40%, var(--bg) 100%);
 }
 /* Film frame: letterbox that opens on load, a vignette, a warm/teal grade. */
-.world .bars { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
-.world .bars span { position: absolute; left: 0; right: 0; height: 12vh; background: #000; animation: bars 1.6s var(--ease) .35s both; }
-.world .bars span:first-child { top: 0; transform-origin: top; }
-.world .bars span:last-child { bottom: 0; transform-origin: bottom; }
 @keyframes bars { from { transform: scaleY(1); } to { transform: scaleY(0); } }
 .world .vignette { position: fixed; inset: 0; z-index: 55; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0,0,0,.55) 100%); }
 .world .atmos::after { content: ""; position: absolute; inset: 0; mix-blend-mode: soft-light; background: linear-gradient(125deg, rgba(var(--accent-rgb),.35), transparent 45%, rgba(var(--cool-rgb),.35)); }
@@ -232,7 +228,6 @@ body:has(> .world) { background: var(--bg, #07080b); }
    effects - letterbox, grain shimmer, light rays, camera pull - but keeps the
    short reveals and the 3D scene, which stays touch-driven instead of auto-spinning. */
 @media (prefers-reduced-motion: reduce) {
-  .world .bars { display: none; }
   .world .grain, .world .presence i { animation: none !important; }
   .world [data-reveal] { transition-duration: .5s; }
   .world .word > span { transition-duration: .5s; }
@@ -393,7 +388,6 @@ body:has(> .world) { background: var(--bg, #07080b); }
 
 /* =====================================================================
    CLAYMORPHISM (dark) + MOTION CHOREOGRAPHY
-   Surfaces are soft, extruded, tactile: an inner top-left highlight, a
    deep inner bottom-right shade, a long soft drop shadow, big radii, and
    a squash on press. Inputs are pressed in. Everything still lives inside
    the film frame (bars, vignette, grain, rays, flare).
@@ -500,8 +494,6 @@ body:has(> .world) { background: var(--bg, #07080b); }
 
 /* =====================================================================
    PIXEL MODE
-   Fonts: Instrument Serif (display), Inter (headings, UI, body).
-   Surfaces (panels, popups, buttons): hard edges, 2px pixel borders, offset
    block shadows. Balls, scrolling and motion stay smooth on purpose.
    ===================================================================== */
 .world { --px: 4px; --px-edge: #0a0a0c; --font-heading: var(--font-heading); font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif; letter-spacing: .01em; }
@@ -552,7 +544,6 @@ body:has(> .world) { background: var(--bg, #07080b); }
 @media (max-width: 720px) { .world .sec-head h2, .world .cta h2, .world .feat h3, .world .story blockquote { font-size: 1.05rem; } }
 
 /* =====================================================================
-   CHAT PAGE: full pixel treatment. The presence ball is deliberately left
    smooth; everything drawn around it is 8-bit.
    ===================================================================== */
 .world.chat-world { --px: 2px; }
@@ -615,19 +606,10 @@ body:has(> .world) { background: var(--bg, #07080b); }
    ===================================================================== */
 /* global scanlines + pixel wipe on every page */
 .world::after { content: ""; position: fixed; inset: 0; z-index: 58; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.14) 0 2px, transparent 2px 4px); mix-blend-mode: multiply; opacity: .55; }
-.world .bars span { height: 50vh; background: var(--px-edge); animation: wipe 1.1s var(--ease) .25s both; }
-.world .bars span:first-child { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), 87.5% calc(100% - 16px), 87.5% 100%, 75% 100%, 75% calc(100% - 16px), 62.5% calc(100% - 16px), 62.5% 100%, 50% 100%, 50% calc(100% - 16px), 37.5% calc(100% - 16px), 37.5% 100%, 25% 100%, 25% calc(100% - 16px), 12.5% calc(100% - 16px), 12.5% 100%, 0 100%); }
-.world .bars span:last-child { clip-path: polygon(0 16px, 12.5% 16px, 12.5% 0, 25% 0, 25% 16px, 37.5% 16px, 37.5% 0, 50% 0, 50% 16px, 62.5% 16px, 62.5% 0, 75% 0, 75% 16px, 87.5% 16px, 87.5% 0, 100% 0, 100% 100%, 0 100%); }
 @keyframes wipe { from { transform: translateY(0); } to { transform: translateY(var(--dir, -100%)); } }
-.world .bars span:last-child { --dir: 100%; }
 
 /* preloader */
-.world .preloader { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; gap: 18px; grid-template-rows: auto auto auto; align-content: center; background: var(--bg); animation: preout .35s var(--ease) 1.2s both; }
 @keyframes preout { to { opacity: 0; visibility: hidden; } }
-.world .pre-orb { width: 96px; height: 96px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, rgba(255,255,255,0) 38%), linear-gradient(145deg, var(--coral-2), var(--accent-mid) 55%, var(--accent-deep)); box-shadow: 0 30px 60px -20px rgba(var(--accent-rgb),.7); animation: breathe 1.4s ease-in-out infinite; }
-.world .pre-word { font-size: clamp(1rem, 3vw, 1.6rem); color: var(--ink); animation: pop .25s var(--ease) both; }
-.world .pre-icons { display: flex; gap: 14px; font-size: 20px; color: var(--ink-3); }
-.world .pre-icons svg { animation: dots 1s var(--ease) infinite; } .world .pre-icons svg:nth-child(2) { animation-delay: .2s; } .world .pre-icons svg:nth-child(3) { animation-delay: .4s; }
 
 /* nav: compact + sticker CTA */
 .world .nav.scrolled .nav-inner { transform: scale(.94); transform-origin: center; }
@@ -681,7 +663,6 @@ body:has(> .world) { background: var(--bg, #07080b); }
 
 @media (max-width: 1024px) { .world .cutout { font-size: 36px; } }
 @media (max-width: 720px) { .world .cutout, .world .wordmark .float { display: none; } .world .band { margin: 40px 0; padding: 56px 0; } .world .band::before, .world .band::after { height: 24px; } .world .band::before { top: -24px; } .world .band::after { bottom: -24px; } .world .wordmark .big { font-size: 2.6rem; text-shadow: 4px 4px 0 var(--accent-deep); } .world .hero h1 { font-size: 1.7rem; } .world .marquee { font-size: .62rem; } .world .feat-visual { --tilt: 0deg !important; } }
-@media (prefers-reduced-motion: reduce) { .world .marquee-track, .world .cutout, .world .wordmark .float, .world .pre-orb, .world .pre-icons svg { animation: none !important; } .world .preloader { display: none; } .world .feat-visual { transform: none !important; } }
 
 .world .nav-signout { font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; margin-right: 6px; }
 @media (max-width: 720px) { .world .nav-cta .nav-signout { display: none; } }
@@ -714,50 +695,12 @@ body:has(> .world) { background: var(--bg, #07080b); }
    THE EXPERIENCE - a sticky full-frame stage, chapters of type top and
    bottom, the ball assembling from voxels in the middle.
    ===================================================================== */
-.world .xp { position: relative; z-index: 1; height: 620vh; }
 /* ------------------------------------------------------------- Title card */
-.world .title-card { position: relative; z-index: 1; min-height: 100svh; display: grid; place-content: center; justify-items: center; text-align: center; padding: 0 24px; overflow: hidden; isolation: isolate; }
-.world .tc-light { position: absolute; left: 50%; top: 50%; width: min(120vw, 1100px); aspect-ratio: 1; translate: -50% -48%; border-radius: 50%; z-index: -1; pointer-events: none;
-  background: radial-gradient(circle at 50% 50%, rgba(var(--accent2-rgb), .28) 0%, rgba(var(--accent-rgb), .13) 28%, rgba(var(--accent-rgb), 0) 62%);
-  animation: tc-breathe 9s ease-in-out infinite; }
-.world .tc-eyebrow { margin: 0 0 clamp(18px, 3vh, 28px); font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif; font-weight: 500; font-size: .72rem; letter-spacing: .32em; text-transform: uppercase; color: var(--ink-2); opacity: 0; animation: tc-rise 1.1s var(--ease) .1s forwards; }
-.world .tc-title { margin: 0; display: grid; justify-items: center; gap: 0; font-family: var(--font-display), "Iowan Old Style", Georgia, serif; font-weight: 300; letter-spacing: -0.02em; font-variation-settings: "SOFT" 80, "opsz" 144; line-height: .92; text-shadow: none; text-transform: none; }
-.world .tc-name-team { font-size: clamp(2.6rem, 8.6vw, 7rem) !important; }
-.world .tc-name { display: block; font-size: clamp(3.4rem, 12vw, 9.6rem); color: var(--ink); opacity: 0; animation: tc-rise 1.3s var(--ease) var(--d) forwards; }
-.world .tc-mark { display: block; margin: clamp(6px, 1.4vh, 16px) 0; font-style: italic; font-size: clamp(2rem, 5.6vw, 4.2rem); line-height: 1; color: var(--coral); text-shadow: 0 0 28px rgba(var(--accent-rgb), .45); opacity: 0; animation: tc-rise 1.3s var(--ease) var(--d) forwards; }
-.world .tc-scroll { position: absolute; left: 50%; bottom: clamp(26px, 5vh, 44px); translate: -50% 0; display: grid; justify-items: center; gap: 10px; font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif; font-size: .62rem; letter-spacing: .28em; text-transform: uppercase; color: var(--ink-3); opacity: 0; animation: tc-rise 1.2s var(--ease) 1.1s forwards; }
-.world .tc-scroll i { display: block; width: 1px; height: 40px; background: linear-gradient(to bottom, var(--ink-3), transparent); }
 @keyframes tc-rise { from { opacity: 0; transform: translateY(22px); filter: blur(10px); } to { opacity: 1; transform: none; filter: blur(0); } }
 @keyframes tc-breathe { 0%, 100% { scale: 1; opacity: .9; } 50% { scale: 1.06; opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .world .tc-eyebrow, .world .tc-name, .world .tc-mark, .world .tc-scroll { opacity: 1; animation: none; } .world .tc-light { animation: none; } }
-.world .xp-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; display: grid; place-items: center; touch-action: pan-y; cursor: grab; }
-.world .xp-scene { position: absolute; inset: 0; }
-.world .xp-scene canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
-.world .xp-scene .scene-mask { -webkit-mask-image: radial-gradient(60% 60% at 50% 50%, #000 40%, transparent 100%); mask-image: radial-gradient(60% 60% at 50% 50%, #000 40%, transparent 100%); }
-.world .xp-top, .world .xp-bottom { position: absolute; left: 0; right: 0; text-align: center; font-size: clamp(1.4rem, 5.4vw, 4.6rem); line-height: 1; white-space: nowrap; pointer-events: none; letter-spacing: .02em; text-shadow: 6px 6px 0 rgba(0,0,0,.6); }
-.world .xp-top { top: clamp(84px, 12vh, 120px); }
-.world .xp-bottom { bottom: clamp(56px, 10vh, 100px); color: var(--ink); }
-.world .xp-top .ch, .world .xp-bottom .ch { display: inline-block; }
-.world .xp-side { position: absolute; top: 50%; transform: translateY(-50%); font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif; font-size: .66rem; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-2); writing-mode: vertical-rl; pointer-events: none; }
-.world .xp-side.l { left: 24px; transform: translateY(-50%) rotate(180deg); }
-.world .xp-side.r { right: 24px; }
-.world .xp-sub { position: absolute; left: 50%; bottom: clamp(140px, 22vh, 220px); transform: translateX(-50%); max-width: 32rem; text-align: center; color: var(--ink-2); font-size: 1rem; line-height: 1.5; margin: 0; padding: 0 20px; pointer-events: none; }
-.world .xp-cta { position: absolute; left: 50%; bottom: clamp(150px, 24vh, 240px); transform: translateX(-50%); }
-.world .xp-dots { position: absolute; right: 24px; bottom: 24px; display: flex; gap: 6px; }
-.world .xp-dots i { width: 8px; height: 8px; background: var(--line-2); }
-.world .xp-dots i.on { background: var(--coral-2); }
-.world .xp-hint { position: absolute; left: 24px; bottom: 24px; font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif; font-size: .62rem; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-3); }
-.world .xp .fallback-orb { position: absolute; left: 50%; top: 50%; width: min(60vw, 320px); }
 .world .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 @media (max-width: 720px) {
-  .world .xp { height: 520vh; }
-  .world .xp-top, .world .xp-bottom { font-size: 1.35rem; white-space: normal; padding: 0 16px; line-height: 1.25; }
-  .world .xp-top { top: 84px; } .world .xp-bottom { bottom: 120px; }
-  .world .xp-side { display: none; }
-  .world .xp-sub { bottom: 180px; font-size: .9rem; }
-  .world .xp-cta { bottom: 190px; }
 }
-@media (prefers-reduced-motion: reduce) { .world .xp { height: auto; } .world .xp-stage { position: relative; } }
 
 /* text-swap hover on nav links: the label slides up out of its own clip box and a coral twin slides in */
 .world .nav-links a { --nav-c: var(--ink-2); }
@@ -773,15 +716,8 @@ body:has(> .world) { background: var(--bg, #07080b); }
 .world button, .world a, .world .mood, .world .offer-opt { touch-action: manipulation; }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-.world .xp { height: 560vh; }
-@media (max-width: 720px) { .world .xp { height: 480vh; } }
 
 /* chapter caption: a readable pixel panel under the top line */
-.world .xp-sub { top: clamp(150px, 23vh, 230px); bottom: auto; max-width: 36rem; padding: 12px 16px 12px 16px; background: color-mix(in srgb, var(--bg) 88%, var(--surface)); border: 2px solid var(--px-edge); box-shadow: 6px 6px 0 rgba(0,0,0,.6); color: var(--ink); font-size: 1.02rem; line-height: 1.5; text-align: left; display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; }
-.world .xp-sub-k { font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif; font-size: .62rem; letter-spacing: .14em; color: var(--coral-2); padding-top: 4px; white-space: nowrap; }
-.world .xp-side { font-size: .72rem; color: var(--ink); background: color-mix(in srgb, var(--bg) 80%, transparent); padding: 8px 4px; border: 2px solid var(--px-edge); }
-.world .xp-cta { bottom: clamp(150px, 24vh, 240px); }
-@media (max-width: 720px) { .world .xp-sub { top: 150px; font-size: .9rem; max-width: calc(100% - 32px); } }
 
 /* press-to-play box on the example chat */
 .world .device { position: relative; }
@@ -793,17 +729,7 @@ html { scroll-behavior: smooth; }
 .world .device:has(.demo-play) .device-body { opacity: .25; filter: blur(1px); }
 
 /* Experience captions: a subtitle strip along the bottom, headline lifted above it */
-.world .xp-bottom { bottom: clamp(118px, 19vh, 180px); }
-.world .xp-sub { top: auto; bottom: 52px; left: 24px; right: 24px; transform: none; max-width: none; margin: 0; padding: 12px 16px; display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; text-align: left; background: color-mix(in srgb, var(--bg) 90%, var(--surface)); border: 2px solid var(--px-edge); box-shadow: 6px 6px 0 rgba(0,0,0,.6); color: var(--ink); font-size: 1rem; line-height: 1.5; pointer-events: auto; }
-.world .xp-sub-k { padding-top: 0; }
-.world .xp-sub-t { max-width: 60ch; }
-.world .xp-cta { position: static; transform: none; }
-.world .xp-dots { bottom: 18px; }
-.world .xp-hint { bottom: 18px; }
 @media (max-width: 720px) {
-  .world .xp-bottom { bottom: 190px; }
-  .world .xp-sub { left: 12px; right: 12px; bottom: 44px; grid-template-columns: auto 1fr; font-size: .9rem; padding: 10px 12px; gap: 10px; }
-  .world .xp-cta { grid-column: 1 / -1; }
 }
 
 /* PLAY box: centre with the individual translate property so the breathing animation cannot cancel it */
@@ -821,20 +747,11 @@ html { scroll-behavior: smooth; }
 .world .grain { opacity: .05; }
 .world .vignette { background: radial-gradient(120% 90% at 50% 45%, transparent 62%, rgba(0,0,0,.45) 100%); }
 /* type: serif display, sans everywhere else */
-.world .display, .world h1, .world h2, .world blockquote.display, .world .xp-top, .world .xp-bottom, .world .theme-frame .label .emotion, .world .wordmark .big, .world .demo-play b, .world .pre-word { font-family: var(--font-display), "Iowan Old Style", Georgia, serif; font-weight: 300; letter-spacing: -0.015em; font-variation-settings: "SOFT" 60, "opsz" 144; text-shadow: 0 6px 24px rgba(0,0,0,.35); }
 .world .nav .display, .world .foot .display { font-family: var(--font-display), "Iowan Old Style", Georgia, serif; font-weight: 500; font-size: 1.4rem; letter-spacing: -0.01em; line-height: 1; text-shadow: none; }
 .world .hero h1 { font-size: clamp(2.4rem, 6.8vw, 5.6rem); line-height: 1.08; }
-.world .xp-top, .world .xp-bottom { font-size: clamp(2rem, 6.8vw, 6rem); line-height: 1; letter-spacing: -0.02em; text-shadow: 0 2px 8px rgba(0,0,0,.55), 0 16px 48px rgba(0,0,0,.7); }
 .world .sec-head h2, .world .cta h2, .world .feat h3, .world .story blockquote { font-size: clamp(1.7rem, 4.4vw, 3.4rem); line-height: 1.15; }
-.world h3, .world h4, .world h5, .world .btn, .world .clay-btn, .world .clay-btn-primary, .world .eyebrow, .world .steps-ind, .world .nav-links a, .world .label, .world .chip-mem .k, .world .t-tab, .world .offer-opt b, .world .mood b, .world .float-card .k, .world .device-head, .world .device-foot .ctl, .world .foot h5, .world .gate b, .world .xp-side, .world .xp-sub-k, .world .xp-hint, .world .marquee, .world .sticker, .world .sec-head .eyebrow, .world .feat .eyebrow, .world .story .eyebrow, .world .demo-play, .world .flank, .world .sheet-table th, .world .nav-signout { font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif; letter-spacing: .04em; }
 .world .btn, .world .clay-btn, .world .clay-btn-primary { text-transform: none; font-size: .95rem; font-weight: 500; letter-spacing: 0; }
-.world .eyebrow, .world .steps-ind, .world .xp-side, .world .marquee, .world .sticker, .world .sec-head .eyebrow, .world .feat .eyebrow, .world .story .eyebrow { font-size: .72rem; letter-spacing: .12em; }
 /* surfaces: thin edges, rounded, soft shadows */
-.world .clay, .world .device, .world .feat-visual, .world .cta, .world .theme-frame, .world .card, .world .mood, .world .float-card, .world form.glass, .world .techniques, .world .offer, .world .bubble-ai, .world .bubble-proactive, .world .composer, .world .clay-sm, .world .device .line.mindease, .world .xp-sub, .world .demo-play, .world .nav-links, .world .mobile-menu {
-  border: 1px solid rgba(255,255,255,.10) !important; border-radius: var(--px) !important;
-  box-shadow: 0 24px 60px -30px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.06) !important;
-  background: var(--surface);
-}
 .world .bubble-user { border: 0 !important; border-radius: var(--px) var(--px) 6px var(--px) !important; box-shadow: 0 16px 40px -24px rgba(0,0,0,.8) !important; }
 .world .bubble-ai, .world .device .line.mindease { border-radius: var(--px) var(--px) var(--px) 6px !important; }
 .world .btn, .world .clay-btn, .world .t-tab, .world .offer-opt, .world .device-foot .ctl, .world .burger, .world .nav-links a { border: 1px solid rgba(255,255,255,.12) !important; border-radius: 999px !important; box-shadow: 0 10px 24px -16px rgba(0,0,0,.8) !important; background: var(--surface-2); }
@@ -847,21 +764,16 @@ html { scroll-behavior: smooth; }
 .world .btn-sticker { transform: none; }
 .world .nav.scrolled { background: color-mix(in srgb, var(--bg) 70%, transparent); border-bottom: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
 .world .nav-links { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background: rgba(255,255,255,.04) !important; }
-.world .bars span { background: var(--bg); clip-path: none; animation: wipe .9s var(--ease) .2s both; }
 .world .band::before, .world .band::after { height: 24px; clip-path: none; border-radius: 24px 24px 0 0; }
 .world .band::after { border-radius: 0 0 24px 24px; }
 .world .band { border-radius: 0; }
 .world .marquee { border-top: 1px solid rgba(255,255,255,.08); border-bottom: 1px solid rgba(255,255,255,.08); background: transparent; }
 .world .marquee span i { border-radius: 50%; width: 6px; height: 6px; }
-.world .xp-dots i, .world .device-foot .prog i, .world .steps-ind i, .world .screen-prog i { border-radius: 999px; }
 .world .theme-frame .swatches i, .world .device .line.typing i { border-radius: 50%; }
-.world .pre-orb { animation-duration: 2s; }
 .world .wordmark .big { text-shadow: 0 10px 40px rgba(0,0,0,.6); color: var(--coral-2); }
 .world .t-ring { border-radius: 50% !important; }
 .world .icon, .world .demo-copy .list svg, .world .feat .icon, .world .t-list b, .world .step i { border-radius: 12px !important; }
 .world .mood .dot { border-radius: 50%; }
-.world .xp-sub { background: color-mix(in srgb, var(--bg) 78%, var(--surface)); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.world .xp-side { border: 0; background: transparent; }
 
 /* ---- soft mode: the rest of the pages (mood, login, reset, summary) ---- */
 .world .mood { border-radius: 18px !important; }
@@ -916,7 +828,6 @@ html { scroll-behavior: smooth; }
 .world.chat-world .thin-scroll::-webkit-scrollbar-thumb { border: 0; border-radius: 999px; background: rgba(255,255,255,.14); }
 
 /* =====================================================================
-   CHAT: living background, chats drawer, profile menu, voice chat bar
    ===================================================================== */
 .world .chat-bg { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; opacity: .9; }
 .world.chat-world .presence { display: none; }
@@ -990,7 +901,6 @@ html { scroll-behavior: smooth; }
 
 
 /* =====================================================================
-   PHONE-FIRST PASS. The demo runs on a phone: touch targets, safe areas,
    a compact chat header, one-column layouts, the ball behind the words.
    ===================================================================== */
 .world { -webkit-tap-highlight-color: transparent; }
@@ -1038,13 +948,6 @@ html { scroll-behavior: smooth; }
   .world .note-row .field { padding-right: 58px; }
   .world .note-row .go { position: absolute !important; right: 6px; left: auto; top: auto; bottom: 7px; transform: none; width: 44px; height: 44px; padding: 0; }
   /* landing */
-  .world .title-card { min-height: 100svh; }
-  .world .tc-name { font-size: 2.6rem; }
-  .world .tc-name-team { font-size: 1.9rem !important; }
-  .world .xp-top, .world .xp-bottom { font-size: 1.7rem; letter-spacing: -0.01em; }
-  .world .xp-top { top: calc(78px + env(safe-area-inset-top)); }
-  .world .xp-bottom { bottom: 206px; text-shadow: 0 1px 3px rgba(0,0,0,.9), 0 4px 14px rgba(0,0,0,.85), 0 12px 40px rgba(0,0,0,.8); }
-  .world .xp-top { text-shadow: 0 1px 3px rgba(0,0,0,.9), 0 4px 14px rgba(0,0,0,.85); }
   .world .cta { padding: 52px 20px 60px; }
   .world .cta .planet { width: 120%; bottom: -108%; }
   .world .cta h2 { font-size: 2.1rem; }
@@ -1077,6 +980,50 @@ html { scroll-behavior: smooth; }
   .world .chat .thin-scroll { padding-left: 12px; padding-right: 12px; }
   .world .bubble-user { border-bottom-right-radius: 6px; }
   .world .offer, .world .techniques { border-radius: 18px !important; }
-  .world .tc-light { width: 140vw; }
   .world footer .foot { gap: 22px; }
 }
+
+
+/* =====================================================================
+   PLAIN HERO + PILLARS (the scroll story and its 3D ball are gone), theme
+   swatches, the language switch.
+   ===================================================================== */
+.world .hero-plain { position: relative; z-index: 1; min-height: calc(100svh - 72px); display: grid; align-items: center; padding: clamp(96px, 14vh, 150px) 0 clamp(48px, 7vh, 80px); overflow: hidden; isolation: isolate; }
+.world .hero-light { position: absolute; left: 50%; top: 40%; width: min(120vw, 1100px); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; z-index: -1; pointer-events: none; background: radial-gradient(circle at 50% 50%, rgba(var(--accent2-rgb), .22) 0%, rgba(var(--accent-rgb), .10) 30%, rgba(var(--accent-rgb), 0) 64%); filter: blur(10px); animation: hero-breathe 9s ease-in-out infinite; }
+@keyframes hero-breathe { 0%,100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.06); opacity: 1; } }
+.world .hero-inner { max-width: 60rem; }
+.world .tc-eyebrow { font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif; font-size: .95rem; color: var(--ink-2); margin: 0 0 22px; }
+.world .hero-title { font-size: clamp(2.8rem, 8vw, 6.4rem); line-height: 1; margin: 0; letter-spacing: -0.02em; }
+.world .hero-accent { color: var(--coral-2); }
+.world .hero-sub { max-width: 34rem; margin: 24px 0 0; font-size: clamp(1.05rem, 1.6vw, 1.3rem); line-height: 1.6; color: var(--ink-2); font-weight: 300; }
+.world .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 34px; }
+.world .hero-note { margin-top: 26px; font-size: .9rem; color: var(--ink-3); }
+.world .pillars { position: relative; z-index: 1; padding: 0 0 clamp(40px, 6vh, 70px); }
+.world .pillars-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.world .pillar { position: relative; padding: 22px 22px 24px; border-radius: 22px; background: var(--glass); border: 1px solid var(--line); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); display: grid; gap: 10px; align-content: start; }
+.world .pillar-ico { position: absolute; right: 18px; top: 18px; font-size: 20px; color: var(--ink-3); }
+.world .pillar h2 { font-size: clamp(1.35rem, 2.2vw, 1.75rem); line-height: 1.15; margin: 0; }
+.world .pillar p { margin: 0; color: var(--ink-2); font-size: .95rem; line-height: 1.55; font-weight: 300; }
+.world .swatch-frame { position: relative; display: grid; gap: 18px; padding: 24px; border-radius: 24px; background: var(--glass); border: 1px solid var(--line); }
+.world .swatch-frame .swatches { position: static; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.world .swatch { display: grid; justify-items: center; gap: 8px; padding: 12px 6px; border-radius: 16px; border: 1px solid transparent; color: var(--ink-2); font-size: .74rem; }
+.world .swatch i { width: 30px; height: 30px; border-radius: 50%; background: var(--c); box-shadow: 0 10px 24px -8px var(--c), inset -6px -8px 14px rgba(0,0,0,.35), inset 4px 4px 10px rgba(255,255,255,.35); }
+.world .swatch.on, .world .swatch:hover { background: var(--glass-2); border-color: var(--line-2); color: var(--ink); }
+.world .swatch-frame .label { position: static; }
+.world .lang-switch { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: var(--glass); border: 1px solid var(--line); color: var(--ink-2); font-size: .85rem; }
+.world .lang-switch select { background: transparent; border: 0; color: var(--ink); font-size: .85rem; outline: none; cursor: pointer; }
+.world .lang-switch select option { background: #14161c; }
+.world .lang-switch.compact { padding: 6px 10px; }
+@media (max-width: 1024px) { .world .pillars-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 720px) {
+  .world .hero-plain { min-height: 0; padding: 96px 0 40px; }
+  .world .hero-title { font-size: 2.5rem; }
+  .world .hero-ctas .btn, .world .hero-ctas .btn-primary { width: 100%; justify-content: center; }
+  .world .pillars-grid { grid-template-columns: 1fr; gap: 10px; }
+  .world .pillar { padding: 18px; }
+  .world .swatch-frame .swatches { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .world .swatch { padding: 8px 2px; font-size: .66rem; }
+  .world .nav-cta .lang-switch { display: none; }
+}
+/* Indic scripts: let the system pick a proper face when Manrope has no glyphs. */
+.world:lang(ta), .world:lang(hi), .world:lang(te), .world:lang(kn), .world:lang(ml) { font-family: var(--font-body), "Noto Sans Tamil", "Noto Sans Devanagari", "Noto Sans Telugu", "Noto Sans Kannada", "Noto Sans Malayalam", ui-sans-serif, system-ui, sans-serif; }

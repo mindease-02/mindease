@@ -45,7 +45,7 @@ export default function ProfileMenu({ name, email, lang, speak, onSpeak, onLangu
           <button className="pmenu-item" role="menuitemcheckbox" aria-checked={speak} onClick={() => onSpeak(!speak)}><PxSound className="pxicon" /> {speak ? t("voiceOn", lang) : t("voiceOff", lang)}</button>
           <label className="pmenu-lang">
             <span>{t("language", lang)}</span>
-            <select value={lang} onChange={(e) => onLanguage(e.target.value)}>
+            <select value={lang} onChange={(e) => { document.cookie = `me.lang=${e.target.value}; path=/; max-age=31536000; samesite=lax`; onLanguage(e.target.value); }}>
               {LANGUAGES.map((l) => <option key={l.id} value={l.id}>{l.id === "auto" ? l.label : `${l.native} · ${l.label}`}</option>)}
             </select>
           </label>

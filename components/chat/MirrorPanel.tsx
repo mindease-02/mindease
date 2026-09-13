@@ -6,6 +6,7 @@ import Sparkline from "./Sparkline";
 import { PxRemove } from "../home/pixelIcons";
 import type { usePush } from "../hooks/usePush";
 import { NEARBY_HELP_URL } from "@/lib/safety/resources";
+import { t } from "@/lib/i18n";
 
 interface Props {
   mirror: UserView | null;
@@ -14,6 +15,7 @@ interface Props {
   onLogout: () => void;
   busy: boolean;
   push: ReturnType<typeof usePush>;
+  lang?: string;
 }
 
 function Section({ title, children, hint }: { title: string; hint?: string; children: React.ReactNode }) {
@@ -26,30 +28,30 @@ function Section({ title, children, hint }: { title: string; hint?: string; chil
   );
 }
 
-
 /**
  * The Mirror, kept small on purpose: how you seem, what MindEase remembers, and the
  * switches. The detector maths, gate verdicts and safety log exist but are not
  * a thing a person needs in front of them while talking.
  */
-export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, busy, push }: Props) {
+export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, busy, push, lang = "en" }: Props) {
   const [tab, setTab] = useState<"you" | "memory">("you");
   if (!mirror) return null;
   const m = mirror;
+  const loc = lang === "en" ? "en-IN" : `${lang}-IN`;
 
   return (
     <aside className="fixed inset-y-0 right-0 z-30 flex w-full max-w-md flex-col bg-clay-bg shadow-[-12px_0_30px_rgba(0,0,0,.5)]">
       <header className="flex items-center justify-between px-5 pb-3 pt-5">
         <div>
-          <h2 className="display text-xl">The Mirror</h2>
-          <p className="text-xs text-clay-muted">What MindEase has of you. Yours to read and delete.</p>
+          <h2 className="display text-xl">{t("mirrorTitle", lang)}</h2>
+          <p className="text-xs text-clay-muted">{t("mirrorSub", lang)}</p>
         </div>
-        <button className="clay-btn px-3 py-2" onClick={onClose} aria-label="Close the Mirror"><PxRemove className="pxicon" style={{ fontSize: 18 }} /></button>
+        <button className="clay-btn px-3 py-2" onClick={onClose} aria-label={t("closeMirror", lang)}><PxRemove className="pxicon" style={{ fontSize: 18 }} /></button>
       </header>
       <nav className="flex gap-1 px-5 pb-3">
-        {(["you", "memory"] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)} className={`rounded-full px-3 py-1.5 text-xs capitalize ${tab === t ? "bg-clay-slate text-clay-surface shadow-clay-sm" : "text-clay-muted"}`}>
-            {t === "memory" ? "memories" : t}
+        {(["you", "memory"] as const).map((k) => (
+          <button key={k} onClick={() => setTab(k)} className={`rounded-full px-3 py-1.5 text-xs ${tab === k ? "bg-clay-slate text-clay-surface shadow-clay-sm" : "text-clay-muted"}`}>
+            {k === "memory" ? t("tabMemories", lang) : t("tabYou", lang)}
           </button>
         ))}
       </nav>
@@ -57,72 +59,72 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
       <div className="thin-scroll flex-1 space-y-3 overflow-y-auto px-5 pb-8">
         {tab === "you" && (
           <>
-            <Section title="How you seem right now" hint="A guess, not a verdict. Correct it in the chat.">
+            <Section title={t("howYouSeem", lang)} hint={t("seemHint", lang)}>
               <p className="text-sm">{m.seem.sentence}</p>
               {m.seem.states.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{m.seem.states.map((s) => <span key={s} className="clay-chip">{s}</span>)}</div>}
               {m.seem.why && <p className="mt-2 text-xs text-clay-muted">{m.seem.why}</p>}
             </Section>
             {m.octant && (
-              <Section title="Your shape today" hint="Brighter: today. Softer: the last few days.">
+              <Section title={t("shapeToday", lang)} hint={t("shapeHint", lang)}>
                 <AxisWheel weather={m.octant.weather} climate={m.octant.climate} />
               </Section>
             )}
-            <Section title="Screening" hint="Short checks doctors use, when the pattern warrants one. A range, not a diagnosis.">
+            <Section title={t("screeningT", lang)} hint={t("screeningHint", lang)}>
               {m.screenings.length ? (
-                <ul className="space-y-1 text-sm">{m.screenings.map((x) => <li key={x.at}><b>{x.name}</b> ({x.domain}) · {new Date(x.at).toLocaleDateString()} · {x.score}/{x.max} · <span className="text-clay-coral">{x.band}</span></li>)}</ul>
-              ) : <p className="text-xs text-clay-muted">None yet. MindEase offers one when it&apos;s warranted; you can also ask for &quot;the mood check&quot;, &quot;the anxiety check&quot; or &quot;the sleep check&quot; in the chat.</p>}
+                <ul className="space-y-1 text-sm">{m.screenings.map((x) => <li key={x.at}><b>{x.name}</b> ({x.domain}) · {new Date(x.at).toLocaleDateString(loc)} · {x.score}/{x.max} · <span className="text-clay-coral">{x.band}</span></li>)}</ul>
+              ) : <p className="text-xs text-clay-muted">{t("noneYetScreen", lang)}</p>}
               {m.signals.length > 0 && (
-                <ul className="mt-3 space-y-1 text-xs text-clay-muted">{m.signals.slice(0, 4).map((sg) => <li key={sg.domain}><span className="text-clay-ink">Consistent with {sg.domain}</span> · {sg.evidence}</li>)}</ul>
+                <ul className="mt-3 space-y-1 text-xs text-clay-muted">{m.signals.slice(0, 4).map((sg) => <li key={sg.domain}><span className="text-clay-ink">{t("consistentWith", lang, { domain: sg.domain })}</span> · {sg.evidence}</li>)}</ul>
               )}
-              <div className="mt-3 flex flex-wrap gap-2"><a href="/summary" className="clay-btn inline-block px-3 py-1.5 text-xs">One-page summary for a clinician</a><a href={NEARBY_HELP_URL} target="_blank" rel="noreferrer" className="clay-btn inline-block px-3 py-1.5 text-xs">Find someone near you</a></div>
+              <div className="mt-3 flex flex-wrap gap-2"><a href="/summary" className="clay-btn inline-block px-3 py-1.5 text-xs">{t("summaryClin", lang)}</a><a href={NEARBY_HELP_URL} target="_blank" rel="noreferrer" className="clay-btn inline-block px-3 py-1.5 text-xs">{t("findNear", lang)}</a></div>
             </Section>
             {m.patterns.length > 0 && (
-              <Section title="Your patterns" hint="From when you tend to talk, not what you say. MindEase uses this to anticipate, not to judge.">
+              <Section title={t("patternsT", lang)} hint={t("patternsHint", lang)}>
                 <ul className="space-y-1 text-sm">{m.patterns.map((l) => <li key={l}>{l}</li>)}</ul>
               </Section>
             )}
-            <Section title="Mood across recent conversations">
+            <Section title={t("moodRecent", lang)}>
               <Sparkline points={m.mood} />
             </Section>
-            <Section title="Would MindEase write to you first today?">
-              <p className="text-sm">{m.checkin.wouldSend ? "Yes" : "Not right now"} <span className="text-xs text-clay-muted">— {m.checkin.reason}</span></p>
+            <Section title={t("wouldWrite", lang)}>
+              <p className="text-sm">{m.checkin.wouldSend ? t("yes", lang) : t("notRightNow", lang)} <span className="text-xs text-clay-muted">— {m.checkin.reason}</span></p>
             </Section>
           </>
         )}
 
         {tab === "memory" && (
-          <Section title={`What MindEase remembers (${m.memories.length})`} hint="Short facts from what you've said. Delete any of them.">
+          <Section title={t("remembersT", lang, { n: String(m.memories.length) })} hint={t("remembersHint", lang)}>
             {m.memories.length ? (
               <ul className="space-y-2">
                 {m.memories.map((mem) => (
                   <li key={mem.id} className="flex items-start gap-2 rounded-2xl bg-clay-bg-deep p-3">
                     <div className="flex-1 text-sm">
-                      <div className="text-[10px] uppercase tracking-wider text-clay-muted">{mem.kind}{mem.era ? ` · ${mem.era}` : ""} · {new Date(mem.at).toLocaleDateString()}</div>
+                      <div className="text-[10px] uppercase tracking-wider text-clay-muted">{mem.kind}{mem.era ? ` · ${mem.era}` : ""} · {new Date(mem.at).toLocaleDateString(loc)}</div>
                       {mem.text}
                     </div>
-                    <button disabled={busy} onClick={() => onSettings({ forgetMemoryId: mem.id })} className="text-xs text-clay-muted hover:text-clay-coral" aria-label="forget">forget</button>
+                    <button disabled={busy} onClick={() => onSettings({ forgetMemoryId: mem.id })} className="text-xs text-clay-muted hover:text-clay-coral" aria-label={t("forget", lang)}>{t("forget", lang)}</button>
                   </li>
                 ))}
               </ul>
-            ) : <p className="text-xs text-clay-muted">Nothing yet. It only keeps what a good friend would remember next week.</p>}
+            ) : <p className="text-xs text-clay-muted">{t("nothingYetMem", lang)}</p>}
           </Section>
         )}
 
-        <Section title="How MindEase is behaving" hint="MindEase sets this itself from your own patterns. It changes as it learns you.">
+        <Section title={t("behaviourT", lang)} hint={t("behaviourHint", lang)}>
           <ul className="space-y-1 text-sm">{m.behaviour.map((n) => <li key={n.key}>{n.text}</li>)}</ul>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: 3 })}>Give me 3 days of space</button>
-            {m.pausedUntil && m.pausedUntil > Date.now() && <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: null })}>Unpause</button>}
+            <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: 3 })}>{t("space3", lang)}</button>
+            {m.pausedUntil && m.pausedUntil > Date.now() && <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => onSettings({ pauseDays: null })}>{t("unpause", lang)}</button>}
             {push.supported && push.enabled && (push.subscribed
-              ? <button className="clay-btn px-3 py-1.5 text-xs" onClick={() => push.unsubscribe()}>Stop notifying me when the tab is closed</button>
-              : <button className="clay-btn px-3 py-1.5 text-xs" onClick={async () => { const err = await push.subscribe(); if (err) alert(err); }}>Notify me when the tab is closed</button>)}
+              ? <button className="clay-btn px-3 py-1.5 text-xs" onClick={() => push.unsubscribe()}>{t("stopNotify", lang)}</button>
+              : <button className="clay-btn px-3 py-1.5 text-xs" onClick={async () => { const err = await push.subscribe(); if (err) alert(err); }}>{t("notify", lang)}</button>)}
           </div>
         </Section>
-        <Section title="Your data">
+        <Section title={t("yourData", lang)}>
           <div className="flex flex-wrap gap-2">
-            <a href="/api/export" className="clay-btn px-3 py-1.5 text-xs">Download everything</a>
-            <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => { if (confirm("Delete all history, memories and messages? This can't be undone.")) onSettings({ clearAll: true }); }}>Delete everything</button>
-            <button className="clay-btn px-3 py-1.5 text-xs" onClick={onLogout}>Sign out</button>
+            <a href="/api/export" className="clay-btn px-3 py-1.5 text-xs">{t("downloadAll", lang)}</a>
+            <button disabled={busy} className="clay-btn px-3 py-1.5 text-xs" onClick={() => { if (confirm(t("deleteAllConfirm", lang))) onSettings({ clearAll: true }); }}>{t("deleteEverything", lang)}</button>
+            <button className="clay-btn px-3 py-1.5 text-xs" onClick={onLogout}>{t("signOut", lang)}</button>
           </div>
         </Section>
       </div>

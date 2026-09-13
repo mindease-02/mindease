@@ -221,7 +221,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   const context = (state.consent.storeTranscript ? sessionMessages(state) : (input.clientContext ?? []))
     .slice(-10).map((m) => ({ role: m.role, content: m.content }));
   const [analysis, extracted] = await Promise.all([
-    analyzeAffect(text, context, { vad: snapshot.vad, octant: octantFromVAD(snapshot.vad) }, now),
+    analyzeAffect(text, context, { vad: snapshot.vad, octant: octantFromVAD(snapshot.vad) }, now, state.language),
     extractMemories(text, now),
   ]);
 

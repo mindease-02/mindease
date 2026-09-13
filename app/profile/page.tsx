@@ -11,6 +11,7 @@ import { patternReport } from "@/lib/screening";
 import { lifestylePatterns } from "@/lib/lifestyle/patterns";
 import { supabaseConfigured } from "@/lib/supabase";
 import { t } from "@/lib/i18n";
+import { pageLanguage } from "@/lib/i18n/server";
 import ProfileClient from "@/components/profile/ProfileClient";
 
 /**
@@ -25,7 +26,7 @@ export default async function ProfilePage() {
   if (!raw) redirect("/mood");
   const state = migrate(raw);
   const now = Date.now();
-  const lang = state.language ?? "auto";
+  const lang = await pageLanguage(state.language);
   const view = userView(state, now);
   const done = (state.screenings ?? []).filter((s) => s.completedAt).sort((a, b) => b.completedAt! - a.completedAt!);
   const life = lifestylePatterns(state.history, state.timeZone, now);

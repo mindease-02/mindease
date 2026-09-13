@@ -33,7 +33,7 @@ const SELF_EVAL_MS = 10 * 60_000;
 const SILENCE_MS = 1500;
 const MAX_UTTERANCE_MS = 45_000;
 
-export default function ChatApp({ name, email, initialLanguage }: { name: string; email: string; initialLanguage: string }) {
+export default function ChatApp({ name, email, initialLanguage, initialUi }: { name: string; email: string; initialLanguage: string; initialUi?: string }) {
   const router = useRouter();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -50,7 +50,7 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [voiceNote, setVoiceNote] = useState<ProsodyFeatures | null>(null);
-  const [lang, setLang] = useState(initialLanguage || "auto");
+  const [lang, setLang] = useState(initialLanguage && initialLanguage !== "auto" ? initialLanguage : (initialUi ?? "auto"));
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [drawer, setDrawer] = useState(false);
@@ -85,7 +85,7 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
       const j = await r.json();
       if (j.mirror) setMirror(j.mirror);
       if (Array.isArray(j.sessions)) { setSessions(j.sessions); setCurrentId(j.currentSessionId ?? null); }
-      if (typeof j.language === "string") setLang(j.language);
+      if (typeof j.language === "string" && j.language !== "auto") setLang(j.language);
       if (Array.isArray(j.outbox) && j.outbox.length) {
         setMessages((m) => [...m, ...j.outbox]);
         setPulse((p) => p + 1);
@@ -107,7 +107,7 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
       const j = await refresh(true);
       const a = (j?.arrival as { mood?: string; label: string; note?: string } | null) ?? null;
       setArrival(a);
-      const l = typeof j?.language === "string" ? j.language : initialLanguage;
+      const l = typeof j?.language === "string" && j.language !== "auto" ? j.language : (initialUi ?? initialLanguage);
       if (j?.messages?.length) { setMessages(j.messages); scroll(); }
       else setMessages([{ role: "assistant", content: greetingFor(name, a, l), at: Date.now() }]);
     })();
@@ -310,7 +310,7 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
   }
   async function notUseful(m: Msg) {
     await fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ at: m.at, kind: m.kind }) });
-    setToast("Noted. That kind of check-in will come less.");
+    setToast(t("noted", lang));
   }
   async function logout() { await fetch("/api/auth/logout", { method: "POST" }); router.push("/"); }
 
@@ -364,9 +364,9 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
               </div>
             </div>
           ))}
-          {crisis && <CrisisCard helplines={crisis.helplines} emergency={crisis.emergency} />}
-          {offer && !tech && <TechniqueOffer reason={offer.reason} suggested={offer.suggested} onPick={(k) => { setTech(k); setOffer(null); }} onDismiss={() => setOffer(null)} />}
-          {screening && <ScreeningCard offer={screening} onDismiss={() => setScreening(null)} onDone={(r: ScreeningResult) => {
+          {crisis && <CrisisCard helplines={crisis.helplines} emergency={crisis.emergency} lang={lang} />}
+          {offer && !tech && <TechniqueOffer lang={lang} reason={offer.reason} suggested={offer.suggested} onPick={(k) => { setTech(k); setOffer(null); }} onDismiss={() => setOffer(null)} />}
+          {screening && <ScreeningCard lang={lang} offer={screening} onDismiss={() => setScreening(null)} onDone={(r: ScreeningResult) => {
             setScreening(null);
             setMessages((m) => [...m, { role: "assistant", content: r.message, at: Date.now() }]);
             if (r.crisis && r.helplines) setCrisis({ helplines: r.helplines as Helpline[], emergency: r.emergency });
@@ -376,7 +376,7 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
         </div>
       </div>
 
-      {tech && <div className="relative z-[1] px-4 sm:px-6"><div className="mx-auto max-w-2xl"><Techniques mood={arrival?.mood ?? null} initial={tech} onClose={() => setTech(null)} /></div></div>}
+      {tech && <div className="relative z-[1] px-4 sm:px-6"><div className="mx-auto max-w-2xl"><Techniques lang={lang} mood={arrival?.mood ?? null} initial={tech} onClose={() => setTech(null)} /></div></div>}
       <footer className="relative z-[1] px-4 pb-4 pt-2 sm:px-6">
         {voiceMode ? (
           <div className="voicebar mx-auto flex max-w-2xl items-center gap-4">
@@ -407,7 +407,7 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
       </footer>
 
       <ChatDrawer open={drawer} lang={lang} sessions={sessions} currentId={currentId} onClose={() => setDrawer(false)} onNew={newChat} onPick={pickChat} onDelete={deleteChat} />
-      {showMirror && <MirrorPanel mirror={mirror} onClose={() => setShowMirror(false)} onSettings={settings} onLogout={logout} busy={busy} push={push} />}
+      {showMirror && <MirrorPanel lang={lang} mirror={mirror} onClose={() => setShowMirror(false)} onSettings={settings} onLogout={logout} busy={busy} push={push} />}
       {toast && <div className="clay-dark fixed bottom-24 left-1/2 z-40 -translate-x-1/2 px-4 py-2 text-sm">{toast}</div>}
     </div>
   );

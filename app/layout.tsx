@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { body, display, heading } from "@/components/home/fonts";
+import { pageLanguage } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
   title: "MindEase - a companion that notices",
@@ -11,9 +12,10 @@ export const metadata: Metadata = {
 };
 export const viewport: Viewport = { themeColor: "#07080b", width: "device-width", initialScale: 1, viewportFit: "cover" };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = await pageLanguage();
   return (
-    <html lang="en">
+    <html lang={lang}>
       <body className={`min-h-full ${display.variable} ${heading.variable} ${body.variable}`}>{children}</body>
     </html>
   );

@@ -2,11 +2,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Magnetic from "./Magnetic";
+import LanguageSwitch from "../LanguageSwitch";
 import { PxMenu, PxRemove, PxArrow } from "./pixelIcons";
+import { t } from "@/lib/i18n";
 
-const LINKS = [["#demo", "Experience"], ["#features", "What it does"], ["#story", "Why"], ["#start", "Start"]];
-
-export default function Nav({ chatHref, signedIn, name }: { chatHref: string; signedIn: boolean; name?: string }) {
+export default function Nav({ chatHref, signedIn, name, lang }: { chatHref: string; signedIn: boolean; name?: string; lang: string }) {
+  const LINKS: [string, string][] = [["#demo", t("navExperience", lang)], ["#features", t("navWhat", lang)], ["#story", t("navWhy", lang)], ["#start", t("navStart", lang)]];
   async function signOut() { await fetch("/api/auth/logout", { method: "POST" }).catch(() => {}); window.location.href = "/login"; }
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -14,29 +15,31 @@ export default function Nav({ chatHref, signedIn, name }: { chatHref: string; si
   useEffect(() => {
     const f = () => setScrolled(window.scrollY > 24);
     f(); window.addEventListener("scroll", f, { passive: true });
-    // Scroll-spy: mark the section in view so the nav shows where you are.
     const secs = LINKS.map(([h]) => document.querySelector<HTMLElement>(h)).filter(Boolean) as HTMLElement[];
     const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) setActive("#" + e.target.id); }, { rootMargin: "-40% 0px -55% 0px" });
     secs.forEach((el) => io.observe(el));
     return () => { window.removeEventListener("scroll", f); io.disconnect(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [open]);
+  const cta = signedIn ? (name ? t("chatAs", lang, { name }) : t("openChat", lang)) : t("talkTo", lang);
 
   return (
     <>
       <header className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-inner">
-          <Link href="/" className="flex items-center gap-3 no-underline" style={{ color: "var(--ink)" }} aria-label="MindEase home">
-            <span className="block h-7 w-7 rounded-full" style={{ background: "radial-gradient(circle at 35% 30%, #fff, rgba(255,255,255,0) 40%), linear-gradient(145deg, var(--coral-2), var(--accent-mid) 60%, var(--accent-deep))", boxShadow: "0 8px 20px -6px rgba(var(--accent-rgb),.7)" }} />
+          <Link href="/" className="flex items-center gap-3 no-underline" style={{ color: "var(--ink)" }} aria-label={t("home", lang)}>
+            <span className="block h-7 w-7 rounded-full" style={{ background: "radial-gradient(circle at 35% 30%, #fff, rgba(255,255,255,0) 40%), linear-gradient(145deg, var(--coral-2), var(--accent-mid) 60%, var(--accent-deep))" }} aria-hidden />
             <span className="display" style={{ fontSize: ".95rem" }}>MindEase</span>
           </Link>
           <nav className="nav-links glass" aria-label="Primary">
             {LINKS.map(([h, l]) => <a key={h} href={h} aria-current={active === h ? "true" : undefined} className="swap"><span data-t={l}>{l}</span></a>)}
           </nav>
           <div className="nav-cta">
-            {signedIn && <button type="button" className="linkish nav-signout" onClick={signOut} title={name ? `Signed in as ${name}` : "Signed in"}>Sign out</button>}
-            <Magnetic href={chatHref} className="btn-primary" >{signedIn ? (name ? `Chat as ${name}` : "Open chat") : "Talk to MindEase"} <PxArrow className="pxicon" /></Magnetic>
-            <button className="burger" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+            <LanguageSwitch lang={lang} signedIn={signedIn} compact />
+            {signedIn && <button type="button" className="linkish nav-signout" onClick={signOut} title={name ? t("signedInAs", lang, { name }) : undefined}>{t("signOut", lang)}</button>}
+            <Magnetic href={chatHref} className="btn-primary">{cta} <PxArrow className="pxicon" /></Magnetic>
+            <button className="burger" aria-label={open ? t("closeMenu", lang) : t("openMenu", lang)} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
               {open ? <PxRemove className="pxicon" style={{ fontSize: 20 }} /> : <PxMenu className="pxicon" style={{ fontSize: 20 }} />}
             </button>
           </div>
@@ -45,8 +48,9 @@ export default function Nav({ chatHref, signedIn, name }: { chatHref: string; si
       {open && (
         <div className="mobile-menu glass" role="dialog" aria-label="Menu">
           {LINKS.map(([h, l]) => <a key={h} href={h} onClick={() => setOpen(false)}>{l}</a>)}
-          <Link href={chatHref} className="btn btn-primary" style={{ justifyContent: "center", marginTop: 6 }} onClick={() => setOpen(false)}>{signedIn ? (name ? `Chat as ${name}` : "Open chat") : "Talk to MindEase"}</Link>
-          {signedIn && <button type="button" className="btn" style={{ justifyContent: "center" }} onClick={signOut}>Sign out</button>}
+          <div style={{ padding: "6px 16px" }}><LanguageSwitch lang={lang} signedIn={signedIn} /></div>
+          <Link href={chatHref} className="btn btn-primary" style={{ justifyContent: "center", marginTop: 6 }} onClick={() => setOpen(false)}>{cta} <PxArrow className="pxicon" /></Link>
+          {signedIn && <button type="button" className="btn" style={{ justifyContent: "center" }} onClick={signOut}>{t("signOut", lang)}</button>}
         </div>
       )}
     </>

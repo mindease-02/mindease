@@ -6,7 +6,7 @@ import { PxArrow } from "./pixelIcons";
 export default function MobileCta({ href, label = "Start talking" }: { href: string; label?: string }) {
   const [off, setOff] = useState(false);
   useEffect(() => {
-    const end = document.querySelector("#start"); const top = document.querySelector(".title-card");
+    const end = document.querySelector("#start"); const top = document.querySelector(".hero-plain");
     if (!end || !("IntersectionObserver" in window)) return;
     const seen = new Map<Element, boolean>();
     const io = new IntersectionObserver((es) => { es.forEach((e) => seen.set(e.target, e.isIntersecting)); setOff([...seen.values()].some(Boolean)); }, { threshold: 0.2 });

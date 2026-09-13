@@ -5,7 +5,7 @@
 import type { LucideProps } from "lucide-react";
 import {
   Gamepad2, ArrowRight, Bell, Trash2, Brain, Check, Settings, Download, Eye, Zap, Hand, Heart, Hourglass, Lock, Menu,
-  MessageCircle, Mic, MicOff, Aperture, Moon, Play, RefreshCw, X, Satellite, Send, Shield, Volume2, Star, Sun, User, Minus,
+  MessageCircle, Mic, MicOff, Aperture, Moon, Play, RefreshCw, X, Satellite, Send, Shield, Volume2, Star, Sun, User, Globe, Minus,
 } from "lucide-react";
 
 type P = LucideProps;
@@ -42,3 +42,4 @@ export const PxStar = (p: P) => <Star {...base} {...p} />;
 export const PxSun = (p: P) => <Sun {...base} {...p} />;
 export const PxUser = (p: P) => <User {...base} {...p} />;
 export const PxMinus = (p: P) => <Minus {...base} {...p} />;
+export const PxGlobe = (p: P) => <Globe {...base} {...p} />;
