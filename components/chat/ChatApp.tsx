@@ -165,7 +165,7 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
     setVoiceNote(null);
     const at = Date.now();
     setMessages((m) => [...m, { role: "user", content: text, at }, { role: "assistant", content: "", at: at + 1, pending: true }]);
-    setSending(true); scroll();
+    setSending(true); scroll(); buzz(8);
     try {
       const clientContext = messages.slice(-10).map((m) => ({ role: m.role, content: m.content }));
       const r = await fetch("/api/chat", {
@@ -176,7 +176,7 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
       const j = (await r.json()) as TurnResult & { error?: string };
       if (!r.ok) throw new Error(j.error ?? "something went wrong");
       setMessages((m) => m.map((x) => x.pending ? { role: "assistant", content: j.reply, at: j.at } : x));
-      setPulse((p) => p + 1);
+      setPulse((p) => p + 1); buzz(12);
       typing.onPromptShown();
       if (j.helplines) setCrisis({ helplines: j.helplines, emergency: j.emergency });
       else if (crisis && j.risk.tier === "none" && /\b(ok|okay|fine|better|safe)\b/i.test(text)) setCrisis(null);
@@ -317,11 +317,25 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
   useEffect(() => { if (toast) { const tm = setTimeout(() => setToast(null), 3500); return () => clearTimeout(tm); } }, [toast]);
   useEffect(() => { if ("Notification" in window && Notification.permission === "default") Notification.requestPermission().catch(() => {}); }, []);
   useEffect(() => () => { voiceModeRef.current = false; }, []);
+  // Phones: when the keyboard opens, size the chat to the visible viewport so the composer stays above it.
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const vv = window.visualViewport; if (!vv) return;
+    const apply = () => {
+      const el = rootRef.current; if (!el) return;
+      const small = window.matchMedia("(max-width: 720px)").matches;
+      el.style.setProperty("--vvh", small ? `${Math.round(vv.height)}px` : "");
+      if (small && vv.height < window.innerHeight - 120) scroll();
+    };
+    vv.addEventListener("resize", apply); vv.addEventListener("scroll", apply); apply();
+    return () => { vv.removeEventListener("resize", apply); vv.removeEventListener("scroll", apply); };
+  }, [scroll]);
+  const buzz = (ms: number) => { try { navigator.vibrate?.(ms); } catch { /* not supported */ } };
 
   const statusLine = voiceStatus === "listening" ? t("listening", lang) : voiceStatus === "thinking" ? t("thinking", lang) : voiceStatus === "speaking" ? t("speaking", lang) : t("tapToTalk", lang);
 
   return (
-    <div className="chat relative z-[1] flex h-screen flex-col" style={{ ["--warm" as string]: tint.warm, ["--cool" as string]: tint.cool, ["--dim" as string]: tint.dim }}>
+    <div ref={rootRef} className="chat relative z-[1] flex h-screen flex-col" style={{ ["--warm" as string]: tint.warm, ["--cool" as string]: tint.cool, ["--dim" as string]: tint.dim }}>
       <LivingBackground tint={tint} level={voice.level} pulse={pulse} active={voice.recording || voiceStatus === "speaking"} />
       <header className="chat-head flex items-center gap-3 px-4 py-3 sm:px-6">
         <button className="clay-btn h-10 w-10 shrink-0 p-0" onClick={() => setDrawer(true)} aria-label={t("chats", lang)} title={t("chats", lang)}><PxMenu className="pxicon" style={{ fontSize: 18 }} /></button>

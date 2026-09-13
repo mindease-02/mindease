@@ -1062,3 +1062,21 @@ html { scroll-behavior: smooth; }
   .world .pstat b { font-size: 1.4rem; }
   .world .pstat span { font-size: .72rem; }
 }
+
+/* phone polish, round two: keyboard-aware chat, no rubber-banding, thumb feedback, floating start button */
+.world .chat { height: var(--vvh, 100dvh); }
+.world.chat-world { overscroll-behavior: none; }
+.world .chat .thin-scroll { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.world .mobile-cta { display: none; }
+@media (max-width: 720px) {
+  .world .mobile-cta { display: inline-flex; position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); translate: -50% 0; z-index: 30; padding: 14px 24px; font-size: 1rem; box-shadow: 0 18px 44px -12px rgba(var(--accent-rgb), .8), 0 8px 20px rgba(0,0,0,.45); transition: translate .45s var(--ease), opacity .3s; }
+  .world .mobile-cta.off { translate: -50% 160%; opacity: 0; pointer-events: none; }
+  .world .mood:active { transform: scale(.97); }
+  .world .clay-btn:active, .world .btn:active, .world .send-btn:active { transform: scale(.94); }
+  .world .drawer-pick:active, .world .pmenu-item:active { background: var(--glass-2); }
+  .world .chat .thin-scroll { padding-left: 12px; padding-right: 12px; }
+  .world .bubble-user { border-bottom-right-radius: 6px; }
+  .world .offer, .world .techniques { border-radius: 18px !important; }
+  .world .tc-light { width: 140vw; }
+  .world footer .foot { gap: 22px; }
+}

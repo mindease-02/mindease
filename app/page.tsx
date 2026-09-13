@@ -10,6 +10,7 @@ import Preloader from "@/components/home/Preloader";
 import ScrollTitle from "@/components/home/ScrollTitle";
 import Marquee from "@/components/home/Marquee";
 import TitleCard from "@/components/home/TitleCard";
+import MobileCta from "@/components/home/MobileCta";
 import { TICKER } from "@/lib/ticker";
 
 export default async function Home() {
@@ -34,6 +35,7 @@ export default async function Home() {
         <Cta chatHref={chatHref} />
       </main>
       <Footer />
+      <MobileCta href={chatHref} />
     </div>
   );
 }
