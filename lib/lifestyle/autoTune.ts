@@ -49,11 +49,11 @@ export function autoTune(state: UserState, now = Date.now()): AutoTuneNote[] {
   c.dailyMax = dep.tier === "high" || dep.tier === "elevated" ? 1 : 2;
   c.weeklyBudget = dep.tier === "high" ? 3 : dep.tier === "elevated" ? 5 : dep.tier === "watch" ? 6 : 8;
   if (dep.tier === "elevated" || dep.tier === "high") notes.push({ key: "reliance", text: "Check-ins are rarer right now because you've been here a lot - MindEase is trying to be a bridge, not a place to stay." });
+  else if (dep.tier === "healthy" && state.outreach.length >= 3) notes.push({ key: "steadier", text: "Things look steadier from here, so MindEase is writing first less. That is the point of it." });
 
-  // Signals: derived features only; used once baselines are trustworthy.
-  c.typingSignals = true;
-  c.voiceSignals = true;
-  c.faceSignals = false;
+  // Signals: derived features only; used once baselines are trustworthy. If the person has set these
+  // switches themselves, their choice stands.
+  if (!c.signalsChosen) { c.typingSignals = true; c.voiceSignals = true; c.faceSignals = false; }
   const reliable = (state.typingBaselines?.ikiMedian?.n ?? 0) >= 8 || (state.prosodyBaselines?.f0Median?.n ?? 0) >= 8;
   c.allowBehaviouralSignals = reliable;
   notes.push({ key: "signals", text: reliable ? "MindEase has enough history to read your typing rhythm and tone of voice, and may mention them." : "MindEase is still learning your typing rhythm and tone of voice; it won't mention them yet." });

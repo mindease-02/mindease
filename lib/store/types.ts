@@ -84,6 +84,8 @@ export interface UserState {
     pushNotifications: boolean;
     /** Transcript retention in days. Messages older than this are dropped on load. */
     retentionDays: number;
+    /** True once the person has set the signal switches themselves; auto-tuning then leaves them alone. */
+    signalsChosen?: boolean;
   };
   history: MoodPoint[];
   messages: StoredMessage[];
@@ -130,6 +132,17 @@ export interface UserState {
   /** Chat sessions. Messages carry a sessionId; memory, trend and safety stay global across sessions. */
   sessions?: ChatSession[];
   currentSessionId?: string;
+  /** Moments the model marked as the person's own insight: a reframe, naming what helps, noticing a pattern, a concrete step. */
+  milestones?: Milestone[];
+  /** Coping tools actually started (breathing, grounding, a screening). Never conversations. */
+  tools?: { kind: string; at: number }[];
+}
+
+export interface Milestone {
+  at: number;
+  kind: "reframe" | "named_help" | "noticed" | "plan";
+  /** The person's own words, short. */
+  text: string;
 }
 
 export interface ChatSession {

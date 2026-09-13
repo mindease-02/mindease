@@ -11,6 +11,9 @@ import ScreeningCard, { type ScreeningResult } from "./ScreeningCard";
 import LivingBackground from "./LivingBackground";
 import ChatDrawer from "./ChatDrawer";
 import ProfileMenu from "./ProfileMenu";
+import ReasonStrip, { type Reason } from "./ReasonStrip";
+import MemoryCard from "./MemoryCard";
+import InsightLine from "./InsightLine";
 import { popIn } from "@/lib/motion";
 import type { ScreeningOffer } from "@/lib/screening";
 import { useTypingMetrics } from "../hooks/useTypingMetrics";
@@ -24,7 +27,7 @@ import type { Helpline } from "@/lib/safety/resources";
 import type { ChatSession } from "@/lib/store/types";
 import { greetingFor, languageMeta, scriptOf, t } from "@/lib/i18n";
 
-interface Msg { role: "user" | "assistant"; content: string; at: number; proactive?: boolean; kind?: string; pending?: boolean }
+interface Msg { role: "user" | "assistant"; content: string; at: number; proactive?: boolean; kind?: string; pending?: boolean; reason?: Reason; newMemories?: { id: string; text: string; kind: string }[]; insight?: string }
 type VoiceStatus = "idle" | "listening" | "thinking" | "speaking";
 
 const POLL_MS = 45_000;
@@ -108,8 +111,9 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
       const a = (j?.arrival as { mood?: string; label: string; note?: string } | null) ?? null;
       setArrival(a);
       const l = typeof j?.language === "string" && j.language !== "auto" ? j.language : (initialUi ?? initialLanguage);
-      if (j?.messages?.length) { setMessages(j.messages); scroll(); }
-      else setMessages([{ role: "assistant", content: greetingFor(name, a, l), at: Date.now() }]);
+      // If the person already sent something while this loaded, keep it rather than replacing it with history.
+      if (j?.messages?.length) { setMessages((cur) => cur.some((m) => m.role === "user") ? [...j.messages, ...cur] : j.messages); scroll(); }
+      else setMessages((cur) => cur.some((m) => m.role === "user") ? [{ role: "assistant", content: greetingFor(name, a, l), at: Date.now() - 1 }, ...cur] : [{ role: "assistant", content: greetingFor(name, a, l), at: Date.now() }]);
     })();
     const poll = setInterval(() => refresh(false), POLL_MS);
     const evaluate = async () => { try { await fetch("/api/checkin/evaluate", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }); await refresh(false); } catch { /* ignore */ } };
@@ -175,7 +179,9 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
       if (r.status === 401) { router.push("/login"); return false; }
       const j = (await r.json()) as TurnResult & { error?: string };
       if (!r.ok) throw new Error(j.error ?? "something went wrong");
-      setMessages((m) => m.map((x) => x.pending ? { role: "assistant", content: j.reply, at: j.at } : x));
+      // Session-only: the reason strip and the memory cards come from this turn's result and are never re-fetched.
+      const reason: Reason = { states: j.analysis.states.slice(0, 3).map((s) => s.name), need: j.analysis.need, intensity: j.analysis.intensity, used: j.memoriesUsed ?? [], will: j.newMemories ?? [], raised: !!j.riskRaised };
+      setMessages((m) => m.map((x) => x.pending ? { role: "assistant", content: j.reply, at: j.at, reason, newMemories: j.newMemories ?? [], insight: j.insight?.kind } : x));
       setPulse((p) => p + 1); buzz(12);
       typing.onPromptShown();
       if (j.helplines) setCrisis({ helplines: j.helplines, emergency: j.emergency });
@@ -308,6 +314,10 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
     setLang(id);
     await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ language: id }) });
   }
+  async function forget(id: string) {
+    await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ forgetMemoryId: id }) });
+    if (showMirror) refresh(true);
+  }
   async function notUseful(m: Msg) {
     await fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ at: m.at, kind: m.kind }) });
     setToast(t("noted", lang));
@@ -356,12 +366,15 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
       <div ref={listRef} className="thin-scroll relative z-[1] flex-1 overflow-y-auto px-4 sm:px-6">
         <div className="mx-auto flex max-w-2xl flex-col gap-3 py-4">
           {messages.map((m, i) => (
-            <div key={m.at + ":" + i} className={`animate-rise flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div key={m.at + ":" + i} className={`animate-rise flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
               <div className={`max-w-[92%] sm:max-w-[85%] whitespace-pre-wrap text-[15px] leading-relaxed ${m.role === "user" ? "bubble-user" : m.proactive ? "bubble-proactive" : "bubble-ai"}`}>
-                {m.proactive && <div className="mb-1 flex items-center gap-2 text-[10px] uppercase tracking-wider opacity-60">{t("unprompted", lang)} · {m.kind?.replace("_", " ")}</div>}
+                {m.proactive && <div className="mb-1 text-[12px] text-clay-muted">{t("unprompted", lang)}</div>}
                 {m.pending ? <span className="inline-flex gap-1 py-1"><i className="h-1.5 w-1.5 animate-breathe rounded-full bg-clay-muted" /><i className="h-1.5 w-1.5 animate-breathe rounded-full bg-clay-muted [animation-delay:.2s]" /><i className="h-1.5 w-1.5 animate-breathe rounded-full bg-clay-muted [animation-delay:.4s]" /></span> : m.content}
                 {m.proactive && !m.pending && <button onClick={() => notUseful(m)} className="mt-2 block text-[11px] text-clay-muted underline decoration-dotted">{t("notUseful", lang)}</button>}
               </div>
+              {m.insight && <InsightLine kind={m.insight} lang={lang} />}
+              {m.newMemories?.map((mem) => <MemoryCard key={mem.id} m={mem} lang={lang} onForget={forget} />)}
+              {m.reason && <ReasonStrip r={m.reason} lang={lang} />}
             </div>
           ))}
           {crisis && <CrisisCard helplines={crisis.helplines} emergency={crisis.emergency} lang={lang} />}
@@ -402,7 +415,7 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
           </form>
         )}
         <p className="mx-auto mt-2 max-w-2xl text-center text-[10px] text-clay-muted">
-          {voiceNote ? "voice tone captured · " : ""}{face.active ? "expression on · " : ""}{t("disclaimer", lang)}
+          {voiceNote ? `${t("voiceLabel", lang)} ✓ ` : ""}{face.active ? `${t("faceLabel", lang)} ✓ ` : ""}{t("trustLine", lang)}
         </p>
       </footer>
 

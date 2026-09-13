@@ -14,6 +14,7 @@ import { lifestylePatterns } from "../lifestyle/patterns";
 import { autoTune } from "../lifestyle/autoTune";
 import { patternReport } from "../screening";
 import { INSTRUMENTS } from "../screening/instruments";
+import { toolsSummary, weeklyReflection } from "../reflection";
 import type { UserState } from "../store/types";
 
 const PLAIN: Record<string, string> = {
@@ -71,6 +72,11 @@ export function userView(state: UserState, now = Date.now()) {
     region: state.region ?? null,
     pushDevices: state.push.length,
     messages: state.consent.storeTranscript ? state.messages.slice(-60) : [],
+    /** The weekly reflection and the tools tried: the only "progress" MindEase shows, and neither is a score. */
+    reflection: weeklyReflection(state, now),
+    tools: toolsSummary(state),
+    moments: (state.milestones ?? []).slice(-6).reverse(),
+    setupDone: !!state.setupDone,
   };
 }
 export type UserView = ReturnType<typeof userView>;

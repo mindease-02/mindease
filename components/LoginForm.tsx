@@ -32,7 +32,7 @@ export default function LoginForm({ lang = "en" }: { lang?: string }) {
         const r = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ identifier, timeZone, region, language }) });
         const j = await r.json();
         if (!r.ok) throw new Error(j.error ?? t("cantSignIn", lang));
-        router.push("/mood"); return;
+        router.push(j.returning ? "/mood" : "/welcome"); return;
       }
       if (mode === "forgot") {
         const r = await fetch("/api/auth/reset", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
@@ -44,7 +44,7 @@ export default function LoginForm({ lang = "en" }: { lang?: string }) {
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? t("cantSignIn", lang));
       if (j.needsConfirmation) { setNotice(t("confirmSent", lang)); setMode("signin"); setBusy(false); return; }
-      router.push("/mood");
+      router.push(j.returning ? "/mood" : "/welcome");
     } catch (err) {
       setError((err as Error).message); setBusy(false);
     }

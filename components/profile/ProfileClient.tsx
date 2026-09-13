@@ -3,6 +3,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LANGUAGES, t } from "@/lib/i18n";
 import { PxArrow, PxDownload, PxBin, PxCheck } from "../home/pixelIcons";
+import type { WeeklyReflection } from "@/lib/reflection";
+import WeekCard from "../reflection/WeekCard";
+import ToolsUsed from "./ToolsUsed";
+import ConsentPanel, { type ConsentView } from "./ConsentPanel";
 
 interface Props {
   name: string; email: string; lang: string; accounts: boolean; memberSince: string;
@@ -11,6 +15,9 @@ interface Props {
   screenings: { name: string; domain: string; date: string; score: number; max: number; band: string }[];
   patterns: { domain: string; strength: number; note: string }[];
   rhythm: string[];
+  reflection: WeeklyReflection;
+  tools: { kind: string; count: number }[];
+  consent: ConsentView;
 }
 
 function Card({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
@@ -62,6 +69,15 @@ export default function ProfileClient(p: Props) {
           <div key={String(l)} className="pstat"><b>{n}</b><span>{l}</span></div>
         ))}
       </div>
+
+      <Card title={t("wkTitle", lang)}>
+        <WeekCard r={p.reflection} lang={lang} />
+        <div className="plabel" style={{ marginTop: 22 }}>{t("skTitle", lang)}</div>
+        <ToolsUsed tools={p.tools} lang={lang} />
+        <div className="prow" style={{ marginTop: 18 }}>
+          <a className="btn" href="/story">{t("storyLink", lang)} <PxArrow className="pxicon" /></a>
+        </div>
+      </Card>
 
       <Card title={t("results", lang)} hint={t("notDiagnosis", lang)}>
         <div className="plabel">{t("howYouSeem", lang)}</div>
@@ -123,8 +139,9 @@ export default function ProfileClient(p: Props) {
         {note && <p role="status" style={{ marginTop: 6, fontSize: ".9rem" }}>{note}</p>}
       </Card>
 
-      <Card title={t("yourData", lang)}>
-        <div className="prow" style={{ flexWrap: "wrap" }}>
+      <Card title={t("dataTitle", lang)}>
+        <ConsentPanel initial={p.consent} lang={lang} />
+        <div className="prow" style={{ flexWrap: "wrap", marginTop: 18 }}>
           <a className="btn" href="/api/export" download="mindease-export.json"><PxDownload className="pxicon" /> {t("exportJson", lang)}</a>
           <button className="btn pdanger" onClick={deleteAll} disabled={busy}><PxBin className="pxicon" /> {t("deleteAll", lang)}</button>
         </div>

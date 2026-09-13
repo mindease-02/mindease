@@ -38,6 +38,13 @@ export default function Techniques({ mood, onClose, initial, lang = "en" }: { mo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running, phase, kind]);
 
+  const used = useRef(new Set<Kind>());
+  /** Counts a tool once per session of the panel, only when the person starts or finishes it. */
+  function record(k: Kind) {
+    if (used.current.has(k)) return; used.current.add(k);
+    fetch("/api/tools", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: k }) }).catch(() => {});
+  }
+  const [done, setDone] = useState<Kind | null>(null);
   const ph = phases[phase][0];
   const scale = !running ? 0.7 : ph === "in" || ph === "sip" ? 1 : ph === "out" || ph === "long" ? 0.62 : undefined;
   const tabs: [Kind, string][] = [["box", "techBox"], ["sigh", "techSigh"], ["ground", "techGround"], ["move", "techMove"]];
@@ -64,7 +71,7 @@ export default function Techniques({ mood, onClose, initial, lang = "en" }: { mo
             {running && <small>{left}</small>}
           </div>
           <div className="t-controls">
-            <button className="clay-btn-primary px-4 py-2 text-sm" onClick={() => { setRunning((r) => !r); setPhase(0); }}>{running ? t("stop", lang) : t("start", lang)}</button>
+            <button className="clay-btn-primary px-4 py-2 text-sm" onClick={() => { if (!running) record(kind); setRunning((r) => !r); setPhase(0); }}>{running ? t("stop", lang) : t("start", lang)}</button>
             <span className="muted t-round">{running ? `${t("round", lang)} ${round + 1} · ${kind === "box" ? t("boxBlurb", lang) : t("sighBlurb", lang)}` : kind === "box" ? t("boxRounds", lang) : t("sighRounds", lang)}</span>
           </div>
         </div>
@@ -80,6 +87,11 @@ export default function Techniques({ mood, onClose, initial, lang = "en" }: { mo
         <ol className="t-list">
           {(["1", "2", "3", "4"] as const).map((n) => <li key={n}><b>{n}</b><span>{t(`m${n}`, lang)}</span></li>)}
         </ol>
+      )}
+      {(kind === "ground" || kind === "move") && (
+        <div className="t-controls" style={{ marginTop: 12 }}>
+          <button className="clay-btn px-4 py-2 text-sm" disabled={done === kind} onClick={() => { record(kind); setDone(kind); }}>{done === kind ? t("noted", lang) : t("didThis", lang)}</button>
+        </div>
       )}
     </div>
   );

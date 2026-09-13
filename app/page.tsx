@@ -7,6 +7,8 @@ import { Cta, Demo, FeatureRows, Footer, Story } from "@/components/home/Section
 import ThemeInit from "@/components/home/ThemeInit";
 import Marquee from "@/components/home/Marquee";
 import MobileCta from "@/components/home/MobileCta";
+import TryMirror from "@/components/home/TryMirror";
+import Compare from "@/components/home/Compare";
 import { getStore } from "@/lib/store";
 import { pageLanguage } from "@/lib/i18n/server";
 import { t, tickerItems } from "@/lib/i18n";
@@ -26,7 +28,9 @@ export default async function Home() {
         <Hero chatHref={chatHref} lang={lang} />
         <Marquee items={tickerItems(lang)} />
         <Demo lang={lang} />
+        <TryMirror lang={lang} />
         <FeatureRows chatHref={chatHref} lang={lang} />
+        <Compare lang={lang} />
         <Story lang={lang} />
         <Cta chatHref={chatHref} lang={lang} />
       </main>

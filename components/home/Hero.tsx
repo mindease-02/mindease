@@ -30,6 +30,7 @@ export default function Hero({ chatHref, lang }: { chatHref: string; lang: strin
             <a href="#demo" className="btn">{t("seeIt", lang)}</a>
           </div>
           <p className="hero-note">{t("disclaimer", lang)}</p>
+          <p className="hero-price">{t("priceLine", lang)}</p>
         </div>
       </section>
       <section className="pillars" aria-label={t("whatItDoes", lang)}>

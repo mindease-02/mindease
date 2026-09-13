@@ -29,6 +29,8 @@ export async function POST(req: Request) {
   if (body.consent) {
     const { cadence, ...rest } = body.consent;
     state.consent = { ...state.consent, ...rest, cadence: { ...state.consent.cadence, ...(cadence ?? {}) } };
+    if ("voiceSignals" in rest || "typingSignals" in rest || "faceSignals" in rest) state.consent.signalsChosen = true;
+    if (typeof rest.retentionDays === "number") state.consent.retentionDays = [7, 30, 90].includes(rest.retentionDays) ? rest.retentionDays : 30;
     state.consent.dailyMax = Math.max(0, Math.min(6, Number(state.consent.dailyMax) || 0));
     state.consent.weeklyBudget = Math.max(0, Math.min(21, Number(state.consent.weeklyBudget) || 0));
     if (!state.consent.storeTranscript) state.messages = [];

@@ -111,6 +111,10 @@ export function migrate(s: UserState): UserState {
     messages,
     sessions,
     currentSessionId,
+    milestones: s.milestones ?? [],
+    tools: s.tools ?? [],
+    // Accounts that talked before onboarding existed are treated as onboarded.
+    setupDone: s.setupDone ?? ((s.history ?? []).length > 0),
     displayName: s.displayName ?? "you",
     octant: s.octant ?? emptyOctant(),
     memories: s.memories ?? [],

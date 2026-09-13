@@ -9,6 +9,7 @@ import LoginForm from "@/components/LoginForm";
 import Reveal from "@/components/home/Reveal";
 import LanguageSwitch from "@/components/LanguageSwitch";
 import { pageLanguage } from "@/lib/i18n/server";
+import TrustStrip from "@/components/TrustStrip";
 import { t } from "@/lib/i18n";
 
 export default async function LoginPage() {
@@ -23,6 +24,7 @@ export default async function LoginPage() {
         <Link href="/" className="display no-underline" style={{ color: "var(--ink)", fontSize: "1.35rem" }}>MindEase</Link>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}><LanguageSwitch lang={lang} compact /><Link href="/" className="btn" style={{ padding: "10px 18px" }}>← {t("back", lang)}</Link></div>
       </div></header>
+      <TrustStrip lang={lang} />
       <Reveal as="main" className="entry shot"><div className="rays" aria-hidden /><div data-reveal style={{ width: "100%", display: "grid", placeItems: "center" }}><LoginForm lang={lang} /></div></Reveal>
     </div>
   );

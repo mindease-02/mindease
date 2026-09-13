@@ -29,6 +29,7 @@ import { updateEwma } from "../trend/ewma";
 import { updateCusum, rebaseline } from "../trend/cusum";
 import { assessDependency, type DependencyAssessment } from "../dependency";
 import { analyzeAffect, type AffectAnalysis } from "../llm/analyze";
+import { detectInsight } from "../llm/insight";
 import { complete, llmConfig } from "../llm";
 import { addMemories, anchors, markRecalled, retrieve } from "../memory";
 import { extractMemories } from "../memory/extract";
@@ -65,8 +66,10 @@ export interface TurnResult {
   incongruent: boolean;
   trend: { triggerScore: number; agreement: number; evidence: string[]; sufficient: boolean };
   dependency: { tier: string; index: number; reasons: string[] };
-  memoriesUsed: { id: string; text: string }[];
+  memoriesUsed: { id: string; text: string; kind: string }[];
   newMemories: { id: string; text: string; kind: string }[];
+  /** A moment the model marked as the person's own insight this turn. Shown once, low-key. */
+  insight: { kind: "reframe" | "named_help" | "noticed" | "plan"; text: string } | null;
   llmConfigured: boolean;
   /** Set when the model second opinion raised the tier above the regex. */
   riskRaised?: boolean;
@@ -220,9 +223,10 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   ensureSession(state, now);
   const context = (state.consent.storeTranscript ? sessionMessages(state) : (input.clientContext ?? []))
     .slice(-10).map((m) => ({ role: m.role, content: m.content }));
-  const [analysis, extracted] = await Promise.all([
+  const [analysis, extracted, spotted] = await Promise.all([
     analyzeAffect(text, context, { vad: snapshot.vad, octant: octantFromVAD(snapshot.vad) }, now, state.language),
     extractMemories(text, now),
+    detectInsight(text),
   ]);
 
   // Fuse: the model's inferred feeling is another observation of the same latent.
@@ -343,6 +347,9 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   const aiMsg: StoredMessage = { role: "assistant", content: reply, at: Date.now() };
   if (state.consent.storeTranscript) { noteMessages(state, [userMsg, aiMsg]); state.messages = [...state.messages, userMsg, aiMsg].slice(-MESSAGE_LIMIT); }
   state.lastUserMessageAt = now;
+  // Insight milestones: at most one every few hours, and never at serious risk (that is not the moment).
+  const insight = spotted && !atLeast(risk.tier, "active") && !(state.milestones ?? []).some((m) => now - m.at < 3 * HOUR) ? spotted : null;
+  if (insight) state.milestones = [...(state.milestones ?? []), { at: now, kind: insight.kind, text: insight.text }].slice(-200);
   await store.put(state);
 
   return {
@@ -352,7 +359,8 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     analysis, vad, confidence, incongruent,
     trend: { triggerScore: trend.triggerScore, agreement: trend.agreement, evidence: trend.evidence, sufficient: trend.sufficient },
     dependency: { tier: dependency.tier, index: dependency.index, reasons: dependency.reasons },
-    memoriesUsed: memoriesUsed.map((m) => ({ id: m.id, text: m.text })),
+    memoriesUsed: memoriesUsed.map((m) => ({ id: m.id, text: m.text, kind: m.kind })),
+    insight,
     newMemories: extracted.map((m) => ({ id: m.id, text: m.text, kind: m.kind })),
     llmConfigured: configured,
     riskRaised: second.raised || undefined,

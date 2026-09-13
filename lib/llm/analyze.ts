@@ -61,7 +61,7 @@ Return exactly this shape:
   "why": string,           // 1 sentence, from THEIR point of view: why this feeling makes sense given what they said
   "need": "vent"|"solve"|"distract"|"company"|"reflect"|"unclear",
   "intensity": 0-1,
-  "mentions": [string]     // named people, places, events, plans (max 6)
+  "mentions": [string],    // named people, places, events, plans (max 6)
 }`;
 
 export async function analyzeAffect(

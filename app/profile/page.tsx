@@ -12,6 +12,7 @@ import { lifestylePatterns } from "@/lib/lifestyle/patterns";
 import { supabaseConfigured } from "@/lib/supabase";
 import { t } from "@/lib/i18n";
 import { pageLanguage } from "@/lib/i18n/server";
+import TrustStrip from "@/components/TrustStrip";
 import ProfileClient from "@/components/profile/ProfileClient";
 
 /**
@@ -42,6 +43,7 @@ export default async function ProfilePage() {
         <Link href="/" className="display no-underline" style={{ color: "var(--ink)", fontSize: "1.35rem" }}>MindEase</Link>
         <Link href="/chat" className="btn" style={{ padding: "10px 18px" }}>← {t("backToChat", lang)}</Link>
       </div></header>
+      <TrustStrip lang={lang} />
       <main className="container profile" id="main">
         <ProfileClient
           name={state.displayName}
@@ -54,6 +56,9 @@ export default async function ProfilePage() {
           screenings={done.map((s) => { const inst = INSTRUMENTS[s.instrument]; return { name: inst.name, domain: inst.domain, date: fmt(s.completedAt!), score: s.score!, max: inst.max, band: bandFor(inst, s.score!).label }; })}
           patterns={patternReport(state, now).map((p) => ({ domain: p.domain, strength: p.strength, note: p.evidence }))}
           rhythm={life.sufficient ? life.lines : []}
+          reflection={view.reflection}
+          tools={view.tools}
+          consent={{ storeTranscript: state.consent.storeTranscript, retentionDays: state.consent.retentionDays, voiceSignals: state.consent.voiceSignals, typingSignals: state.consent.typingSignals, faceSignals: state.consent.faceSignals }}
         />
       </main>
     </div>

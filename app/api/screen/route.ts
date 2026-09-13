@@ -49,6 +49,7 @@ export async function POST(req: Request) {
     if (open.answers.length < inst.items.length) { await store.put(state); return NextResponse.json({ ok: true, item: itemPayload(inst.id, open.answers.length) }); }
     const scored = scoreScreening(open);
     Object.assign(open, scored);
+    state.tools = [...(state.tools ?? []), { kind: `screening:${inst.id}`, at: now }].slice(-300);
     const text = resultMessage(scored, state.region);
     const crisis = inst.crisisItem !== undefined && (scored.answers[inst.crisisItem] ?? 0) > 0;
     if (crisis) { const r = assessRisk("thoughts that I would be better off dead"); state.risk = { tier: r.tier === "none" ? "passive" : r.tier, at: now, peakTier: "passive", peakAt: now } as typeof state.risk; }

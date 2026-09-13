@@ -7,6 +7,10 @@ import { PxRemove } from "../home/pixelIcons";
 import type { usePush } from "../hooks/usePush";
 import { NEARBY_HELP_URL } from "@/lib/safety/resources";
 import { t } from "@/lib/i18n";
+import WeekCard from "../reflection/WeekCard";
+import ToolsUsed from "../profile/ToolsUsed";
+
+const KIND_KEY: Record<string, string> = { person: "stPeople", event: "stEvents", preference: "stPrefs", past: "stPast", fact: "stFacts", goal: "stGoals", struggle: "stStruggles", routine: "stRoutine" };
 
 interface Props {
   mirror: UserView | null;
@@ -21,7 +25,7 @@ interface Props {
 function Section({ title, children, hint }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
     <section className="clay-sm p-4">
-      <h3 className="text-[11px] font-medium uppercase tracking-widest text-clay-muted">{title}</h3>
+      <h3 className="mirror-h">{title}</h3>
       {hint && <p className="mt-1 text-xs text-clay-muted/80">{hint}</p>}
       <div className="mt-3">{children}</div>
     </section>
@@ -83,6 +87,12 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
                 <ul className="space-y-1 text-sm">{m.patterns.map((l) => <li key={l}>{l}</li>)}</ul>
               </Section>
             )}
+            <Section title={t("wkTitle", lang)}>
+              <WeekCard r={m.reflection} lang={lang} compact />
+            </Section>
+            <Section title={t("skTitle", lang)}>
+              <ToolsUsed tools={m.tools} lang={lang} />
+            </Section>
             <Section title={t("moodRecent", lang)}>
               <Sparkline points={m.mood} />
             </Section>
@@ -99,7 +109,7 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
                 {m.memories.map((mem) => (
                   <li key={mem.id} className="flex items-start gap-2 rounded-2xl bg-clay-bg-deep p-3">
                     <div className="flex-1 text-sm">
-                      <div className="text-[10px] uppercase tracking-wider text-clay-muted">{mem.kind}{mem.era ? ` · ${mem.era}` : ""} · {new Date(mem.at).toLocaleDateString(loc)}</div>
+                      <div className="text-[11px] text-clay-muted">{t(KIND_KEY[mem.kind] ?? "stFacts", lang)}{mem.era ? `, ${mem.era}` : ""}, {new Date(mem.at).toLocaleDateString(loc)}</div>
                       {mem.text}
                     </div>
                     <button disabled={busy} onClick={() => onSettings({ forgetMemoryId: mem.id })} className="text-xs text-clay-muted hover:text-clay-coral" aria-label={t("forget", lang)}>{t("forget", lang)}</button>
@@ -107,6 +117,7 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
                 ))}
               </ul>
             ) : <p className="text-xs text-clay-muted">{t("nothingYetMem", lang)}</p>}
+            <a href="/story" className="clay-btn mt-3 inline-block px-3 py-1.5 text-xs">{t("storyLink", lang)}</a>
           </Section>
         )}
 
