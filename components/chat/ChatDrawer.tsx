@@ -42,7 +42,7 @@ export default function ChatDrawer({ open, lang, sessions, currentId, onClose, o
             <div key={s.id} className={`drawer-item ${s.id === currentId ? "on" : ""}`}>
               <button className="drawer-pick" onClick={() => onPick(s.id)} aria-current={s.id === currentId ? "true" : undefined}>
                 <b>{s.title || t("untitled", lang)}</b>
-                <span>{when(s.lastAt, lang)} · {s.count}</span>
+                <span>{when(s.lastAt, lang)}</span>
               </button>
               <button className="drawer-del" onClick={() => onDelete(s.id)} aria-label={t("deleteChat", lang)} title={t("deleteChat", lang)}><PxBin className="pxicon" /></button>
             </div>

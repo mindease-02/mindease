@@ -27,7 +27,7 @@ export default function ReasonStrip({ r, lang }: { r: Reason; lang: string }) {
           {r.states.length > 0 && <div><dt>{t("rsRead", lang)}</dt><dd>{r.states.join(", ")}</dd></div>}
           {r.need && r.need !== "unclear" && <div><dt>{t("rsNeed", lang)}</dt><dd>{r.need}</dd></div>}
           <div><dt>{t("rsIntensity", lang)}</dt><dd><span className="reason-dots" aria-label={`${level}/3`}>{[1, 2, 3].map((i) => <i key={i} className={i <= level ? "on" : ""} />)}</span></dd></div>
-          {r.used.length > 0 && <div><dt>{t("rsUsed", lang)}</dt><dd>{r.used.map((m) => m.text).join(" · ")}</dd></div>}
+          {r.used.length > 0 && <div><dt>{t("rsUsed", lang)}</dt><dd>{r.used.map((m) => m.text).join("; ")}</dd></div>}
           {r.raised && <div><dt>{t("rsSafety", lang)}</dt><dd /></div>}
         </dl>
       )}

@@ -1172,3 +1172,17 @@ html { scroll-behavior: smooth; }
   .world .welcome-entry { padding-top: 24px; }
   .world .story-list li { grid-template-columns: 1fr; gap: 2px; }
 }
+
+/* Sentence case everywhere: no tracked all-caps labels. */
+.world .eyebrow, .world .steps-ind, .world .foot h5, .world .drawer-label, .world .chip-mem .k, .world .msg .k,
+.world .nav-signout, .world .story .frame .label, .world .sheet-table th, .world.chat-world .clay-sm h3,
+.world.chat-world .t-ring span, .world .btn, .world .clay-btn, .world .clay-btn-primary, .world.chat-world aside nav button,
+.world.chat-world .offer-opt, .world.chat-world .t-tab, .world.chat-world .clay-chip, .world .sticker {
+  text-transform: none !important; letter-spacing: 0 !important;
+}
+.world .eyebrow, .world .steps-ind { font-size: .85rem; }
+.world .foot h5, .world .drawer-label, .world .chip-mem .k { font-size: .82rem; }
+.world.chat-world .clay-sm h3 { font-size: .92rem; color: var(--ink); font-weight: 600; }
+.world .chat-sub-link { margin-left: 8px; }
+.world .foot-bottom span + span { margin-left: 0; }
+.world .mirror-row { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }

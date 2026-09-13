@@ -53,11 +53,21 @@ export interface CompletionOptions {
   signal?: AbortSignal;
 }
 
-export async function complete(messages: ChatMessage[], opts: CompletionOptions = {}): Promise<string> {
-  const cfg = llmConfig();
-  if (!cfg) throw new Error("No LLM configured. Set GROQ_API_KEY (or OPENROUTER_API_KEY).");
-  const model = opts.tier === "fast" ? cfg.fastModel : cfg.chatModel;
+/** Seconds Groq asks us to wait on a 429, from the header or the message; null when it does not say. */
+function retryAfterSeconds(res: Response, body: string): number | null {
+  const h = Number(res.headers.get("retry-after"));
+  if (Number.isFinite(h) && h > 0) return h;
+  const m = /try again in (?:(\d+)m)?([\d.]+)(ms|s)/i.exec(body);
+  if (!m) return null;
+  const n = Number(m[2]);
+  return (Number(m[1] ?? 0) * 60) + (m[3].toLowerCase() === "ms" ? n / 1000 : n);
+}
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** Longest we will wait inside one request for a rate-limit window to reopen. */
+const MAX_WAIT_S = 6;
+
+async function post(cfg: LlmConfig, model: string, messages: ChatMessage[], opts: CompletionOptions): Promise<Response> {
   const body: Record<string, unknown> = {
     model,
     messages,
@@ -68,8 +78,7 @@ export async function complete(messages: ChatMessage[], opts: CompletionOptions 
   // gpt-oss models reason before answering; keep that short so it neither eats
   // the token budget nor adds seconds of latency to a two-line reply.
   if (/gpt-oss/.test(model)) body.reasoning_effort = "low";
-
-  const res = await fetch(`${cfg.baseUrl}/chat/completions`, {
+  return fetch(`${cfg.baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${cfg.apiKey}`,
@@ -79,6 +88,32 @@ export async function complete(messages: ChatMessage[], opts: CompletionOptions 
     body: JSON.stringify(body),
     signal: opts.signal,
   });
+}
+
+/**
+ * One completion. On a rate limit it first waits, if the provider says the
+ * window reopens within a few seconds, and tries again. A fast-tier job that
+ * would have to wait longer moves once to the chat model, which has its own
+ * budget on Groq. Same provider either way, so nothing leaves where it went before.
+ */
+export async function complete(messages: ChatMessage[], opts: CompletionOptions = {}): Promise<string> {
+  const cfg = llmConfig();
+  if (!cfg) throw new Error("No LLM configured. Set GROQ_API_KEY (or OPENROUTER_API_KEY).");
+  const primary = opts.tier === "fast" ? cfg.fastModel : cfg.chatModel;
+
+  let res = await post(cfg, primary, messages, opts);
+  if (res.status === 429) {
+    const text = await res.text();
+    const wait = retryAfterSeconds(res, text);
+    if (wait !== null && wait <= MAX_WAIT_S) {
+      await sleep(Math.ceil(wait * 1000) + 150);
+      res = await post(cfg, primary, messages, opts);
+    } else if (opts.tier === "fast" && cfg.chatModel !== cfg.fastModel) {
+      res = await post(cfg, cfg.chatModel, messages, opts);
+    } else {
+      throw new Error(`LLM 429: ${text.slice(0, 300)}`);
+    }
+  }
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`LLM ${res.status}: ${text.slice(0, 300)}`);

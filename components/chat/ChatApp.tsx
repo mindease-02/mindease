@@ -352,7 +352,7 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
         <Orb size={40} tint={tint} />
         <div className="leading-tight">
           <div className="display chat-title text-lg">MindEase</div>
-          <div className="chat-sub text-[11px] text-clay-muted">{t("software", lang)} &middot; {t("hereFor", lang, { name })} &middot; <a href="/mood" className="underline decoration-dotted">{t("changeMood", lang)}</a></div>
+          <div className="chat-sub text-[11px] text-clay-muted">{t("software", lang)}, {t("hereFor", lang, { name })} <a href="/mood" className="chat-sub-link underline decoration-dotted">{t("changeMood", lang)}</a></div>
         </div>
         <div className="ml-auto flex items-center gap-2">
           <button onClick={() => voiceMode ? stopVoiceMode() : startVoiceMode()} className={`clay-btn px-3 py-2 text-xs ${voiceMode ? "bg-clay-coral" : ""}`} title={t("voiceChat", lang)}>

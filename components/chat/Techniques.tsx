@@ -72,7 +72,7 @@ export default function Techniques({ mood, onClose, initial, lang = "en" }: { mo
           </div>
           <div className="t-controls">
             <button className="clay-btn-primary px-4 py-2 text-sm" onClick={() => { if (!running) record(kind); setRunning((r) => !r); setPhase(0); }}>{running ? t("stop", lang) : t("start", lang)}</button>
-            <span className="muted t-round">{running ? `${t("round", lang)} ${round + 1} · ${kind === "box" ? t("boxBlurb", lang) : t("sighBlurb", lang)}` : kind === "box" ? t("boxRounds", lang) : t("sighRounds", lang)}</span>
+            <span className="muted t-round">{running ? `${t("round", lang)} ${round + 1}. ${kind === "box" ? t("boxBlurb", lang) : t("sighBlurb", lang)}` : kind === "box" ? t("boxRounds", lang) : t("sighRounds", lang)}</span>
           </div>
         </div>
       )}

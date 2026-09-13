@@ -6,7 +6,7 @@ import { t } from "@/lib/i18n";
 export default function CrisisCard({ helplines, emergency, lang = "en" }: { helplines: Helpline[]; emergency: string; lang?: string }) {
   return (
     <div className="clay-dark animate-rise mx-auto my-3 w-full max-w-lg p-5">
-      <div className="text-[11px] uppercase tracking-widest text-clay-haze">{t("crisisEyebrow", lang)}</div>
+      <div className="text-[13px] text-clay-haze">{t("crisisEyebrow", lang)}</div>
       <p className="mt-2 text-sm leading-relaxed text-clay-surface">{t("crisisP", lang, { emergency })}</p>
       <ul className="mt-3 space-y-2">
         {helplines.map((h) => (

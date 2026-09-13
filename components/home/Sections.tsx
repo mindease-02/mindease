@@ -67,7 +67,7 @@ export function Demo({ lang }: L) {
         </div>
         <div className="demo">
           <div ref={host} className="device" data-reveal role="region" aria-label={t("demoLabel", lang)}>
-            <div className="device-head"><span className="dot" aria-hidden />MindEase <span className="muted">· {t("demoLabel", lang)}</span></div>
+            <div className="device-head"><span className="dot" aria-hidden />MindEase <span className="muted">{t("demoLabel", lang)}</span></div>
             {!started && (
               <button type="button" className="demo-play" onClick={() => { setStarted(true); setPlaying(true); }} aria-label={t("playSub", lang)}>
                 <span className="demo-play-ico">{I.play}</span>
@@ -181,7 +181,7 @@ export function FeatureRows({ chatHref = "/login", lang }: { chatHref?: string }
           </div>
           <div className="feat-visual" aria-hidden>
             <div className="line mindease in" style={{ maxWidth: "100%", opacity: 1, transform: "none", padding: "12px 14px", borderRadius: 16, background: "var(--surface-2)", border: "1px solid var(--color-border)", fontSize: ".9rem" }}>
-              <span style={{ display: "block", fontSize: ".62rem", letterSpacing: ".16em", textTransform: "uppercase", color: "var(--color-accent)", marginBottom: 4 }}>{t("f3Why", lang)}</span>
+              <span style={{ display: "block", fontSize: ".8rem", color: "var(--color-accent)", marginBottom: 4 }}>{t("f3Why", lang)}</span>
               {t("f3Msg", lang)}
             </div>
             <div className="gates" data-stagger>
@@ -251,10 +251,10 @@ export function Footer({ lang }: L) {
             <p className="muted" style={{ maxWidth: "24rem", fontWeight: 300, lineHeight: 1.6, marginTop: 10 }}>{t("footBlurb", lang)}</p>
           </div>
           <div><h5>{t("product", lang)}</h5><a href="#demo">{t("seeIt", lang)}</a><a href="#features">{t("navWhat", lang)}</a><a href="#story">{t("navWhy", lang)}</a><a href="#start">{t("navStart", lang)}</a></div>
-          <div><h5>{t("crisisLines", lang)}</h5><a href="https://telemanas.mohfw.gov.in" target="_blank" rel="noreferrer">Tele-MANAS · 14416</a><a href="tel:18005990019">Kiran · 1800-599-0019</a><a href="https://www.vandrevalafoundation.com" target="_blank" rel="noreferrer">Vandrevala · +91 9999 666 555</a><a href="tel:112">Emergency · 112</a></div>
+          <div><h5>{t("crisisLines", lang)}</h5><a href="https://telemanas.mohfw.gov.in" target="_blank" rel="noreferrer">Tele-MANAS 14416</a><a href="tel:18005990019">Kiran 1800-599-0019</a><a href="https://www.vandrevalafoundation.com" target="_blank" rel="noreferrer">Vandrevala +91 9999 666 555</a><a href="tel:112">Emergency 112</a></div>
           <div><h5>{t("source", lang)}</h5><a href="https://github.com/mindease-02/mindease" target="_blank" rel="noreferrer">GitHub</a><Link href="/login">{t("signIn", lang)}</Link></div>
         </div>
-        <div className="foot-bottom"><span>© {new Date().getFullYear()} MindEase · {t("icons", lang)}: <a href="https://lucide.dev" target="_blank" rel="noreferrer" style={{ display: "inline" }}>Lucide</a> (ISC)</span><span>{t("footNot", lang)}</span></div>
+        <div className="foot-bottom"><span>© {new Date().getFullYear()} MindEase</span><span>{t("icons", lang)}: <a href="https://lucide.dev" target="_blank" rel="noreferrer" style={{ display: "inline" }}>Lucide</a> (ISC)</span><span>{t("footNot", lang)}</span></div>
       </div>
     </footer>
   );

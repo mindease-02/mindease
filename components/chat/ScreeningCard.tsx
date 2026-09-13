@@ -25,7 +25,7 @@ export default function ScreeningCard({ offer, onDone, onDismiss, lang = "en" }:
       <p className="offer-q">{offer.intro}</p>
       <p className="muted" style={{ fontSize: ".8rem", margin: "0 0 10px" }}>{t("screenWhyNow", lang, { reason: offer.reason })}</p>
       <div className="offer-opts">
-        <button type="button" className="offer-opt" disabled={busy} onClick={start}><b>{t("okLetsDo", lang)}</b><span>{code} · {t("twoMinutes", lang)}</span></button>
+        <button type="button" className="offer-opt" disabled={busy} onClick={start}><b>{t("okLetsDo", lang)}</b><span>{code}, {t("twoMinutes", lang)}</span></button>
         <button type="button" className="offer-opt dim" disabled={busy} onClick={decline}><b>{t("notNow", lang)}</b><span>{t("askLater", lang)}</span></button>
       </div>
     </div>
@@ -33,7 +33,7 @@ export default function ScreeningCard({ offer, onDone, onDismiss, lang = "en" }:
   return (
     <div className="offer bubble-ai screen" role="group" aria-label={`${item.name} ${t("ofN", lang, { i: String(item.index + 1), n: String(item.total) })}`}>
       <div className="screen-prog" aria-hidden>{Array.from({ length: item.total }).map((_, i) => <i key={i} className={i <= item.index ? "on" : ""} />)}</div>
-      <p className="muted" style={{ fontSize: ".72rem", margin: "6px 0 2px", letterSpacing: ".1em", textTransform: "uppercase" }}>{item.name} · {t("ofN", lang, { i: String(item.index + 1), n: String(item.total) })}</p>
+      <p className="muted" style={{ fontSize: ".85rem", margin: "6px 0 2px" }}>{item.name}, {t("ofN", lang, { i: String(item.index + 1), n: String(item.total) })}</p>
       <p className="offer-q"><span className="muted">{item.stem}</span> {item.text}</p>
       <div className="offer-opts">
         {item.options.map((o) => <button key={o.value} type="button" className="offer-opt" disabled={busy} onClick={() => answer(o.value)}><b>{o.label}</b></button>)}

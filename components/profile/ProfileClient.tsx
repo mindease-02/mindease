@@ -60,7 +60,8 @@ export default function ProfileClient(p: Props) {
         <div className="avatar-big" aria-hidden>{(p.name.trim()[0] ?? "?").toUpperCase()}</div>
         <div>
           <h1 className="display">{p.name}</h1>
-          <p className="muted">{p.email || "—"} · {t("memberSince", lang)} {p.memberSince}</p>
+          <p className="muted">{p.email || "—"}</p>
+          <p className="muted" style={{ fontSize: ".85rem" }}>{t("memberSince", lang)} {p.memberSince}</p>
         </div>
       </div>
 
@@ -132,7 +133,7 @@ export default function ProfileClient(p: Props) {
         <div className="pform">
           <label className="label" htmlFor="plang">{t("language", lang)}</label>
           <select id="plang" className="field" value={lang} onChange={(e) => saveLanguage(e.target.value)} disabled={busy}>
-            {LANGUAGES.map((l) => <option key={l.id} value={l.id}>{l.id === "auto" ? l.label : `${l.native} · ${l.label}`}</option>)}
+            {LANGUAGES.map((l) => <option key={l.id} value={l.id}>{l.id === "auto" ? l.label : `${l.native} (${l.label})`}</option>)}
           </select>
           <p className="muted" style={{ marginTop: 6, fontSize: ".85rem" }}>{t("languageHint", lang)}</p>
         </div>

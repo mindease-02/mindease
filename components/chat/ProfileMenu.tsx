@@ -46,7 +46,7 @@ export default function ProfileMenu({ name, email, lang, speak, onSpeak, onLangu
           <label className="pmenu-lang">
             <span>{t("language", lang)}</span>
             <select value={lang} onChange={(e) => { document.cookie = `me.lang=${e.target.value}; path=/; max-age=31536000; samesite=lax`; onLanguage(e.target.value); }}>
-              {LANGUAGES.map((l) => <option key={l.id} value={l.id}>{l.id === "auto" ? l.label : `${l.native} · ${l.label}`}</option>)}
+              {LANGUAGES.map((l) => <option key={l.id} value={l.id}>{l.id === "auto" ? l.label : `${l.native} (${l.label})`}</option>)}
             </select>
           </label>
           <button className="pmenu-item pmenu-out" role="menuitem" onClick={onLogout}>{t("signOut", lang)}</button>

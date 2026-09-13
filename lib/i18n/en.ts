@@ -8,7 +8,7 @@ const en: Record<string, string> = {
   disclaimer: "MindEase is software, not a therapist. In crisis, use a helpline.", unprompted: "unprompted", notUseful: "this wasn't useful",
   micDenied: "Microphone permission was refused.", nothingHeard: "Didn't catch anything.", noted: "Noted. That kind of check-in will come less.",
   // mood page
-  step2: "Step 2 of 2 · how you're arriving", arriving: "How are you arriving, {name}?",
+  step2: "Step 2 of 2", arriving: "How are you arriving, {name}?",
   arrivingSub: "Tap one. It gives MindEase a sense of what to hold, and you can be wrong about it.",
   ownWords: "Or say it in your own words", ownWordsPh: "e.g. exam on Monday and I can’t focus", openingChat: "Opening the chat…", skipToChat: "Skip to chat", goToChat: "Go to the chat",
   // profile
@@ -29,8 +29,8 @@ const en: Record<string, string> = {
   ticker: "not therapy|not a person|not private from you|says so|eight axes|remembers you|checks in, carefully|needs you less over time",
   // experience chapters
   xp1Top: "Someone who", xp1Bottom: "notices.", xp1Left: "an ai companion", xp1Right: "not a therapist", xp1Sub: "MindEase is an AI companion. It notices how you're doing from the way you talk, and checks in when it matters.",
-  xp2Top: "It reads more", xp2Bottom: "than words", xp2Left: "eight emotions", xp2Right: "tone · rhythm · words", xp2Sub: "It reads eight emotions in what you write - and, only if you allow it, your tone of voice and typing rhythm.",
-  xp3Top: "It remembers", xp3Bottom: "you", xp3Left: "names · plans · past", xp3Right: "yours to forget", xp3Sub: "It remembers the people and plans you mention, so next week it can ask how the interview went.",
+  xp2Top: "It reads more", xp2Bottom: "than words", xp2Left: "eight emotions", xp2Right: "tone, rhythm, words", xp2Sub: "It reads eight emotions in what you write - and, only if you allow it, your tone of voice and typing rhythm.",
+  xp3Top: "It remembers", xp3Bottom: "you", xp3Left: "names, plans, past", xp3Right: "yours to forget", xp3Sub: "It remembers the people and plans you mention, so next week it can ask how the interview went.",
   xp4Top: "It checks in,", xp4Bottom: "carefully", xp4Left: "quiet hours learned", xp4Right: "two a day, at most", xp4Sub: "It only writes first when there's a real reason - never at night, and at most twice a day.",
   xp5Top: "A bridge, not", xp5Bottom: "a destination", xp5Left: "needs you less", xp5Right: "over time", xp5Sub: "It's built to need you less over time. The more you lean on it, the more it points you back to people.",
   xp6Top: "Tell it how", xp6Bottom: "you're arriving", xp6Left: "pick a mood", xp6Right: "no password", xp6Sub: "Pick how you're arriving and start talking. No password needed.",
@@ -42,11 +42,11 @@ const en: Record<string, string> = {
   gapT: "Check the gap", gapP: "When words and tone disagree, MindEase lowers its confidence and asks. It never overrides you.",
   rememberT: "Remember", rememberP: "People, plans and past — retrieved when relevant, shown to you in full.",
   demoU1: "i'm fine. just can't sleep. keep thinking about the meeting",
-  demoM1: "You've said “fine” and then described a night of not sleeping. Which half should I believe?", demoC1k: "Read", demoC1v: "masking 0.6 · anxiety 0.7 · need: reflect",
+  demoM1: "You've said “fine” and then described a night of not sleeping. Which half should I believe?", demoC1k: "Read", demoC1v: "masking 0.6, anxiety 0.7, need: reflect",
   demoU2: "ok not fine. i think they're going to let me go",
-  demoM2: "Makes sense you're braced for it, after the way last month went. What's the actual evidence, either way?", demoC2k: "Move", demoC2v: "validate the feeling, not the conclusion · one question",
+  demoM2: "Makes sense you're braced for it, after the way last month went. What's the actual evidence, either way?", demoC2k: "Move", demoC2v: "validate the feeling, not the conclusion, one question",
   demoU3: "…nothing concrete. one weird look in the meeting",
-  demoM3: "One look. That's a small thing to hang a whole night on. Text me tomorrow after you've slept - I'll ask about the look, not the fear.", demoC3k: "Remembered", demoC3v: "review last month · meeting tomorrow",
+  demoM3: "One look. That's a small thing to hang a whole night on. Text me tomorrow after you've slept - I'll ask about the look, not the fear.", demoC3k: "Remembered", demoC3v: "review last month, meeting tomorrow",
   // features
   whatItDoes: "What it does", threeThings: "Three things, done properly.",
   f1T: "Reads more than words", f1P: "Eight emotional axes and states like loneliness, dread or relief — from what you write, and, if you allow it, how you sound and how you type. Each channel weighed by how sure it is.",
@@ -57,14 +57,14 @@ const en: Record<string, string> = {
   forget: "forget",
   f3T: "Checks in, carefully", f3P: "Mornings, isolated evenings, long silences, and real downward trends. Four detectors watch the multi-day pattern; two must agree. Quiet hours, a daily cap, and it stops if you go quiet on it.",
   f3L1: "Every check-in says what prompted it", f3L2: "“Not useful” makes it rarer", f3L3: "The more you lean on it, the less it initiates",
-  f3Why: "unprompted · because your evenings have been shorter", f3Msg: "Your messages have been getting shorter in the evenings this week. Am I reading that right?",
+  f3Why: "unprompted, because your evenings have been shorter", f3Msg: "Your messages have been getting shorter in the evenings this week. Am I reading that right?",
   g1: "Two of four detectors agree", g2: "Outside quiet hours", g3: "Budget", g3v: "1 of 2 today", g4: "Reliance not climbing", g4v: "waiting",
   // story + cta + footer
   whyExists: "Why it exists", storyQ1: "A companion that is ", storyEm: "always there", storyQ2: " can quietly become the only one there. We built the opposite.",
   storyP: "MindEase measures how much you lean on it. When that climbs, it gets shorter, says so, and points you back toward people. It is software and never pretends otherwise. Success is this mattering less over time.",
   ctaTitle: "Tell it how you're arriving.", ctaP: "Pick a mood, say a line if you want, and MindEase meets you there. No account, no password — a name is enough.",
   footBlurb: "MindEase is software, and says so. If you're in crisis, call a helpline — the app shows real Indian lines automatically, and never invents a number.",
-  product: "Product", crisisLines: "Crisis lines · India", source: "Source", signIn: "Sign in", footNot: "Not therapy · Not a person · Not private from you", icons: "icons",
+  product: "Product", crisisLines: "Crisis lines in India", source: "Source", signIn: "Sign in", footNot: "Not therapy, not a person, not private from you", icons: "icons",
   // login
   step1: "Step 1 of 2", createAccount: "create account", signInWord: "sign in", whatCallYou: "What should MindEase call you?", namePh: "e.g. Priya",
   whoLabel: "Your name, or anything you'll remember", whoPh: "e.g. Priya, or a nickname",
@@ -94,7 +94,7 @@ const en: Record<string, string> = {
   crisisNotEmergency: "Not an emergency, but heavy for a while?", crisisFind: "Find someone near you", crisisFoot: "MindEase is software and cannot keep you safe. This card stays until you say you're okay.",
   // techniques
   techBox: "Box breathing", techSigh: "Physiological sigh", techGround: "5-4-3-2-1", techMove: "Move it",
-  boxBlurb: "4 in · 4 hold · 4 out · 4 hold", sighBlurb: "two sips in, one long out", groundBlurb: "come back to the room", moveBlurb: "shake out, cold water, walk",
+  boxBlurb: "4 in, 4 hold, 4 out, 4 hold", sighBlurb: "two sips in, one long out", groundBlurb: "come back to the room", moveBlurb: "shake out, cold water, walk",
   notNow: "Not now", keepTalking: "keep talking", offerAria: "MindEase is offering a technique",
   techEyebrowAngry: "Bringing the heat down", techEyebrowAnxious: "Settling", techEyebrow: "Techniques",
   techSubAngry: "Anger's a full-body thing. Two minutes of this and the next sentence comes out different.", techSub: "Pick one. None of them need you to feel like it.",
@@ -106,7 +106,7 @@ const en: Record<string, string> = {
   screenWhyNow: "Why now: {reason}. It's a screening, not a diagnosis, and you can stop at any question.", okLetsDo: "Okay, let's do it", twoMinutes: "two minutes", askLater: "ask me again in a couple of weeks", stopHere: "Stop here", ofN: "{i} of {n}",
   screenAria: "MindEase is offering a screening",
   // summary sheet
-  sumSticker: "Screening summary · not a diagnosis", sumTitle: "{name}'s summary from MindEase",
+  sumSticker: "Screening summary, not a diagnosis", sumTitle: "{name}'s summary from MindEase",
   sumPrep: "Prepared {date} from {days} days of conversation. Everything below is a screening signal, produced by software; only a clinician can assess or diagnose. Bring this to someone trained, or use it to ask for help.",
   sumScores: "Screening scores", instrument: "Instrument", date: "Date", score: "Score", range: "Range",
   sumNoScreen: "No screenings completed yet. MindEase offers one when the pattern warrants it; you can also ask for one in the chat.",

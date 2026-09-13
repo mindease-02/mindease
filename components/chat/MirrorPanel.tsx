@@ -75,10 +75,10 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
             )}
             <Section title={t("screeningT", lang)} hint={t("screeningHint", lang)}>
               {m.screenings.length ? (
-                <ul className="space-y-1 text-sm">{m.screenings.map((x) => <li key={x.at}><b>{x.name}</b> ({x.domain}) · {new Date(x.at).toLocaleDateString(loc)} · {x.score}/{x.max} · <span className="text-clay-coral">{x.band}</span></li>)}</ul>
+                <ul className="space-y-1 text-sm">{m.screenings.map((x) => <li key={x.at} className="mirror-row"><span><b>{x.name}</b> ({x.domain}), {new Date(x.at).toLocaleDateString(loc)}</span><span>{x.score}/{x.max}, <span className="text-clay-coral">{x.band}</span></span></li>)}</ul>
               ) : <p className="text-xs text-clay-muted">{t("noneYetScreen", lang)}</p>}
               {m.signals.length > 0 && (
-                <ul className="mt-3 space-y-1 text-xs text-clay-muted">{m.signals.slice(0, 4).map((sg) => <li key={sg.domain}><span className="text-clay-ink">{t("consistentWith", lang, { domain: sg.domain })}</span> · {sg.evidence}</li>)}</ul>
+                <ul className="mt-3 space-y-1 text-xs text-clay-muted">{m.signals.slice(0, 4).map((sg) => <li key={sg.domain}><span className="text-clay-ink">{t("consistentWith", lang, { domain: sg.domain })}</span>. {sg.evidence}</li>)}</ul>
               )}
               <div className="mt-3 flex flex-wrap gap-2"><a href="/summary" className="clay-btn inline-block px-3 py-1.5 text-xs">{t("summaryClin", lang)}</a><a href={NEARBY_HELP_URL} target="_blank" rel="noreferrer" className="clay-btn inline-block px-3 py-1.5 text-xs">{t("findNear", lang)}</a></div>
             </Section>
