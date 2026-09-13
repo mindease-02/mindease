@@ -50,7 +50,7 @@ export default function Scene3D({ pointer, drag, lite = false, story }: { pointe
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
     const camera = new THREE.PerspectiveCamera(32, el.clientWidth / el.clientHeight, 0.1, 50);
-    const DOLLY_FROM = lite ? 12.5 : 10.5, DOLLY_TO = lite ? 9.4 : 7.2, DOLLY_MS = 2600;
+    const DOLLY_FROM = lite ? 16 : 10.5, DOLLY_TO = lite ? 13.2 : 7.2, DOLLY_MS = 2600;
     camera.position.set(0, 0.35, DOLLY_FROM);
 
     // Post: a restrained bloom so the clearcoat highlight and the ring's rim read

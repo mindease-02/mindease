@@ -327,8 +327,8 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
         <button className="clay-btn h-10 w-10 shrink-0 p-0" onClick={() => setDrawer(true)} aria-label={t("chats", lang)} title={t("chats", lang)}><PxMenu className="pxicon" style={{ fontSize: 18 }} /></button>
         <Orb size={40} tint={tint} />
         <div className="leading-tight">
-          <div className="display text-lg">MindEase</div>
-          <div className="text-[11px] text-clay-muted">{t("software", lang)} &middot; {t("hereFor", lang, { name })} &middot; <a href="/mood" className="underline decoration-dotted">{t("changeMood", lang)}</a></div>
+          <div className="display chat-title text-lg">MindEase</div>
+          <div className="chat-sub text-[11px] text-clay-muted">{t("software", lang)} &middot; {t("hereFor", lang, { name })} &middot; <a href="/mood" className="underline decoration-dotted">{t("changeMood", lang)}</a></div>
         </div>
         <div className="ml-auto flex items-center gap-2">
           <button onClick={() => voiceMode ? stopVoiceMode() : startVoiceMode()} className={`clay-btn px-3 py-2 text-xs ${voiceMode ? "bg-clay-coral" : ""}`} title={t("voiceChat", lang)}>
@@ -343,7 +343,7 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
         <div className="mx-auto flex max-w-2xl flex-col gap-3 py-4">
           {messages.map((m, i) => (
             <div key={m.at + ":" + i} className={`animate-rise flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[85%] whitespace-pre-wrap text-[15px] leading-relaxed ${m.role === "user" ? "bubble-user" : m.proactive ? "bubble-proactive" : "bubble-ai"}`}>
+              <div className={`max-w-[92%] sm:max-w-[85%] whitespace-pre-wrap text-[15px] leading-relaxed ${m.role === "user" ? "bubble-user" : m.proactive ? "bubble-proactive" : "bubble-ai"}`}>
                 {m.proactive && <div className="mb-1 flex items-center gap-2 text-[10px] uppercase tracking-wider opacity-60">{t("unprompted", lang)} · {m.kind?.replace("_", " ")}</div>}
                 {m.pending ? <span className="inline-flex gap-1 py-1"><i className="h-1.5 w-1.5 animate-breathe rounded-full bg-clay-muted" /><i className="h-1.5 w-1.5 animate-breathe rounded-full bg-clay-muted [animation-delay:.2s]" /><i className="h-1.5 w-1.5 animate-breathe rounded-full bg-clay-muted [animation-delay:.4s]" /></span> : m.content}
                 {m.proactive && !m.pending && <button onClick={() => notUseful(m)} className="mt-2 block text-[11px] text-clay-muted underline decoration-dotted">{t("notUseful", lang)}</button>}
@@ -369,11 +369,11 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
             <button type="button" className={`voice-orb ${voiceStatus}`} style={{ ["--lvl" as string]: voice.level }} onClick={() => voiceStatus === "listening" ? finishListening() : voiceStatus === "idle" ? listen() : undefined} aria-label={statusLine}>
               <Orb size={56} tint={tint} pulse={voiceStatus !== "idle"} />
             </button>
-            <div className="leading-tight">
+            <div className="leading-tight min-w-0">
               <div className="text-sm">{t("voiceChat", lang)}</div>
               <div className="text-[12px] text-clay-muted" aria-live="polite">{statusLine}</div>
             </div>
-            <button type="button" className="clay-btn ml-auto px-3 py-2 text-xs" onClick={stopVoiceMode}><PxRemove className="pxicon" /> {t("endVoice", lang)}</button>
+            <button type="button" className="clay-btn ml-auto px-3 py-2 text-xs" onClick={stopVoiceMode} aria-label={t("endVoice", lang)}><PxRemove className="pxicon" /> <span className="hidden sm:inline">{t("endVoice", lang)}</span></button>
           </div>
         ) : (
           <form className="composer glass mx-auto flex max-w-2xl items-end gap-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
@@ -384,7 +384,7 @@ export default function ChatApp({ name, email, initialLanguage }: { name: string
             </button>
             <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { typing.onKeyDown(e); if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
               rows={1} placeholder={voice.recording ? t("listening", lang) : t("sayAnything", lang)} className="clay-input max-h-40 min-h-[48px] resize-none py-3.5" />
-            <button type="submit" disabled={sending || !input.trim()} className="clay-btn-primary h-12 shrink-0 rounded-full px-5"><PxSend className="pxicon" /> {t("send", lang)}</button>
+            <button type="submit" disabled={sending || !input.trim()} aria-label={t("send", lang)} className="clay-btn-primary send-btn h-12 shrink-0 rounded-full px-5"><PxSend className="pxicon" /> <span className="hidden sm:inline">{t("send", lang)}</span></button>
           </form>
         )}
         <p className="mx-auto mt-2 max-w-2xl text-center text-[10px] text-clay-muted">

@@ -987,3 +987,78 @@ html { scroll-behavior: smooth; }
 .world .pstatic { color: var(--ink-2); display: flex; align-items: center; }
 .world .pdanger { color: var(--coral-2); }
 @media (max-width: 720px) { .world .pstats { grid-template-columns: 1fr 1fr 1fr; gap: 8px; } .world .pstat b { font-size: 1.5rem; } .world .prow { flex-wrap: wrap; } .world .profile { padding-top: 24px; } }
+
+
+/* =====================================================================
+   PHONE-FIRST PASS. The demo runs on a phone: touch targets, safe areas,
+   a compact chat header, one-column layouts, the ball behind the words.
+   ===================================================================== */
+.world { -webkit-tap-highlight-color: transparent; }
+.world .chat { height: 100svh; height: 100dvh; }
+.world .chat-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.world .mobile-menu { background: color-mix(in srgb, var(--bg) 96%, transparent) !important; }
+.world .pmenu-mood { display: none; }
+@media (hover: none) { .world .drawer-del { opacity: 1; } }
+@media (max-width: 720px) {
+  /* buttons and fields sized for thumbs; 16px inputs so iOS does not zoom */
+  .world .btn, .world .clay-btn, .world .clay-btn-primary { min-height: 44px; }
+  .world .field, .world .clay-input, .world textarea, .world select.field, .world .composer .clay-input { font-size: 16px; }
+  /* chat */
+  .world .chat-head { padding: calc(8px + env(safe-area-inset-top)) 12px 8px; gap: 8px; }
+  .world .chat-head .orb { width: 34px !important; height: 34px !important; }
+  .world .chat-title { font-size: 1.05rem; }
+  .world .chat-sub { display: none; }
+  .world .chat-head .clay-btn { width: 40px; height: 40px; padding: 0 !important; }
+  .world .chat-head .clay-btn .pxicon { font-size: 18px; }
+  .world .chat-head .avatar-btn { width: 36px; height: 36px; font-size: .85rem; }
+  .world .chat-head .ml-auto { gap: 6px; }
+  .world .pmenu-mood { display: flex; }
+  .world .chat .thin-scroll > div { padding: 12px 0 16px; gap: 10px; }
+  .world .bubble-user, .world .bubble-ai, .world .bubble-proactive { padding: 10px 14px; font-size: 15px; }
+  .world .chat footer { padding: 6px 10px calc(8px + env(safe-area-inset-bottom)); }
+  .world .composer { padding: 6px; gap: 6px; }
+  .world .composer .clay-btn { width: 44px; height: 44px; }
+  .world .composer .clay-input { min-height: 44px; padding: 11px 8px; }
+  .world .send-btn { width: 44px; height: 44px; padding: 0 !important; }
+  .world .chat footer p { font-size: 9.5px; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .world .voicebar { padding: 8px 10px; gap: 10px; }
+  .world .voicebar .clay-btn { width: 40px; height: 40px; padding: 0 !important; }
+  .world .drawer { width: min(86vw, 320px); padding: calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom)); }
+  .world .pmenu { width: min(280px, calc(100vw - 24px)); }
+  .world .pmenu-item { padding: 12px; font-size: .95rem; }
+  .world .chat aside.fixed { max-width: 100%; padding-bottom: env(safe-area-inset-bottom); }
+  /* mood page */
+  .world .entry h1 { font-size: 2.1rem !important; line-height: 1.1; }
+  .world .moods { gap: 10px; margin-top: 22px; }
+  .world .mood { padding: 16px 14px; border-radius: 18px !important; min-height: 0; }
+  .world .mood .dot { width: 28px; height: 28px; margin-bottom: 10px; }
+  .world .mood b { font-size: .98rem; }
+  .world .mood span { font-size: .76rem; }
+  .world .mood small { display: none; }
+  .world .note-row .field { padding-right: 58px; }
+  .world .note-row .go { position: absolute !important; right: 6px; left: auto; top: auto; bottom: 7px; transform: none; width: 44px; height: 44px; padding: 0; }
+  /* landing */
+  .world .title-card { min-height: 100svh; }
+  .world .tc-name { font-size: 2.6rem; }
+  .world .tc-name-team { font-size: 1.9rem !important; }
+  .world .xp-top, .world .xp-bottom { font-size: 1.7rem; letter-spacing: -0.01em; }
+  .world .xp-top { top: calc(78px + env(safe-area-inset-top)); }
+  .world .xp-bottom { bottom: 206px; text-shadow: 0 1px 3px rgba(0,0,0,.9), 0 4px 14px rgba(0,0,0,.85), 0 12px 40px rgba(0,0,0,.8); }
+  .world .xp-top { text-shadow: 0 1px 3px rgba(0,0,0,.9), 0 4px 14px rgba(0,0,0,.85); }
+  .world .cta { padding: 52px 20px 60px; }
+  .world .cta .planet { width: 120%; bottom: -108%; }
+  .world .cta h2 { font-size: 2.1rem; }
+  .world .cta p { font-size: .95rem; }
+  .world .band .display, .world .sec-head h2, .world .feat h3 { font-size: 1.75rem; }
+  .world .feat-visual { border-radius: 20px !important; }
+  /* profile */
+  .world .profile { padding: 18px 0 60px; }
+  .world .profile-head { gap: 12px; }
+  .world .profile-head h1 { font-size: 1.7rem; }
+  .world .avatar-big { width: 52px; height: 52px; font-size: 1.2rem; }
+  .world .pcard { padding: 16px 16px 18px; border-radius: 18px; }
+  .world .pcard h2 { font-size: 1.3rem; }
+  .world .pstat { padding: 12px; }
+  .world .pstat b { font-size: 1.4rem; }
+  .world .pstat span { font-size: .72rem; }
+}

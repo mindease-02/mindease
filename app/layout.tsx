@@ -5,9 +5,11 @@ import { body, display, heading } from "@/components/home/fonts";
 export const metadata: Metadata = {
   title: "MindEase - a companion that notices",
   description: "A companion that notices when you're drifting down, says so honestly, and works to need you less over time. Not therapy. Not a replacement for people.",
-  icons: { icon: "/icon.png" },
+  icons: { icon: "/icon.png", apple: "/icon.png" },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "MindEase" },
 };
-export const viewport: Viewport = { themeColor: "#07080b", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#07080b", width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

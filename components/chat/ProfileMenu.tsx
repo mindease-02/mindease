@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { LANGUAGES, t } from "@/lib/i18n";
-import { PxUser, PxMirror, PxSound, PxDownload } from "../home/pixelIcons";
+import { PxUser, PxMirror, PxSound, PxDownload, PxRefresh } from "../home/pixelIcons";
 
 interface Props {
   name: string;
@@ -38,6 +38,7 @@ export default function ProfileMenu({ name, email, lang, speak, onSpeak, onLangu
             <b>{name}</b>
             <span>{email || "—"}</span>
           </div>
+          <Link href="/mood" className="pmenu-item pmenu-mood" role="menuitem" onClick={() => setOpen(false)}><PxRefresh className="pxicon" /> {t("changeMood", lang)}</Link>
           <Link href="/profile" className="pmenu-item" role="menuitem" onClick={() => setOpen(false)}><PxUser className="pxicon" /> {t("profileResults", lang)}</Link>
           <Link href="/summary" className="pmenu-item" role="menuitem" onClick={() => setOpen(false)}><PxDownload className="pxicon" /> {t("summary", lang)}</Link>
           <button className="pmenu-item" role="menuitem" onClick={() => { setOpen(false); onMirror(); }}><PxMirror className="pxicon" /> {t("mirror", lang)}</button>
