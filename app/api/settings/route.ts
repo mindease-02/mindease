@@ -24,12 +24,15 @@ export async function POST(req: Request) {
     region?: string;
     language?: string;
     displayName?: string;
+    ageBand?: string;
+    resetStyle?: boolean;
   };
 
   if (body.consent) {
     const { cadence, ...rest } = body.consent;
     state.consent = { ...state.consent, ...rest, cadence: { ...state.consent.cadence, ...(cadence ?? {}) } };
     if ("voiceSignals" in rest || "typingSignals" in rest || "faceSignals" in rest) state.consent.signalsChosen = true;
+    if (rest.memoryMode !== undefined) state.consent.memoryMode = ["ask", "auto", "off"].includes(String(rest.memoryMode)) ? rest.memoryMode : "ask";
     if (typeof rest.retentionDays === "number") state.consent.retentionDays = [7, 30, 90].includes(rest.retentionDays) ? rest.retentionDays : 30;
     state.consent.dailyMax = Math.max(0, Math.min(6, Number(state.consent.dailyMax) || 0));
     state.consent.weeklyBudget = Math.max(0, Math.min(21, Number(state.consent.weeklyBudget) || 0));
@@ -43,9 +46,15 @@ export async function POST(req: Request) {
     state.displayName = body.displayName.trim().slice(0, 40);
     if (supabaseConfigured()) { try { const sb = await serverClient(); await sb.auth.updateUser({ data: { name: state.displayName } }); } catch { /* metadata sync is best-effort */ } }
   }
+  if (body.ageBand !== undefined) {
+    const teens = process.env.NEXT_PUBLIC_ALLOW_TEENS === "1";
+    state.ageBand = body.ageBand === "18-24" || body.ageBand === "25+" || (teens && body.ageBand === "13-17") ? body.ageBand : undefined;
+  }
+  if (body.resetStyle) { state.replyFeedback = []; state.readCorrections = []; }
   if (body.setupDone !== undefined) state.setupDone = !!body.setupDone;
   if (body.clearAll) {
     state.history = []; state.messages = []; state.memories = []; state.outreach = []; state.sessions = []; state.currentSessionId = undefined;
+    state.axesDaily = []; state.readCorrections = []; state.replyFeedback = []; state.peopleContacts = []; state.milestones = []; state.tools = [];
   }
   await store.put(state);
   return NextResponse.json({ ok: true });

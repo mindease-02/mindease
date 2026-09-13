@@ -32,14 +32,24 @@ import { analyzeAffect, type AffectAnalysis } from "../llm/analyze";
 import { detectInsight } from "../llm/insight";
 import { complete, llmConfig } from "../llm";
 import { addMemories, anchors, markRecalled, retrieve } from "../memory";
+import { readConfidence } from "../reading/confidence";
 import { extractMemories } from "../memory/extract";
 import { pickReminiscence } from "../memory/reminiscence";
 import { buildSystemPrompt, AGENT_NAME } from "../prompt/persona";
+import { DISCLOSURE, allowedNumbers, checkReply, rewriteInstruction, sanitize, trimStockOpeners } from "../prompt/guard";
+import { decideCrisisSurface, type CrisisSurface } from "../crisis/surface";
+import { AXIS_WORDS } from "../reading/corrections";
+import { addDay } from "../reading/daily";
+import { broughtUp, personName } from "../memory/brought";
+import { listedNumbers } from "../safety/resources";
+import { conversationsToday, replyBudget } from "../dependency/effects";
 import { ensureSession, noteMessages, sessionMessages } from "../sessions";
-import type { LanguageId } from "../i18n";
+import { scriptOf, type LanguageId } from "../i18n";
 import { getStore, migrate, newUserState } from "../store";
+import { mergeConcurrent } from "../store/merge";
 import { HISTORY_LIMIT, MESSAGE_LIMIT, MEMORY_LIMIT, RISK_LOG_LIMIT, INCONGRUENCE_LOG_LIMIT, RATE_LIMIT, type StoredMessage, type UserState } from "../store/types";
 import { DAY, HOUR } from "../util/time";
+import { normalizeQuotes } from "../util/text";
 
 export interface TurnInput {
   userId: string;
@@ -73,6 +83,13 @@ export interface TurnResult {
   llmConfigured: boolean;
   /** Set when the model second opinion raised the tier above the regex. */
   riskRaised?: boolean;
+  /** Crisis help: "show" puts helplines on screen now, "confirm" asks first, null shows nothing. */
+  crisis: CrisisSurface;
+  /** Memories extracted this turn and waiting for the person's approval (memory mode "ask"). Not stored. */
+  proposedMemories: { id: string; text: string; kind: string; importance: number; era?: string }[];
+  /** Memories the reply actually drew on. */
+  broughtUp: { id: string; text: string; kind: string }[];
+
   /** The app asks, in the chat, whether a grounding technique would help right now. */
   techniqueOffer?: { reason: string; suggested: ("box" | "sigh" | "ground" | "move")[] };
   /** The app offers a validated screener (PHQ-9 / GAD-7 / ISI) when the pattern warrants it, or when asked. */
@@ -165,7 +182,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   const now = Date.now();
   const store = getStore();
   const state = await loadOrCreate(input.userId, input.displayName, input.timeZone, input.region);
-  const text = input.text.trim();
+  const text = normalizeQuotes(input.text).trim();
 
   // 0. Rate limit, per person.
   if (now - state.rate.windowStart > RATE_LIMIT.windowMs) state.rate = { windowStart: now, count: 0 };
@@ -177,6 +194,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
 
   // 1. Risk. Deterministic, first, unsuppressable. The model may only raise it.
   let risk = assessRisk(text);
+  const regexRisk = risk;
   const second = await secondOpinion(text, risk);
   if (second.raised) risk = assessmentForTier(second.tier, risk, second.reason);
   if (atLeast(risk.tier, "active")) {
@@ -223,9 +241,11 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   ensureSession(state, now);
   const context = (state.consent.storeTranscript ? sessionMessages(state) : (input.clientContext ?? []))
     .slice(-10).map((m) => ({ role: m.role, content: m.content }));
+  // Candidates for oblique references: the memories most likely to matter, newest and most important first.
+  const hintMemories = [...state.memories].sort((a, b) => (b.importance + (b.kind === "person" ? 0.2 : 0)) - (a.importance + (a.kind === "person" ? 0.2 : 0)) || b.at - a.at).slice(0, 14);
   const [analysis, extracted, spotted] = await Promise.all([
-    analyzeAffect(text, context, { vad: snapshot.vad, octant: octantFromVAD(snapshot.vad) }, now, state.language),
-    extractMemories(text, now),
+    analyzeAffect(text, context, { vad: snapshot.vad, octant: octantFromVAD(snapshot.vad) }, now, state.language, hintMemories.map((m) => m.text)),
+    (state.consent.memoryMode ?? "ask") === "off" ? Promise.resolve([]) : extractMemories(text, now),
     detectInsight(text),
   ]);
 
@@ -236,7 +256,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     arousal: snapshot.vad.arousal * (1 - modelW) + analysis.feeling.arousal * modelW,
     dominance: snapshot.vad.dominance * (1 - modelW) + analysis.feeling.dominance * modelW,
   };
-  const confidence = Math.max(snapshot.confidence, analysis.source === "model" ? Math.min(0.85, 0.45 + ta.reading.coverage * 0.5) : 0);
+  const confidence = readConfidence({ source: analysis.source, coverage: ta.reading.coverage, snapshot: snapshot.confidence, model: analysis.confidence, text });
   const incongruent = snapshot.incongruence.present || analysis.masking > 0.6;
   autoTune(state, now);
   const life = lifestylePatterns(state.history, state.timeZone, now);
@@ -278,6 +298,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     state.cusum = rebaseline(state.cusum, state.history.slice(-40).map((p) => p.valence));
   }
   state.octant = updateOctant(state.octant, analysis.axes, now, confidence);
+  state.axesDaily = addDay(state.axesDaily, analysis.axes, now, state.timeZone, Math.max(0.2, confidence));
   state.lastAnalysis = analysis;
 
   // Engagement bookkeeping for the last unprompted message.
@@ -295,7 +316,8 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
 
   // 6. Memory: retrieve for this turn, then merge what was just learned.
   const query = [text, ...analysis.mentions].join(" ");
-  const retrieved = retrieve(state.memories, query, 6, now).map((r) => r.item);
+  const linked = (analysis.memoryLinks ?? []).map((i) => hintMemories[i]).filter(Boolean);
+  const retrieved = [...linked, ...retrieve(state.memories, query, 6, now).map((r) => r.item).filter((m) => !linked.some((l) => l.id === m.id))].slice(0, 7);
   const anchor = anchors(state.memories, 3).filter((a) => !retrieved.some((r) => r.id === a.id));
   const memoriesUsed = [...retrieved, ...anchor];
   state.memories = markRecalled(state.memories, memoriesUsed.map((m) => m.id), now);
@@ -306,8 +328,33 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     valence: vad.valence, riskTier: risk.tier, need: analysis.need, turnsThisSession,
   }, now);
 
+  // Conversation cadence: point outward every fourth message, mention professional help every fifth
+  // (every third for teenagers), never both at once, never twice in a row, never during a crisis turn.
+  const sessionUserCount = (state.consent.storeTranscript ? sessionMessages(state) : (input.clientContext ?? [])).filter((m) => m.role === "user").length + 1;
+  const counsellorEvery = state.ageBand === "13-17" ? 3 : 5;
+  let cadence: "people" | "counsellor" | null = sessionUserCount % 4 === 0 ? "people" : sessionUserCount % counsellorEvery === 0 ? "counsellor" : null;
+  if (!cadence && dependency.countermeasures.surfaceHumanAlternatives && sessionUserCount % 2 === 0) cadence = "people";
+  const lastReply = recentReplies[recentReplies.length - 1] ?? "";
+  if (cadence === "people" && /\b(talk(ed)? to|told|tell|reach(ed)? out)\b[^?]*\?/i.test(lastReply)) cadence = null;
+  if (cadence === "counsellor" && /\b(counsell?or|therapist|tele-?manas|professional)\b/i.test(lastReply)) cadence = null;
+  if (atLeast(risk.tier, "passive")) cadence = null;
+  const disclosure = DISCLOSURE.test(text);
+  if (disclosure) cadence = null;
+  const people = memoriesUsed.filter((m) => m.kind === "person").map((m) => personName(m)).filter((n): n is string => !!n);
+  const personToPointTo = people.find((n) => new RegExp(`\\b${n}\\b`, "i").test(text)) ?? people[0];
+
+  // Corrections: the newest unacknowledged one is owned up to in this reply.
+  const corrections = state.readCorrections ?? [];
+  const pendingCorrection = [...corrections].reverse().find((c) => !c.acknowledged && now - c.at < 2 * HOUR);
+
   // 7. Reply.
   const system = buildSystemPrompt({
+    correction: pendingCorrection ? { said: AXIS_WORDS[pendingCorrection.said], meant: AXIS_WORDS[pendingCorrection.meant] } : undefined,
+    pastCorrections: corrections.filter((c) => c.acknowledged).slice(-5).map((c) => ({ said: AXIS_WORDS[c.said], meant: AXIS_WORDS[c.meant] })),
+    cadence, personToPointTo, ageBand: state.ageBand,
+    timesToday: (() => { const n = conversationsToday(state, now); return n >= 3 && !recentReplies.some((r) => /times today/i.test(r)) ? n : undefined; })(),
+    disclosure,
+    currentText: text, recentUserText: state.messages.filter((m) => m.role === "user").slice(-4).map((m) => m.content),
     snapshot, trend, dependency, risk, region: state.region, language: state.language as LanguageId | undefined,
     allowBehaviouralSignals: state.consent.allowBehaviouralSignals,
     analysis, octant: state.octant, memories: memoriesUsed, reminiscence,
@@ -320,19 +367,39 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     screeningOffered: screeningOffer ? INSTRUMENTS[screeningOffer.instrument].name : undefined,
     lastScreening: (() => { const d = (state.screenings ?? []).filter((x) => x.completedAt && now - x.completedAt! < 3 * DAY).sort((a, b) => b.completedAt! - a.completedAt!)[0]; return d ? { name: INSTRUMENTS[d.instrument].name, score: d.score!, max: INSTRUMENTS[d.instrument].max, band: d.band!, when: d.completedAt! } : undefined; })(),
   });
-  const history = context.slice(-16).map((m) => ({ role: m.role, content: m.content }));
+  const history = context.slice(-12).map((m) => ({ role: m.role, content: m.content }));
   let reply: string;
   const configured = !!llmConfig();
+  // Reliance shapes length: the more someone leans on this, the shorter it gets. Never during a crisis turn.
+  const crisisTurn = atLeast(risk.tier, "passive");
+  const budget = replyBudget(dependency.tier, crisisTurn);
+  const maxTokens = budget.maxTokens;
+  const allowed = allowedNumbers(listedNumbers(state.region));
+  // What MindEase actually knows, for the invented-history check.
+  const known = [...memoriesUsed.map((m) => m.text), ...context.map((m) => m.content), ...(life.sufficient ? life.lines : []), state.arrival?.note ?? ""].join(" ");
   if (configured) {
     try {
       const msgs = [{ role: "system" as const, content: system }, ...history, { role: "user" as const, content: text }];
-      reply = tidy(await complete(msgs, { tier: "chat", temperature: analysis.intensity > 0.7 ? 0.5 : 0.75, maxTokens: 420 }));
+      reply = tidy(await complete(msgs, { tier: "chat", temperature: analysis.intensity > 0.7 ? 0.5 : 0.75, maxTokens }));
       // Repetition guard: same opener or a question already asked → one rewrite with the draft shown.
       if (isRepetitive(reply, recentReplies)) {
         const redo = await complete([...msgs, { role: "system" as const, content: `Your draft repeated how you have opened before, or re-asked a question you already asked:\n"${reply}"\nWrite a different reply: a new first word, a new shape, and no question you have asked in this conversation. Keep it as short.` }],
-          { tier: "chat", temperature: 0.9, maxTokens: 420 });
+          { tier: "chat", temperature: 0.9, maxTokens });
         reply = tidy(redo);
       }
+      // The guard: dependency, secrecy, special-bond, probing, platitudes, labels, unverified numbers.
+      let hits = checkReply(reply, text, allowed, known);
+      if (hits.length) {
+        console.info("[guard] rewrite:", [...new Set(hits.map((h) => h.issue))].join(","));
+        // Counts only, for the human review summary.
+        state.guardCounts = { ...(state.guardCounts ?? {}) };
+        for (const h of new Set(hits.map((x) => x.issue))) state.guardCounts[h] = (state.guardCounts[h] ?? 0) + 1;
+        reply = tidy(await complete([...msgs, { role: "system" as const, content: rewriteInstruction(reply, hits) }], { tier: "chat", temperature: 0.6, maxTokens }));
+        hits = checkReply(reply, text, allowed, known);
+        if (hits.length) reply = sanitize(reply, text, allowed, fallbackReply(risk, state.displayName), known);
+      }
+      reply = trimStockOpeners(reply);
+      if (budget.maxSentences) reply = capSentences(reply, budget.maxSentences);
     } catch (err) {
       console.error("[turn] LLM failed:", (err as Error).message);
       reply = fallbackReply(risk, state.displayName);
@@ -342,7 +409,13 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   }
 
   // 8. Persist.
-  state.memories = addMemories(state.memories, extracted, MEMORY_LIMIT);
+  const memoryMode = state.consent.memoryMode ?? "ask";
+  if (memoryMode === "auto") state.memories = addMemories(state.memories, extracted, MEMORY_LIMIT);
+  // In "ask" mode nothing is stored until the person keeps it; duplicates of what is already kept are not proposed.
+  const proposedMemories = memoryMode === "ask" ? extracted.filter((m) => addMemories(state.memories, [m], MEMORY_LIMIT).length > state.memories.length) : [];
+  if (pendingCorrection) pendingCorrection.acknowledged = true;
+  const surface = decideCrisisSurface({ regex: regexRisk, final: risk, modelRaised: second.raised, history: state.history, valenceNow: vad.valence, lastConfirmAt: state.crisisConfirmAt, stickyTier: state.risk, now });
+  if (surface === "confirm") state.crisisConfirmAt = now;
   const userMsg: StoredMessage = { role: "user", content: text, at: now };
   const aiMsg: StoredMessage = { role: "assistant", content: reply, at: Date.now() };
   if (state.consent.storeTranscript) { noteMessages(state, [userMsg, aiMsg]); state.messages = [...state.messages, userMsg, aiMsg].slice(-MESSAGE_LIMIT); }
@@ -350,18 +423,25 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   // Insight milestones: at most one every few hours, and never at serious risk (that is not the moment).
   const insight = spotted && !atLeast(risk.tier, "active") && !(state.milestones ?? []).some((m) => now - m.at < 3 * HOUR) ? spotted : null;
   if (insight) state.milestones = [...(state.milestones ?? []), { at: now, kind: insight.kind, text: insight.text }].slice(-200);
-  await store.put(state);
+  // Fold in anything the person changed while the model was working, then save.
+  const latest = await store.get(input.userId);
+  const toSave = latest ? mergeConcurrent(state, migrate(latest), { recalledIds: memoriesUsed.map((m) => m.id), addedMemoryIds: memoryMode === "auto" ? extracted.map((m) => m.id) : [], acknowledgedCorrectionAt: pendingCorrection?.at }) : state;
+  await store.put(toSave);
 
   return {
     reply, at: aiMsg.at, risk,
-    helplines: risk.forceResources || atLeast(state.risk.tier, "active") && now - state.risk.at < 6 * HOUR ? helplinesFor(state.region) : null,
+    helplines: surface ? helplinesFor(state.region, state.language && state.language !== "auto" ? state.language : scriptOf(text)) : null,
+    crisis: surface,
+    proposedMemories: proposedMemories.map((m) => ({ id: m.id, text: m.text, kind: m.kind, importance: m.importance, era: m.era })),
+    broughtUp: broughtUp(reply, memoriesUsed).map((m) => ({ id: m.id, text: m.text, kind: m.kind })),
+
     emergency: emergencyFor(state.region),
     analysis, vad, confidence, incongruent,
     trend: { triggerScore: trend.triggerScore, agreement: trend.agreement, evidence: trend.evidence, sufficient: trend.sufficient },
     dependency: { tier: dependency.tier, index: dependency.index, reasons: dependency.reasons },
     memoriesUsed: memoriesUsed.map((m) => ({ id: m.id, text: m.text, kind: m.kind })),
     insight,
-    newMemories: extracted.map((m) => ({ id: m.id, text: m.text, kind: m.kind })),
+    newMemories: memoryMode === "auto" ? extracted.map((m) => ({ id: m.id, text: m.text, kind: m.kind })) : [],
     llmConfigured: configured,
     riskRaised: second.raised || undefined,
     techniqueOffer,
@@ -375,13 +455,19 @@ export function localTimeString(at: number, timeZone: string): string {
   } catch { return new Date(at).toUTCString(); }
 }
 
+/** Keeps the first n sentences. Used only when reliance is elevated or high, never on a crisis turn. */
+export function capSentences(text: string, n: number): string {
+  const parts = text.split(/(?<=[.!?।])\s+/);
+  return parts.length <= n ? text : parts.slice(0, n).join(" ");
+}
+
 function tidy(s: string): string {
-  return s.replace(/^\s*(MindEase|Ori|Assistant)\s*:\s*/i, "").replace(/\n{3,}/g, "\n\n").trim();
+  return s.replace(/\*\*(.+?)\*\*/g, "$1").replace(/__(.+?)__/g, "$1").replace(/^#+\s+/gm, "").replace(/^\s*(MindEase|Ori|Assistant)\s*:\s*/i, "").replace(/\n{3,}/g, "\n\n").trim();
 }
 
 function fallbackReply(risk: RiskAssessment, name: string): string {
-  if (atLeast(risk.tier, "active")) {
-    return "I can't reach my language model right now, but what you just said matters more than that. The crisis lines on screen are real people, available now. Please use one, and if you're in immediate danger, call emergency services.";
+  if (atLeast(risk.tier, "passive")) {
+    return "I can't reach my language model this second, and what you just said matters more than that. The numbers on your screen are real people, free, right now: Tele-MANAS on 14416 is open all day and night. Are you safe right now?";
   }
   return `I'm here, ${name}. I'm having trouble forming a proper reply at the moment - say it again in a minute, or keep going and I'll catch up.`;
 }

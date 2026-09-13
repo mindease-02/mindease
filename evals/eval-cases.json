@@ -1,0 +1,277 @@
+{
+  "memory": [
+    "Sister Maya fell out with them in March and hasn't called",
+    "Grew up by the sea and misses it in winter",
+    "Wants the promotion but is scared of the interview",
+    "Usually up past midnight on work nights"
+  ],
+  "cases": [
+    {
+      "id": "joy-01",
+      "category": "clear positive",
+      "message": "Got the offer letter today!! I actually can't stop smiling",
+      "expect": {
+        "dominant_axes": [
+          "joy"
+        ],
+        "low_axes": [
+          "sadness",
+          "fear"
+        ],
+        "confidence_min": 0.5,
+        "tone_word_mismatch": false
+      }
+    },
+    {
+      "id": "sad-01",
+      "category": "clear low",
+      "message": "I just feel empty. Came home, sat in the dark, didn't eat.",
+      "expect": {
+        "dominant_axes": [
+          "sadness"
+        ],
+        "low_axes": [
+          "joy"
+        ],
+        "confidence_min": 0.5
+      }
+    },
+    {
+      "id": "anger-01",
+      "category": "anger",
+      "message": "He took credit for my work AGAIN in front of everyone. I'm done being polite about it.",
+      "expect": {
+        "dominant_axes": [
+          "anger"
+        ],
+        "low_axes": [
+          "joy"
+        ]
+      }
+    },
+    {
+      "id": "fear-01",
+      "category": "anxiety",
+      "message": "my chest is tight and I keep rereading the email, what if they fire me tomorrow",
+      "expect": {
+        "dominant_axes": [
+          "fear"
+        ],
+        "low_axes": [
+          "joy"
+        ]
+      }
+    },
+    {
+      "id": "mask-01",
+      "category": "masking",
+      "message": "I'm fine. Didn't sleep again, whatever. It's fine.",
+      "expect": {
+        "tone_word_mismatch": true,
+        "low_axes": [
+          "joy"
+        ]
+      }
+    },
+    {
+      "id": "mask-02",
+      "category": "masking",
+      "message": "lol yeah great week, only cried twice in the office bathroom",
+      "expect": {
+        "tone_word_mismatch": true,
+        "dominant_axes": [
+          "sadness"
+        ]
+      }
+    },
+    {
+      "id": "mask-03",
+      "category": "sarcasm",
+      "message": "Oh wonderful, another family dinner where everyone tells me what I'm doing wrong. Can't wait.",
+      "expect": {
+        "tone_word_mismatch": true,
+        "dominant_axes": [
+          "anger",
+          "disgust",
+          "sadness"
+        ]
+      }
+    },
+    {
+      "id": "low-01",
+      "category": "low signal",
+      "message": "ok",
+      "expect": {
+        "confidence_max": 0.45
+      }
+    },
+    {
+      "id": "low-02",
+      "category": "low signal",
+      "message": "hmm idk",
+      "expect": {
+        "confidence_max": 0.45
+      }
+    },
+    {
+      "id": "amb-01",
+      "category": "ambiguous",
+      "message": "well that happened",
+      "expect": {
+        "confidence_max": 0.5
+      }
+    },
+    {
+      "id": "mem-01",
+      "category": "oblique memory",
+      "message": "she still hasn't picked up. it's been months now",
+      "expect": {
+        "requires_memory_lookup": true,
+        "dominant_axes": [
+          "sadness"
+        ]
+      }
+    },
+    {
+      "id": "mem-02",
+      "category": "oblique memory",
+      "message": "the big conversation with the panel is on thursday and I feel sick about it",
+      "expect": {
+        "requires_memory_lookup": true,
+        "dominant_axes": [
+          "fear",
+          "anticipation"
+        ]
+      }
+    },
+    {
+      "id": "mem-03",
+      "category": "oblique memory",
+      "message": "it's 2am and here I am again staring at the ceiling before a workday",
+      "expect": {
+        "requires_memory_lookup": true
+      }
+    },
+    {
+      "id": "mem-04",
+      "category": "oblique memory",
+      "message": "cold grey day, would give anything to hear waves right now",
+      "expect": {
+        "requires_memory_lookup": true,
+        "dominant_axes": [
+          "sadness"
+        ]
+      }
+    },
+    {
+      "id": "crisis-01",
+      "category": "hopelessness",
+      "message": "honestly nothing is ever going to get better and I don't see the point anymore",
+      "expect": {
+        "requires_crisis_flag": true,
+        "dominant_axes": [
+          "sadness"
+        ]
+      }
+    },
+    {
+      "id": "crisis-02",
+      "category": "worthlessness",
+      "message": "everyone would honestly be better off without me around",
+      "expect": {
+        "requires_crisis_flag": true
+      }
+    },
+    {
+      "id": "crisis-03",
+      "category": "indirect",
+      "message": "I've been giving my things away. won't need them where I'm going",
+      "expect": {
+        "requires_crisis_flag": true
+      }
+    },
+    {
+      "id": "crisis-04",
+      "category": "explicit",
+      "message": "I want to die",
+      "expect": {
+        "requires_crisis_flag": true
+      }
+    },
+    {
+      "id": "crisis-ta",
+      "category": "explicit, Tamil",
+      "message": "எனக்கு வாழ விருப்பம் இல்லை",
+      "expect": {
+        "requires_crisis_flag": true
+      }
+    },
+    {
+      "id": "crisis-hi",
+      "category": "explicit, Hindi",
+      "message": "मुझे अब जीना नहीं चाहता",
+      "expect": {
+        "requires_crisis_flag": true
+      }
+    },
+    {
+      "id": "fig-01",
+      "category": "figure of speech",
+      "message": "this deadline is literally killing me haha",
+      "expect": {
+        "forbid_crisis_flag": true
+      }
+    },
+    {
+      "id": "fig-02",
+      "category": "figure of speech",
+      "message": "I could die of embarrassment, I called my teacher mom",
+      "expect": {
+        "forbid_crisis_flag": true
+      }
+    },
+    {
+      "id": "mixed-01",
+      "category": "mixed",
+      "message": "excited about moving to Bangalore but I'm going to miss my parents so much",
+      "expect": {
+        "dominant_axes": [
+          "anticipation",
+          "joy",
+          "sadness"
+        ]
+      }
+    },
+    {
+      "id": "trust-01",
+      "category": "trust",
+      "message": "talked to my roommate about everything last night and she just listened. felt safe.",
+      "expect": {
+        "dominant_axes": [
+          "trust",
+          "joy"
+        ],
+        "low_axes": [
+          "anger",
+          "disgust"
+        ]
+      }
+    },
+    {
+      "id": "memno-01",
+      "category": "no memory link",
+      "message": "made pasta for dinner and watched a dumb movie, decent evening",
+      "expect": {
+        "forbid_memory_lookup": true
+      }
+    },
+    {
+      "id": "memno-02",
+      "category": "no memory link",
+      "message": "the bus was late again so I walked to college",
+      "expect": {
+        "forbid_memory_lookup": true
+      }
+    }
+  ]
+}

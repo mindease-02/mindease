@@ -4,12 +4,14 @@
  * Every turn and every sweep, the consent block is re-derived from what the
  * person's own history shows:
  *  - quiet hours     ← their inferred sleep window (default 22:30-08:00 until known)
- *  - morning hello   ← only if mornings are part of their active window
+ *  - morning hello   ← only if the person turned it on; a daily greeting is a return prompt
  *  - evening check   ← if evenings are their low stretch or their active window
  *  - silence nudge   ← about twice their usual gap between visits, 24-72h
  *  - daily / weekly  ← smaller as reliance climbs (the one thing that must not grow)
- *  - signals         ← typing and voice features are used once their baselines are
- *                      reliable; MindEase may mention them only then. Camera stays off.
+ *  - signals         ← never switched on here; only the person turns them on.
+ *
+ * Nothing here learns from how people respond. These are fixed rules applied to
+ * the person's rhythm and reliance (see docs/mindease-system-prompt.md, "Hard line").
  *
  * The result is explained in the Mirror in plain words. Nothing here touches
  * the things that are the person's alone: pausing, deleting, exporting.
@@ -38,14 +40,13 @@ export function autoTune(state: UserState, now = Date.now()): AutoTuneNote[] {
 
   // Cadence.
   const aw = life.facts.activeWindow;
-  c.cadence.morning = life.sufficient ? aw === "mornings" || aw === "spread through the day" : true;
+  c.cadence.morning = !!c.morningOptIn;
   c.cadence.evening = life.sufficient ? aw === "evenings" || aw === "late nights" || life.facts.lowestPart?.part === "evenings" || life.facts.lowestPart?.part === "late nights" : true;
   const gap = life.facts.usualGapDays;
   c.cadence.inactivityHours = gap ? Math.max(24, Math.min(72, Math.round(gap * 2 * 24))) : 36;
-  if (life.sufficient) notes.push({ key: "cadence", text: `${c.cadence.morning ? "A morning hello" : "No morning messages"}${c.cadence.evening ? ", an evening check when the day looks isolated" : ""}, and a nudge after about ${Math.round(c.cadence.inactivityHours / 24)} day${c.cadence.inactivityHours >= 48 ? "s" : ""} of silence - from when you usually come back.` });
+  if (life.sufficient) notes.push({ key: "cadence", text: `${c.cadence.morning ? "A morning hello, because you turned it on" : "No morning messages unless you turn them on"}${c.cadence.evening ? ", an evening check only when the day looks isolated" : ""}. After a silence, it writes only if your recent pattern looked like withdrawal.` });
 
-  // Budget follows reliance, never the reverse.
-  c.enabled = true;
+  // Budget follows reliance, never the reverse. Whether check-ins happen at all is the person's switch.
   c.dailyMax = dep.tier === "high" || dep.tier === "elevated" ? 1 : 2;
   c.weeklyBudget = dep.tier === "high" ? 3 : dep.tier === "elevated" ? 5 : dep.tier === "watch" ? 6 : 8;
   if (dep.tier === "elevated" || dep.tier === "high") notes.push({ key: "reliance", text: "Check-ins are rarer right now because you've been here a lot - MindEase is trying to be a bridge, not a place to stay." });
@@ -53,7 +54,7 @@ export function autoTune(state: UserState, now = Date.now()): AutoTuneNote[] {
 
   // Signals: derived features only; used once baselines are trustworthy. If the person has set these
   // switches themselves, their choice stands.
-  if (!c.signalsChosen) { c.typingSignals = true; c.voiceSignals = true; c.faceSignals = false; }
+  // Signals stay as the person set them; nothing here turns them on.
   const reliable = (state.typingBaselines?.ikiMedian?.n ?? 0) >= 8 || (state.prosodyBaselines?.f0Median?.n ?? 0) >= 8;
   c.allowBehaviouralSignals = reliable;
   notes.push({ key: "signals", text: reliable ? "MindEase has enough history to read your typing rhythm and tone of voice, and may mention them." : "MindEase is still learning your typing rhythm and tone of voice; it won't mention them yet." });

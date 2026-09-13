@@ -15,6 +15,7 @@ import { autoTune } from "../lifestyle/autoTune";
 import { patternReport } from "../screening";
 import { INSTRUMENTS } from "../screening/instruments";
 import { toolsSummary, weeklyReflection } from "../reflection";
+import { weeklyMeans } from "../reading/daily";
 import type { UserState } from "../store/types";
 
 const PLAIN: Record<string, string> = {
@@ -67,7 +68,7 @@ export function userView(state: UserState, now = Date.now()) {
     screenings: (state.screenings ?? []).filter((x) => x.completedAt).sort((a, b) => b.completedAt! - a.completedAt!).slice(0, 6).map((x) => ({ name: INSTRUMENTS[x.instrument].name, domain: INSTRUMENTS[x.instrument].domain, at: x.completedAt!, score: x.score!, max: INSTRUMENTS[x.instrument].max, band: x.band! })),
     signals: patternReport(state, now),
     memories: state.memories.slice().sort((x, y) => y.at - x.at).map((m) => ({ id: m.id, kind: m.kind, text: m.text, at: m.at, era: m.era ?? null })),
-    helplines: helplinesFor(state.region),
+    helplines: helplinesFor(state.region, state.language),
     emergency: emergencyFor(state.region),
     region: state.region ?? null,
     pushDevices: state.push.length,
@@ -77,6 +78,13 @@ export function userView(state: UserState, now = Date.now()) {
     tools: toolsSummary(state),
     moments: (state.milestones ?? []).slice(-6).reverse(),
     setupDone: !!state.setupDone,
+    corrections: (state.readCorrections ?? []).length,
+    feedbackCount: (state.replyFeedback ?? []).length,
+    axesWeekly: weeklyMeans(state.axesDaily, now, state.timeZone, 8),
+    memoryMode: state.consent.memoryMode ?? "ask",
+    ageBand: state.ageBand ?? null,
+    dependencyTier: dependency.tier,
+    budget: { weekly: state.consent.weeklyBudget, effective: Math.max(1, Math.floor(state.consent.weeklyBudget * dependency.countermeasures.reachOutBudgetMultiplier)) },
   };
 }
 export type UserView = ReturnType<typeof userView>;

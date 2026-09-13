@@ -11,7 +11,7 @@ import { assessTrend } from "../trend";
 import { assessDependency } from "../dependency";
 import { scoreOutcome, OUTCOME_LAG_MS, OUTCOME_WINDOW_MS } from "../dependency/objective";
 import { decideProactive, localDayKey, CADENCE_KINDS, type ProactiveDecision, type ReachKind } from "../proactive/policy";
-import { selectArm, updateArm, rewardToUnit } from "../proactive/bandit";
+import { pickCheckinKind } from "../proactive/kind";
 import { buildSystemPrompt, AGENT_NAME } from "../prompt/persona";
 import { complete, llmConfig } from "../llm";
 import { anchors, retrieve } from "../memory";
@@ -77,7 +77,7 @@ export async function evaluateUser(userId: string, opts: { now?: number; force?:
   // Let the bandit refine the evidence-based kinds it is allowed to choose between.
   let kind = decision.kind;
   if (!opts.force && ["observation", "callback", "light_touch"].includes(kind)) {
-    kind = selectArm(state.bandit, ["observation", "callback", "light_touch"]).kind;
+    kind = pickCheckinKind(kind, state.outreach, now);
   }
 
   const message = await composeCheckin(state, kind, decision, trend, dependency, now);
@@ -159,8 +159,8 @@ function scoreOutstanding(state: UserState, now: number) {
       if (before.length >= 3 && after.length >= 3) {
         const dep = assessDependency(state.history, [], o.at + OUTCOME_LAG_MS + OUTCOME_WINDOW_MS);
         const score = scoreOutcome({ before, after }, dep);
+        // Kept for human review in aggregate. Never fed back into behaviour automatically.
         o.reward = score.total;
-        state.bandit = updateArm(state.bandit, o.kind, rewardToUnit(o.rejected ? score.total - 1 : score.total), now);
       } else {
         o.reward = 0;
       }

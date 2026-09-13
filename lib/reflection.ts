@@ -21,6 +21,10 @@ export interface WeekSlice {
   tools: number;
   /** Moments of insight the model marked. */
   moments: number;
+  /** Separate conversations here (messages more than 45 minutes apart start a new one). */
+  conversations: number;
+  /** Times the person logged talking to someone in their life. */
+  logged: number;
 }
 
 export interface WeeklyReflection {
@@ -43,10 +47,22 @@ function slice(state: UserState, from: number, to: number): WeekSlice {
   const checkins = state.outreach.filter((o) => o.at >= from && o.at < to).length;
   const tools = (state.tools ?? []).filter((x) => x.at >= from && x.at < to).length;
   const moments = (state.milestones ?? []).filter((x) => x.at >= from && x.at < to).length;
-  return { here: pts.length, people, checkins, tools, moments };
+  let conversations = 0;
+  for (let i = 0; i < pts.length; i++) if (i === 0 || pts[i].at - pts[i - 1].at >= 45 * 60_000) conversations++;
+  const logged = (state.peopleContacts ?? []).filter((x) => x.at >= from && x.at < to).length;
+  return { here: pts.length, people, checkins, tools, moments, conversations, logged };
 }
 
-const share = (s: WeekSlice): number | null => (s.here >= 5 ? s.people / s.here : null);
+/**
+ * The people-vs-MindEase share: moments that pointed at people in their life (mentions and
+ * logged conversations) against separate conversations here. Counting conversations rather
+ * than messages keeps one long chat from swamping the week.
+ */
+const share = (s: WeekSlice): number | null => {
+  const outward = s.people + s.logged;
+  if (s.here < 5 && s.logged < 2) return null;
+  return outward / Math.max(1, outward + s.conversations);
+};
 
 export function weeklyReflection(state: UserState, now = Date.now()): WeeklyReflection {
   const thisWeek = slice(state, now - 7 * DAY, now + 1);

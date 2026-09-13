@@ -64,8 +64,8 @@ function retryAfterSeconds(res: Response, body: string): number | null {
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-/** Longest we will wait inside one request for a rate-limit window to reopen. */
-const MAX_WAIT_S = 6;
+/** Longest we will wait inside one request for a rate-limit window to reopen. Replies wait longer than background jobs. */
+const MAX_WAIT_S = { fast: 6, chat: 12 } as const;
 
 async function post(cfg: LlmConfig, model: string, messages: ChatMessage[], opts: CompletionOptions): Promise<Response> {
   const body: Record<string, unknown> = {
@@ -91,10 +91,9 @@ async function post(cfg: LlmConfig, model: string, messages: ChatMessage[], opts
 }
 
 /**
- * One completion. On a rate limit it first waits, if the provider says the
- * window reopens within a few seconds, and tries again. A fast-tier job that
- * would have to wait longer moves once to the chat model, which has its own
- * budget on Groq. Same provider either way, so nothing leaves where it went before.
+ * One completion. On a rate limit it waits, if the provider says the window
+ * reopens soon, and tries once more. Background jobs never borrow the chat
+ * model's budget: replies need it more, and a crisis reply most of all.
  */
 export async function complete(messages: ChatMessage[], opts: CompletionOptions = {}): Promise<string> {
   const cfg = llmConfig();
@@ -105,11 +104,9 @@ export async function complete(messages: ChatMessage[], opts: CompletionOptions 
   if (res.status === 429) {
     const text = await res.text();
     const wait = retryAfterSeconds(res, text);
-    if (wait !== null && wait <= MAX_WAIT_S) {
+    if (wait !== null && wait <= MAX_WAIT_S[opts.tier === "fast" ? "fast" : "chat"]) {
       await sleep(Math.ceil(wait * 1000) + 150);
       res = await post(cfg, primary, messages, opts);
-    } else if (opts.tier === "fast" && cfg.chatModel !== cfg.fastModel) {
-      res = await post(cfg, cfg.chatModel, messages, opts);
     } else {
       throw new Error(`LLM 429: ${text.slice(0, 300)}`);
     }

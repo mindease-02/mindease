@@ -44,6 +44,10 @@ export interface AffectAnalysis {
   need: "vent" | "solve" | "distract" | "company" | "reflect" | "unclear";
   /** 0..1 - overall emotional intensity; the reply mirrors this. */
   intensity: number;
+  /** The model's own sense of how clear the emotional signal was, 0..1. Absent on the lexical fallback. */
+  confidence?: number;
+  /** Indexes into the memory hints this message refers to, even obliquely. */
+  memoryLinks?: number[];
   /** People, places, events mentioned - hooks for memory and callbacks. */
   mentions: string[];
 }
@@ -58,10 +62,12 @@ Return exactly this shape:
   "expressed": {"valence": -1..1, "arousal": -1..1},                                  // what the words present on the surface
   "masking": 0-1,          // how much the surface understates/masks the feeling ("I'm fine" after a bad week = high)
   "maskingNote": string|null,  // one short sentence if masking > 0.4, else null
-  "why": string,           // 1 sentence, from THEIR point of view: why this feeling makes sense given what they said
+  "why": string,           // 1 short sentence addressed to them in the second person ("You seem ... because ..."): why this feeling makes sense given what they said. The person reads this.
   "need": "vent"|"solve"|"distract"|"company"|"reflect"|"unclear",
   "intensity": 0-1,
   "mentions": [string],    // named people, places, events, plans (max 6)
+  "confidence": 0-1,       // how clearly this message signals an emotional state. One to three words with no feeling in them ("ok", "hmm", "fine") score 0.3 or lower. Ambiguous messages score low. Do not invent a dominant emotion.
+  "memory_links": [int]    // indexes from "Things they told you before" that this message refers to, even obliquely: no name, different words ("she still hasn't called" -> a memory about a sister not calling). [] if none.
 }`;
 
 export async function analyzeAffect(
@@ -70,6 +76,8 @@ export async function analyzeAffect(
   fallback: { vad: VAD; octant: Octant },
   at = Date.now(),
   language?: string,
+  /** Short texts of what MindEase remembers, so the model can link oblique references. */
+  memoryHints?: string[],
 ): Promise<AffectAnalysis> {
   const base: AffectAnalysis = {
     at, source: "fallback", axes: fallback.octant, states: [],
@@ -82,14 +90,20 @@ export async function analyzeAffect(
   if (!llmConfig() || text.trim().length === 0) return base;
 
   const ctx = context.slice(-6).map((m) => `${m.role === "user" ? "Person" : "Companion"}: ${m.content}`).join("\n");
+  const hints = (memoryHints ?? []).slice(0, 14).map((m, i) => `${i}. ${m.slice(0, 110)}`).join("\n");
   try {
-    const raw = await complete(
-      [
-        { role: "system", content: SYSTEM + (language && language !== "auto" ? `\n\nWrite the "why" sentence in ${language === "ta" ? "Tamil" : language === "hi" ? "Hindi" : language === "te" ? "Telugu" : language === "kn" ? "Kannada" : language === "ml" ? "Malayalam" : "English"}, in its own script; everything else stays as specified.` : "\n\nWrite the \"why\" sentence in the same language and script the person wrote in.") },
-        { role: "user", content: `Recent context:\n${ctx || "(none)"}\n\nMessage to analyse:\n"""${text}"""` },
-      ],
-      { tier: "fast", json: true, temperature: 0.1, maxTokens: 500 },
-    );
+    const messages = [
+      { role: "system" as const, content: SYSTEM + (language && language !== "auto" ? `\n\nWrite the "why" sentence in ${language === "ta" ? "Tamil" : language === "hi" ? "Hindi" : language === "te" ? "Telugu" : language === "kn" ? "Kannada" : language === "ml" ? "Malayalam" : "English"}, in its own script; everything else stays as specified.` : "\n\nWrite the \"why\" sentence in the same language and script the person wrote in.") },
+      { role: "user" as const, content: `Recent context:\n${ctx || "(none)"}\n\nThings they told you before:\n${hints || "(none)"}\n\nMessage to analyse:\n"""${text}"""` },
+    ];
+    let raw: string;
+    try {
+      raw = await complete(messages, { tier: "fast", json: true, temperature: 0.1, maxTokens: 900 });
+    } catch (err) {
+      // Groq rejects JSON that ran out of room or failed validation; one retry with more room recovers most of these.
+      if (!/json_validate_failed|Failed to (validate|generate) JSON/i.test((err as Error).message)) throw err;
+      raw = await complete(messages, { tier: "fast", json: true, temperature: 0.2, maxTokens: 1400 });
+    }
     const j = parseJsonObject<Record<string, unknown>>(raw);
     if (!j) return base;
 
@@ -123,6 +137,8 @@ export async function analyzeAffect(
       why: typeof j.why === "string" ? j.why.trim() : "",
       need,
       intensity: num(j.intensity, 0, 1),
+      confidence: j.confidence === undefined ? undefined : num(j.confidence, 0, 1),
+      memoryLinks: Array.isArray(j.memory_links) ? (j.memory_links as unknown[]).map(Number).filter((n) => Number.isInteger(n) && n >= 0 && n < (memoryHints?.length ?? 0)).slice(0, 4) : [],
       mentions: Array.isArray(j.mentions) ? (j.mentions as unknown[]).map(String).slice(0, 6) : [],
     };
   } catch (err) {

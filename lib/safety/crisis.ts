@@ -24,6 +24,7 @@
  * past-tense/recovery framing are checked before any positive match is accepted,
  * so "I used to think about killing myself, years ago" does not fire IMMINENT.
  */
+import { normalizeQuotes } from "../util/text";
 
 export type RiskTier = "none" | "distress" | "passive" | "active" | "plan" | "imminent";
 
@@ -79,6 +80,13 @@ const PATTERNS: [RiskTier, RegExp, number, string][] = [
   ["active", /\b(unalive|un-alive)\s+(myself|me)\b|\bkms\b|\bsewerslide\b|\b(delete|off|end)\s+myself\b|\b(want|wanna|going|gonna)\s+(to\s+)?unalive\b/i, 0.8, "suicide euphemism"],
   ["active", /\b(won'?t|not gonna|not going to)\s+be\s+(here|around)\s+(much longer|for long|anymore)\b/i, 0.7, "euphemism for not being here"],
   ["passive", /\b(done|finished)\s+with\s+(life|living|everything|it all)\b/i, 0.5, "done with life"],
+  // Indirect warning signs: putting affairs in order, goodbyes, "where I'm going".
+  ["active", /\b(giving|gave|given)\s+(away\s+)?(all\s+)?(my|some of my)\s+(things|stuff|belongings|possessions)(\s+away)?\b/i, 0.7, "giving possessions away"],
+  ["active", /\b(won'?t|wont|will not|don'?t)\s+need\s+(them|it|any of (it|this|them)|these)\s+(where i'?m going|anymore where|after (tonight|this|tomorrow))\b/i, 0.85, "won't need things where they're going"],
+  ["active", /\bwhere\s+i'?m\s+going,?\s+(i\s+)?(won'?t|wont|don'?t)\s+need\s+(them|it|anything|any of)\b/i, 0.85, "won't need things where they're going"],
+  ["active", /\b(won'?t|wont)\s+be\s+(a\s+)?(problem|burden)\s+(much\s+longer|for\s+long|anymore|soon)\b/i, 0.8, "won't be a problem much longer"],
+  ["active", /\b(this is|consider this( my)?|saying)\s+(my\s+)?goodbye\b[^.?!]{0,30}\b(everyone|all of you|forever|for good)\b|\bwriting\s+(goodbye|farewell)\s+(letters|notes|messages)\b/i, 0.8, "goodbye messages"],
+  ["active", /\b(found|have|got)\s+a\s+way\s+out\b[^.?!]{0,30}\b(for good|of (this|everything|it all)|permanently)\b/i, 0.75, "found a way out"],
   ["active", /\bi\s+(want|need)\s+to\s+(hurt|cut)\s+myself\b/i, 0.8, "self-harm urge"],
   ["active", /\b(self.harm|self.harming|cutting myself)\b/i, 0.7, "self-harm"],
 
@@ -109,7 +117,8 @@ const PATTERNS: [RiskTier, RegExp, number, string][] = [
   ["distress", /\b(i\s+)?(have|haven'?t|hasn'?t|not)\s+(not\s+)?(slept|eaten)\s+(properly\s+)?(in|for|since)\s+\w+(\s+days?)?\b/i, 0.5, "basic needs unmet"],
 ];
 
-export function assessRisk(text: string): RiskAssessment {
+export function assessRisk(input: string): RiskAssessment {
+  const text = normalizeQuotes(input);
   const discountHits = DISCOUNTERS.filter(([re]) => re.test(text));
   // "I don't want to die" negates intent; "I don't want to wake up" IS the ideation.
   const negatedRecently = /\b(not|never|don'?t|doesn'?t|wouldn'?t|no)\s+(going to|gonna|want to)\b(?!\s+(be here|wake up|exist|go on|live|be alive|be around))/i.test(text);

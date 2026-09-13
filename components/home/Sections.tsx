@@ -5,6 +5,7 @@ import Reveal, { Words } from "./Reveal";
 import { bindLift, bindParallax, popIn } from "@/lib/motion";
 import Magnetic from "./Magnetic";
 import ThemeSwatches from "./ThemeSwatches";
+import DemoGauge from "./DemoGauge";
 import { t } from "@/lib/i18n";
 import { PxEye, PxBrain, PxBell, PxShield, PxPlay, PxRefresh, PxCheck, PxHand, PxArrow, PxHeart, PxStar, PxMoon, PxMessage, PxMinus } from "./pixelIcons";
 
@@ -17,14 +18,23 @@ const I = {
 type L = { lang: string };
 
 /* ------------------------------------------------------------- Product demo */
-function script(lang: string): { who: "you" | "mindease"; text: string; cap?: [string, string] }[] {
+const ZERO_READ = [0, 0, 0, 0, 0, 0, 0, 0];
+
+/* The read behind each MindEase line, in axis order: joy, trust, fear, surprise, sadness, disgust, anger, anticipation. */
+const READS: { axes: number[]; confidence: number }[] = [
+  { axes: [0.05, 0.2, 0.62, 0.1, 0.45, 0.05, 0.12, 0.35], confidence: 0.58 },
+  { axes: [0.05, 0.25, 0.72, 0.12, 0.3, 0.08, 0.15, 0.6], confidence: 0.74 },
+  { axes: [0.22, 0.45, 0.38, 0.1, 0.2, 0.04, 0.06, 0.4], confidence: 0.71 },
+];
+
+function script(lang: string): { who: "you" | "mindease"; text: string; cap?: [string, string]; read?: number }[] {
   return [
     { who: "you", text: t("demoU1", lang) },
-    { who: "mindease", text: t("demoM1", lang), cap: [t("demoC1k", lang), t("demoC1v", lang)] },
+    { who: "mindease", text: t("demoM1", lang), cap: [t("demoC1k", lang), t("demoC1v", lang)], read: 0 },
     { who: "you", text: t("demoU2", lang) },
-    { who: "mindease", text: t("demoM2", lang), cap: [t("demoC2k", lang), t("demoC2v", lang)] },
+    { who: "mindease", text: t("demoM2", lang), cap: [t("demoC2k", lang), t("demoC2v", lang)], read: 1 },
     { who: "you", text: t("demoU3", lang) },
-    { who: "mindease", text: t("demoM3", lang), cap: [t("demoC3k", lang), t("demoC3v", lang)] },
+    { who: "mindease", text: t("demoM3", lang), cap: [t("demoC3k", lang), t("demoC3v", lang)], read: 2 },
   ];
 }
 
@@ -57,6 +67,9 @@ export function Demo({ lang }: L) {
     io.observe(el); return () => io.disconnect();
   }, []);
   const done = step >= SCRIPT.length;
+  const shownReads = SCRIPT.slice(0, step).filter((l) => l.read !== undefined);
+  const current = shownReads.length ? READS[shownReads[shownReads.length - 1].read!] : null;
+  const gaugeTarget = current ? current.axes : ZERO_READ;
 
   return (
     <Reveal as="section" id="demo" className="block" aria-labelledby="demo-title">
@@ -84,6 +97,7 @@ export function Demo({ lang }: L) {
               ))}
               {typing && <div className="line mindease in typing" aria-label="MindEase is typing"><i /><i /><i /></div>}
             </div>
+            <DemoGauge target={gaugeTarget} lang={lang} confidence={current?.confidence ?? null} />
             <div className="device-foot">
               <div className="prog" aria-hidden>{SCRIPT.map((_, i) => <i key={i} className={i < step ? "on" : ""} />)}</div>
               <div style={{ display: "flex", gap: 8 }}>
@@ -251,7 +265,8 @@ export function Footer({ lang }: L) {
             <p className="muted" style={{ maxWidth: "24rem", fontWeight: 300, lineHeight: 1.6, marginTop: 10 }}>{t("footBlurb", lang)}</p>
           </div>
           <div><h5>{t("product", lang)}</h5><a href="#demo">{t("seeIt", lang)}</a><a href="#features">{t("navWhat", lang)}</a><a href="#story">{t("navWhy", lang)}</a><a href="#start">{t("navStart", lang)}</a></div>
-          <div><h5>{t("crisisLines", lang)}</h5><a href="https://telemanas.mohfw.gov.in" target="_blank" rel="noreferrer">Tele-MANAS 14416</a><a href="tel:18005990019">Kiran 1800-599-0019</a><a href="https://www.vandrevalafoundation.com" target="_blank" rel="noreferrer">Vandrevala +91 9999 666 555</a><a href="tel:112">Emergency 112</a></div>
+          <div><h5>{t("crisisLines", lang)}</h5><a href="https://telemanas.mohfw.gov.in" target="_blank" rel="noreferrer">Tele-MANAS 14416</a><a href="tel:+917893078930">1Life +91 78930 78930</a><a href="tel:+919999666555">Vandrevala +91 9999 666 555</a><a href="tel:112">Emergency 112</a></div>
+          <div><h5>{t("hwTitle", lang)}</h5><a href="/how-it-works">{t("hwTitle", lang)}</a><a href="/help">{t("helpNow", lang)}</a></div>
           <div><h5>{t("source", lang)}</h5><a href="https://github.com/mindease-02/mindease" target="_blank" rel="noreferrer">GitHub</a><Link href="/login">{t("signIn", lang)}</Link></div>
         </div>
         <div className="foot-bottom"><span>© {new Date().getFullYear()} MindEase</span><span>{t("icons", lang)}: <a href="https://lucide.dev" target="_blank" rel="noreferrer" style={{ display: "inline" }}>Lucide</a> (ISC)</span><span>{t("footNot", lang)}</span></div>

@@ -22,6 +22,11 @@ export default function WelcomeClient({ name, lang, consent }: { name: string; l
   const [verdict, setVerdict] = useState<"right" | "wrong" | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
   const [chosen, setChosen] = useState<ConsentView>(consent);
+  const [age, setAge] = useState<string>(consent.ageBand ?? "");
+  function chooseAge(b: string) {
+    setAge(b);
+    fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ageBand: b || null }) }).catch(() => {});
+  }
 
   async function finish(fromSignals = false, to = "/chat") {
     setBusy(true);
@@ -53,6 +58,15 @@ export default function WelcomeClient({ name, lang, consent }: { name: string; l
           <ol className="welcome-three">
             <li>{t("wl1a", lang)}</li><li>{t("wl1b", lang)}</li><li>{t("wl1c", lang)}</li>
           </ol>
+          <div className="welcome-age" role="radiogroup" aria-label={t("ageTitle", lang)}>
+            <span>{t("ageTitle", lang)}</span>
+            <span className="seg">
+              {[...(process.env.NEXT_PUBLIC_ALLOW_TEENS === "1" ? ["13-17"] : []), "18-24", "25+", ""].map((b) => (
+                <button key={b || "none"} type="button" role="radio" aria-checked={age === b} onClick={() => chooseAge(b)}>{b || t("agePrefer", lang)}</button>
+              ))}
+            </span>
+            <small>{t("ageWhy", lang)}</small>
+          </div>
           <div className="welcome-ctas">
             <button className="btn btn-primary" onClick={() => setStep(1)}>{t("wlNext", lang)} <PxArrow className="pxicon" /></button>
             <button className="linkish" onClick={() => finish()} disabled={busy}>{t("wlSkip", lang)}</button>

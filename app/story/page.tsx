@@ -6,6 +6,7 @@ import { body, display, heading } from "@/components/home/fonts";
 import ThemeInit from "@/components/home/ThemeInit";
 import TrustStrip from "@/components/TrustStrip";
 import WeekCard from "@/components/reflection/WeekCard";
+import MemoryList from "@/components/profile/MemoryList";
 import { getStore, migrate } from "@/lib/store";
 import { weeklyReflection } from "@/lib/reflection";
 import { t } from "@/lib/i18n";
@@ -62,14 +63,13 @@ export default async function StoryPage() {
           </div>
         </section>
 
-        {groups.length ? groups.map((g) => (
-          <section className="pcard" key={g.key}>
-            <h2 className="display">{t(g.key, lang)}</h2>
-            <div className="pcard-body">
-              <ul className="story-list">{g.items.map((m) => <li key={m.id}><span className="moment-when">{fmt(m.at)}</span><span>{m.text}</span></li>)}</ul>
-            </div>
-          </section>
-        )) : <section className="pcard"><p className="muted">{t("stEmpty", lang)}</p></section>}
+        <section className="pcard" id="memories">
+          <h2 className="display">{t("knowsTitle", lang)}</h2>
+          <p className="muted pcard-hint">{t("memPromise", lang)}</p>
+          <div className="pcard-body">
+            {groups.length ? <MemoryList lang={lang} groups={groups.map((g) => ({ key: g.key, items: g.items.map((m) => ({ id: m.id, kind: m.kind, text: m.text, when: fmt(m.at) })) }))} /> : <p className="muted">{t("stEmpty", lang)}</p>}
+          </div>
+        </section>
         <p className="muted" style={{ fontSize: ".85rem" }}><Link href="/profile">{t("profileResults", lang)}</Link></p>
       </main>
     </div>

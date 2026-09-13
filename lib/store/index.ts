@@ -113,6 +113,11 @@ export function migrate(s: UserState): UserState {
     currentSessionId,
     milestones: s.milestones ?? [],
     tools: s.tools ?? [],
+    readCorrections: s.readCorrections ?? [],
+    axesDaily: s.axesDaily ?? [],
+    replyFeedback: s.replyFeedback ?? [],
+    peopleContacts: s.peopleContacts ?? [],
+    notices: s.notices ?? {},
     // Accounts that talked before onboarding existed are treated as onboarded.
     setupDone: s.setupDone ?? ((s.history ?? []).length > 0),
     displayName: s.displayName ?? "you",
@@ -128,6 +133,8 @@ export function migrate(s: UserState): UserState {
       storeTranscript: true, voiceSignals: false, typingSignals: false, faceSignals: false, pushNotifications: false, retentionDays: 30,
       ...(s.consent as Partial<UserState["consent"]>),
       cadence: { ...DEFAULT_CONSENT.cadence, ...(s.consent?.cadence ?? {}) },
+      // Memories are proposed for approval unless the person chose otherwise.
+      memoryMode: (s.consent as Partial<UserState["consent"]> | undefined)?.memoryMode ?? "ask",
     },
   };
 }

@@ -49,12 +49,15 @@ export const SLANG_GLOSSARY: [string, string][] = [
   ["... only", "emphasis (\"I'm tired only\" = I'm just tired)"],
 ];
 
-export function slangBlock(): string {
+export function slangBlock(recentText = ""): string {
+  const hay = ` ${recentText.toLowerCase()} `;
+  // Only the terms they actually used; the full glossary on every turn cost more than it helped.
+  const used = SLANG_GLOSSARY.filter(([t]) => t.toLowerCase().split(/[\s/,]+/).map((w) => w.replace(/[^a-z']/g, "")).filter((w) => w.length >= 2).some((w) => new RegExp(`[^a-z]${w}[^a-z]`).test(hay)));
   return [
     "## Reading how they actually talk",
     "",
-    "They may write in Gen Z internet English, Indian English, or Hinglish. Read it fluently and reply in plain, warm English - do not mimic the slang back at them, and never explain it. Meanings that matter:",
-    ...SLANG_GLOSSARY.map(([t, m]) => `- ${t}: ${m}`),
+    "They may write in internet English, Indian English, or a mix with Hindi, Tamil or another language. Read it fluently; do not mimic slang back or explain it.",
+    ...used.map(([t, m]) => `- ${t}: ${m}`),
     "- unalive, kms, sewerslide, 'delete myself', 'off myself': suicide. Always serious, however casual the tone.",
   ].join("\n");
 }

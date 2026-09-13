@@ -9,8 +9,8 @@ import { NEARBY_HELP_URL } from "@/lib/safety/resources";
 import { t } from "@/lib/i18n";
 import WeekCard from "../reflection/WeekCard";
 import ToolsUsed from "../profile/ToolsUsed";
-
-const KIND_KEY: Record<string, string> = { person: "stPeople", event: "stEvents", preference: "stPrefs", past: "stPast", fact: "stFacts", goal: "stGoals", struggle: "stStruggles", routine: "stRoutine" };
+import StyleLearned from "./StyleLearned";
+import MemoryCard from "./MemoryCard";
 
 interface Props {
   mirror: UserView | null;
@@ -90,6 +90,9 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
             <Section title={t("wkTitle", lang)}>
               <WeekCard r={m.reflection} lang={lang} compact />
             </Section>
+            <Section title={t("styTitle", lang)} hint={t("styHint", lang)}>
+              <StyleLearned corrections={m.corrections} feedback={m.feedbackCount} lang={lang} onReset={() => onSettings({ resetStyle: true })} />
+            </Section>
             <Section title={t("skTitle", lang)}>
               <ToolsUsed tools={m.tools} lang={lang} />
             </Section>
@@ -97,25 +100,18 @@ export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, bus
               <Sparkline points={m.mood} />
             </Section>
             <Section title={t("wouldWrite", lang)}>
-              <p className="text-sm">{m.checkin.wouldSend ? t("yes", lang) : t("notRightNow", lang)} <span className="text-xs text-clay-muted">— {m.checkin.reason}</span></p>
+              <p className="text-sm">{m.checkin.wouldSend ? t("yes", lang) : t("notRightNow", lang)}<span className="text-xs text-clay-muted">, {m.checkin.reason}</span></p>
             </Section>
           </>
         )}
 
         {tab === "memory" && (
           <Section title={t("remembersT", lang, { n: String(m.memories.length) })} hint={t("remembersHint", lang)}>
+            <p className="mb-2 text-xs text-clay-muted">{t("memPromise", lang)}</p>
             {m.memories.length ? (
-              <ul className="space-y-2">
-                {m.memories.map((mem) => (
-                  <li key={mem.id} className="flex items-start gap-2 rounded-2xl bg-clay-bg-deep p-3">
-                    <div className="flex-1 text-sm">
-                      <div className="text-[11px] text-clay-muted">{t(KIND_KEY[mem.kind] ?? "stFacts", lang)}{mem.era ? `, ${mem.era}` : ""}, {new Date(mem.at).toLocaleDateString(loc)}</div>
-                      {mem.text}
-                    </div>
-                    <button disabled={busy} onClick={() => onSettings({ forgetMemoryId: mem.id })} className="text-xs text-clay-muted hover:text-clay-coral" aria-label={t("forget", lang)}>{t("forget", lang)}</button>
-                  </li>
-                ))}
-              </ul>
+              <div className="space-y-2">
+                {m.memories.map((mem) => <MemoryCard key={mem.id} m={{ id: mem.id, kind: mem.kind, text: mem.text }} lang={lang} mode="kept" />)}
+              </div>
             ) : <p className="text-xs text-clay-muted">{t("nothingYetMem", lang)}</p>}
             <a href="/story" className="clay-btn mt-3 inline-block px-3 py-1.5 text-xs">{t("storyLink", lang)}</a>
           </Section>

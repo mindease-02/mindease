@@ -32,8 +32,13 @@ const base = () => ({
   cadence: { cadenceLog: {}, isolation: 0, messagesToday: 0 }, now: MORNING,
 });
 
-test("morning check-in fires in the window when nothing else stops it", () => {
+test("morning hello is off by default: a daily greeting is a return prompt", () => {
   const d = decideProactive(base());
+  assert.equal(d.send, false);
+});
+
+test("morning check-in fires in the window only when the person turned it on", () => {
+  const d = decideProactive({ ...base(), consent: { ...DEFAULT_CONSENT, timeZone: "UTC", cadence: { ...DEFAULT_CONSENT.cadence, morning: true } } });
   assert.equal(d.send, true);
   assert.equal(d.kind, "morning");
 });
@@ -92,11 +97,18 @@ test("evening only when the day read as isolated", () => {
   assert.equal(isolated.kind, "evening");
 });
 
-test("inactivity nudge once per silence", () => {
+test("a silence alone never triggers a nudge", () => {
+  const NOON = Date.UTC(2026, 8, 4, 12, 0);
+  const d = decideProactive({ ...base(), now: NOON, lastUserMessageAt: NOON - 40 * HOUR, cadence: { cadenceLog: { morning: localDayKey(NOON, "UTC") }, isolation: 0, messagesToday: 0 } });
+  assert.equal(d.send, false);
+});
+
+test("inactivity nudge only on a withdrawal pattern, and once per silence", () => {
   const NOON = Date.UTC(2026, 8, 4, 12, 0);
   const last = NOON - 40 * HOUR;
-  const first = decideProactive({ ...base(), now: NOON, lastUserMessageAt: last, cadence: { cadenceLog: { morning: localDayKey(NOON, "UTC") }, isolation: 0, messagesToday: 0 } });
+  const withdrawing = trend({ withdrawal: { score: 0.6, reasons: ["gaps between visits growing"] } });
+  const first = decideProactive({ ...base(), trend: withdrawing, now: NOON, lastUserMessageAt: last, cadence: { cadenceLog: { morning: localDayKey(NOON, "UTC") }, isolation: 0, messagesToday: 0 } });
   assert.equal(first.kind, "inactivity");
-  const again = decideProactive({ ...base(), now: NOON, lastUserMessageAt: last, history: [{ at: NOON - 7 * HOUR, kind: "inactivity", triggerScore: 0 }], cadence: { cadenceLog: { morning: localDayKey(NOON, "UTC") }, isolation: 0, messagesToday: 0 } });
+  const again = decideProactive({ ...base(), trend: withdrawing, now: NOON, lastUserMessageAt: last, history: [{ at: NOON - 7 * HOUR, kind: "inactivity", triggerScore: 0 }], cadence: { cadenceLog: { morning: localDayKey(NOON, "UTC") }, isolation: 0, messagesToday: 0 } });
   assert.equal(again.send, false);
 });

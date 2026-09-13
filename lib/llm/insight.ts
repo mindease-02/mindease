@@ -9,6 +9,7 @@
  * "lol ok" and on plain venting, and the milestone stays rare by design.
  */
 import { complete, parseJsonObject, llmConfig } from "./index";
+import { normalizeQuotes } from "../util/text";
 
 export type InsightKind = "reframe" | "named_help" | "noticed" | "plan";
 export interface Insight { kind: InsightKind; text: string }
@@ -21,7 +22,7 @@ const HELPS = /\b(helps?|helped|calms? me|keeps? me (sane|going|steady|grounded)
 const FUTURE = /\b(i'?ll|i will|i'?m going to|gonna|going to|tomorrow|tonight|this (week|weekend|evening)|next|plan to|decided to|book|call|text|email|ask|start)\b/i;
 
 export function worthChecking(text: string): boolean {
-  const t = text.trim();
+  const t = normalizeQuotes(text).trim();
   if (t.length < 12) return false;
   if (NON_LATIN.test(t)) return t.length >= 16;
   return CUES.test(t);

@@ -17,6 +17,7 @@
  * is clear-eyed about that and so is this - the giant advert that says "everything
  * you want to hear" is the point of the character, not a plot twist.
  */
+import { normalizeQuotes } from "../util/text";
 import type { MoodPoint } from "../trend";
 import { mean, slope } from "../util/stats";
 import { DAY } from "../util/time";
@@ -111,7 +112,8 @@ export function assessDependency(
 
   let exclusivityWeight = 0;
   const exclusivityExamples: string[] = [];
-  for (const text of recentUserText) {
+  for (const raw of recentUserText) {
+    const text = normalizeQuotes(raw);
     for (const [re, w, label] of EXCLUSIVITY_PATTERNS) {
       if (re.test(text)) {
         exclusivityWeight += w;

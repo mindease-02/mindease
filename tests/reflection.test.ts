@@ -46,6 +46,13 @@ test("no messages at all does not count as steadier", () => {
   assert.equal(weeklyReflection(state([], { outreach }), now).steadier, false);
 });
 
+test("logged conversations with people count toward the outward side", () => {
+  const peopleContacts = [1, 2, 3].map((d) => ({ at: now - d * DAY }));
+  const r = weeklyReflection(state(week(6, 0, 0), { peopleContacts }), now);
+  assert.equal(r.thisWeek.logged, 3);
+  assert.ok((r.outward ?? 0) > 0.2);
+});
+
 test("tools are grouped and sorted by use", () => {
   const s = state([], { tools: [{ kind: "box", at: 1 }, { kind: "sigh", at: 2 }, { kind: "box", at: 3 }] });
   assert.deepEqual(toolsSummary(s), [{ kind: "box", count: 2 }, { kind: "sigh", count: 1 }]);

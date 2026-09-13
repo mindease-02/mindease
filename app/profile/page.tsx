@@ -58,7 +58,8 @@ export default async function ProfilePage() {
           rhythm={life.sufficient ? life.lines : []}
           reflection={view.reflection}
           tools={view.tools}
-          consent={{ storeTranscript: state.consent.storeTranscript, retentionDays: state.consent.retentionDays, voiceSignals: state.consent.voiceSignals, typingSignals: state.consent.typingSignals, faceSignals: state.consent.faceSignals }}
+          consent={{ enabled: state.consent.enabled, morningOptIn: !!state.consent.morningOptIn, storeTranscript: state.consent.storeTranscript, retentionDays: state.consent.retentionDays, voiceSignals: state.consent.voiceSignals, typingSignals: state.consent.typingSignals, faceSignals: state.consent.faceSignals, memoryMode: state.consent.memoryMode ?? "ask", ageBand: state.ageBand ?? null }}
+          axesWeekly={view.axesWeekly}
         />
       </main>
     </div>

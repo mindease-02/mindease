@@ -79,7 +79,7 @@ export const DEFAULT_CONSENT: ProactiveConsent = {
   quietTo: 8,
   timeZone: "UTC",
   allowBehaviouralSignals: false,
-  cadence: { morning: true, evening: true, inactivityHours: 36 },
+  cadence: { morning: false, evening: true, inactivityHours: 36 },
 };
 
 export interface OutreachRecord {
@@ -288,13 +288,17 @@ export function decideProactive(args: {
     });
 
     const inactHours = consent.cadence.inactivityHours;
-    const inactivityOk = inactHours > 0 && lastUserMessageAt > 0 && silentHours >= inactHours &&
+    // Silence alone is not a reason to write: someone needing this less is the goal. Only a withdrawal
+    // pattern or recent risk makes a silence worth one gentle line.
+    const concerning = trend.withdrawal.score >= 0.4 || (atLeast(recentRisk.tier, "passive") && now - recentRisk.at < 7 * DAY);
+    const inactivityOk = inactHours > 0 && lastUserMessageAt > 0 && silentHours >= inactHours && concerning &&
       !history.some((h) => h.kind === "inactivity" && h.at > lastUserMessageAt);
     cadenceCandidates.push({
       kind: "inactivity", ok: inactivityOk,
       detail: inactHours <= 0 ? "inactivity nudges are off"
         : lastUserMessageAt === 0 ? "no messages yet"
         : history.some((h) => h.kind === "inactivity" && h.at > lastUserMessageAt) ? "already nudged once during this silence"
+        : !concerning ? "a silence on its own is fine; no sign of withdrawal"
         : `${Math.round(silentHours)}h since your last message (threshold ${inactHours}h)`,
       rationale: [`it's been about ${Math.round(silentHours / 24) >= 2 ? Math.round(silentHours / 24) + " days" : Math.round(silentHours) + " hours"} since you last wrote`],
     });

@@ -13,6 +13,7 @@ export default function TrustStrip({ lang, className = "" }: { lang: string; cla
         {parts.map((p, i) => p === "14416" || p === "112"
           ? <a key={i} href={`tel:${p}`}>{p}</a>
           : <span key={i}>{p}</span>)}
+        {" "}<a href="/help" className="trust-help">{t("helpNow", lang)}</a>
       </span>
     </div>
   );

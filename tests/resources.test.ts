@@ -7,7 +7,9 @@ test("India is the default and comes first", () => {
   assert.equal(DEFAULT_REGION, "IN");
   const names = helplinesFor().map((h) => h.name);
   assert.match(names[0], /Tele-MANAS/);
-  assert.ok(names.some((n) => /Kiran/.test(n)));
+  // KIRAN was merged into Tele-MANAS and phased out in 2024; it must not come back.
+  assert.ok(!names.some((n) => /Kiran/i.test(n)));
+  assert.ok(names.some((n) => /Vandrevala/.test(n)));
   assert.equal(names.at(-1), "Find a Helpline");
   assert.equal(emergencyFor(), "112");
 });
@@ -31,4 +33,11 @@ test("regionFor: time zone beats locale, locale beats nothing", () => {
   assert.equal(regionFor("America/New_York", "en"), undefined);
   assert.equal(regionFor(undefined, undefined), undefined);
   assert.equal(regionFor("UTC", "hi-Deva-IN"), undefined); // script subtag is not a region; the server default (IN) applies
+});
+
+test("a verified line in the person's language follows Tele-MANAS", () => {
+  const ta = helplinesFor("IN", "ta").map((h) => h.name);
+  assert.match(ta[0], /Tele-MANAS/);
+  assert.match(ta[1], /Sneha/);
+  assert.equal(helplinesFor("GB", "ta").some((h) => /Sneha/.test(h.name)), false);
 });

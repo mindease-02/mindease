@@ -82,11 +82,10 @@ export function registerBlock(intensity: number, need: string): string {
     r.guidance,
     "",
     "Examples of the register (never reuse verbatim):",
-    ...r.examples.map((e) => `- "${e}"`),
+    ...r.examples.slice(0, 2).map((e) => `- "${e}"`),
     "",
     `What they seem to need: ${need}. ${needLine[need] ?? needLine.unclear}`,
     "",
-    "Validation patterns (shape, not text):",
-    ...VALIDATION_PATTERNS.map((p) => `- ${p}`),
+    "Validate the feeling, not the conclusion: \"It makes sense you feel <feeling>, given <what they said>.\"",
   ].join("\n");
 }

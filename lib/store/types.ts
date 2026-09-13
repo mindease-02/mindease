@@ -25,6 +25,9 @@ import type { RiskTier } from "../safety/crisis";
 import type { MemoryItem } from "../memory";
 import type { AffectAnalysis } from "../llm/analyze";
 import type { Screening } from "../screening";
+import type { ReadCorrection } from "../reading/corrections";
+import type { AxesDay } from "../reading/daily";
+import type { ReplyFeedback } from "../style/profile";
 
 /** Audit entry for every turn at tier >= active (regex or model second opinion). */
 export interface RiskLogEntry {
@@ -86,6 +89,10 @@ export interface UserState {
     retentionDays: number;
     /** True once the person has set the signal switches themselves; auto-tuning then leaves them alone. */
     signalsChosen?: boolean;
+    /** A daily morning hello. Off unless the person turns it on. */
+    morningOptIn?: boolean;
+    /** Memory: "ask" proposes each memory for approval, "auto" keeps them, "off" keeps none. */
+    memoryMode?: "ask" | "auto" | "off";
   };
   history: MoodPoint[];
   messages: StoredMessage[];
@@ -136,6 +143,22 @@ export interface UserState {
   milestones?: Milestone[];
   /** Coping tools actually started (breathing, grounding, a screening). Never conversations. */
   tools?: { kind: string; at: number }[];
+  /** The person's corrections to the emotion read. */
+  readCorrections?: ReadCorrection[];
+  /** Daily averages of the eight axes, 90 days. */
+  axesDaily?: AxesDay[];
+  /** "Helped" / "missed" taps under replies, with optional reasons. Feeds the style profile. */
+  replyFeedback?: ReplyFeedback[];
+  /** Times the person logged talking to someone in their life. Timestamps only. */
+  peopleContacts?: { at: number }[];
+  /** Optional age band chosen at onboarding. */
+  ageBand?: "13-17" | "18-24" | "25+";
+  /** Last time the app asked whether to show crisis help (implicit signals). */
+  crisisConfirmAt?: number;
+  /** How often the reply guard had to rewrite, by issue. Counts only, for human review. */
+  guardCounts?: Record<string, number>;
+  /** One-off notes already shown, so they are not repeated. */
+  notices?: { steadierWeek?: string; shorterAt?: number };
 }
 
 export interface Milestone {

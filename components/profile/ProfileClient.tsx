@@ -7,6 +7,7 @@ import type { WeeklyReflection } from "@/lib/reflection";
 import WeekCard from "../reflection/WeekCard";
 import ToolsUsed from "./ToolsUsed";
 import ConsentPanel, { type ConsentView } from "./ConsentPanel";
+import AxesTrend from "./AxesTrend";
 
 interface Props {
   name: string; email: string; lang: string; accounts: boolean; memberSince: string;
@@ -18,6 +19,7 @@ interface Props {
   reflection: WeeklyReflection;
   tools: { kind: string; count: number }[];
   consent: ConsentView;
+  axesWeekly: { label: string; values: (number | null)[] }[];
 }
 
 function Card({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
@@ -77,7 +79,12 @@ export default function ProfileClient(p: Props) {
         <ToolsUsed tools={p.tools} lang={lang} />
         <div className="prow" style={{ marginTop: 18 }}>
           <a className="btn" href="/story">{t("storyLink", lang)} <PxArrow className="pxicon" /></a>
+          <a className="btn" href="/story#memories">{t("knowsTitle", lang)} <PxArrow className="pxicon" /></a>
         </div>
+      </Card>
+
+      <Card title={t("trendTitle", lang)} hint={t("trendHint", lang)}>
+        <AxesTrend series={p.axesWeekly} lang={lang} />
       </Card>
 
       <Card title={t("results", lang)} hint={t("notDiagnosis", lang)}>

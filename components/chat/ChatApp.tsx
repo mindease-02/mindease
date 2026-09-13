@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Orb from "../Orb";
-import { PxMirror, PxMic, PxMicoff, PxSend, PxMenu, PxRemove } from "../home/pixelIcons";
+import { PxMirror, PxMic, PxMicoff, PxSend, PxMenu, PxRemove, PxShield } from "../home/pixelIcons";
 import CrisisCard from "./CrisisCard";
 import MirrorPanel from "./MirrorPanel";
 import Techniques from "./Techniques";
@@ -11,9 +11,12 @@ import ScreeningCard, { type ScreeningResult } from "./ScreeningCard";
 import LivingBackground from "./LivingBackground";
 import ChatDrawer from "./ChatDrawer";
 import ProfileMenu from "./ProfileMenu";
-import ReasonStrip, { type Reason } from "./ReasonStrip";
-import MemoryCard from "./MemoryCard";
+import MirrorCaption, { type Caption } from "./MirrorCaption";
+import MemoryCard, { type MemoryLite } from "./MemoryCard";
 import InsightLine from "./InsightLine";
+import { assessRisk, atLeast } from "@/lib/safety/crisis";
+import { helplinesFor, emergencyFor } from "@/lib/safety/resources";
+import { regionFor } from "@/lib/util/region";
 import { popIn } from "@/lib/motion";
 import type { ScreeningOffer } from "@/lib/screening";
 import { useTypingMetrics } from "../hooks/useTypingMetrics";
@@ -27,7 +30,8 @@ import type { Helpline } from "@/lib/safety/resources";
 import type { ChatSession } from "@/lib/store/types";
 import { greetingFor, languageMeta, scriptOf, t } from "@/lib/i18n";
 
-interface Msg { role: "user" | "assistant"; content: string; at: number; proactive?: boolean; kind?: string; pending?: boolean; reason?: Reason; newMemories?: { id: string; text: string; kind: string }[]; insight?: string }
+interface Msg { role: "user" | "assistant"; content: string; at: number; proactive?: boolean; kind?: string; pending?: boolean; caption?: Caption; brought?: MemoryLite[]; proposed?: MemoryLite[]; insight?: string }
+type CrisisMode = "show" | "confirm" | "open";
 type VoiceStatus = "idle" | "listening" | "thinking" | "speaking";
 
 const POLL_MS = 45_000;
@@ -47,7 +51,11 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
   const [offer, setOffer] = useState<{ reason: string; suggested: TechKind[] } | null>(null);
   const [screening, setScreening] = useState<ScreeningOffer | null>(null);
   const [tech, setTech] = useState<TechKind | null>(null);
-  const [crisis, setCrisis] = useState<{ helplines: Helpline[]; emergency: string } | null>(null);
+  const [crisis, setCrisis] = useState<{ helplines: Helpline[]; emergency: string; mode: CrisisMode } | null>(null);
+  const [notice, setNotice] = useState<"steadier" | "shorter" | null>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const sheetOpen = crisis?.mode === "open";
+  useEffect(() => { if (sheetOpen) sheetRef.current?.focus(); }, [sheetOpen]);
   const [tint, setTint] = useState<{ warm: number; cool: number; dim: number }>({ warm: 0.5, cool: 0.3, dim: 0 });
   const [speak, setSpeak] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -89,6 +97,7 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
       if (j.mirror) setMirror(j.mirror);
       if (Array.isArray(j.sessions)) { setSessions(j.sessions); setCurrentId(j.currentSessionId ?? null); }
       if (typeof j.language === "string" && j.language !== "auto") setLang(j.language);
+      if (j.notice === "steadier" || j.notice === "shorter") setNotice(j.notice);
       if (Array.isArray(j.outbox) && j.outbox.length) {
         setMessages((m) => [...m, ...j.outbox]);
         setPulse((p) => p + 1);
@@ -170,6 +179,12 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
     const at = Date.now();
     setMessages((m) => [...m, { role: "user", content: text, at }, { role: "assistant", content: "", at: at + 1, pending: true }]);
     setSending(true); scroll(); buzz(8);
+    // Explicit crisis language puts help on screen now, before the server has answered.
+    const quick = assessRisk(text);
+    if (atLeast(quick.tier, "active") || (quick.tier === "passive" && !quick.discounted && quick.strength >= 0.7)) {
+      const region = regionFor(tz.current, navigator.language);
+      setCrisis({ helplines: helplinesFor(region, langRef.current), emergency: emergencyFor(region), mode: "show" });
+    }
     try {
       const clientContext = messages.slice(-10).map((m) => ({ role: m.role, content: m.content }));
       const r = await fetch("/api/chat", {
@@ -179,13 +194,14 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
       if (r.status === 401) { router.push("/login"); return false; }
       const j = (await r.json()) as TurnResult & { error?: string };
       if (!r.ok) throw new Error(j.error ?? "something went wrong");
-      // Session-only: the reason strip and the memory cards come from this turn's result and are never re-fetched.
-      const reason: Reason = { states: j.analysis.states.slice(0, 3).map((s) => s.name), need: j.analysis.need, intensity: j.analysis.intensity, used: j.memoriesUsed ?? [], will: j.newMemories ?? [], raised: !!j.riskRaised };
-      setMessages((m) => m.map((x) => x.pending ? { role: "assistant", content: j.reply, at: j.at, reason, newMemories: j.newMemories ?? [], insight: j.insight?.kind } : x));
+      // Session-only: the caption and the memory cards come from this turn's result and are never re-fetched.
+      const caption: Caption = { axes: j.analysis.axes, confidence: j.confidence, states: j.analysis.states.slice(0, 3).map((s) => s.name), need: j.analysis.need, why: j.analysis.why, source: j.analysis.source, used: j.memoriesUsed ?? [], raised: !!j.riskRaised };
+      setMessages((m) => m.map((x) => x.pending ? { role: "assistant", content: j.reply, at: j.at, caption, brought: j.broughtUp ?? [], proposed: [...(j.proposedMemories ?? []), ...(j.newMemories ?? []).map((n) => ({ ...n, kept: true }))], insight: j.insight?.kind } : x));
       setPulse((p) => p + 1); buzz(12);
       typing.onPromptShown();
-      if (j.helplines) setCrisis({ helplines: j.helplines, emergency: j.emergency });
-      else if (crisis && j.risk.tier === "none" && /\b(ok|okay|fine|better|safe)\b/i.test(text)) setCrisis(null);
+      if (j.helplines && j.crisis === "show") setCrisis({ helplines: j.helplines, emergency: j.emergency, mode: "show" });
+      else if (j.helplines && j.crisis === "confirm") setCrisis((c) => c ?? { helplines: j.helplines!, emergency: j.emergency, mode: "confirm" });
+      else if (crisis && crisis.mode !== "open" && j.risk.tier === "none" && /\b(ok|okay|fine|better|safe)\b/i.test(text)) setCrisis(null);
       if (j.techniqueOffer) { setOffer(j.techniqueOffer); setTech(null); } else setOffer(null);
       if (j.screeningOffer) setScreening(j.screeningOffer);
       const a = j.analysis.axes;
@@ -314,9 +330,9 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
     setLang(id);
     await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ language: id }) });
   }
-  async function forget(id: string) {
-    await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ forgetMemoryId: id }) });
-    if (showMirror) refresh(true);
+  function openHelp() {
+    const region = regionFor(tz.current, navigator.language);
+    setCrisis({ helplines: helplinesFor(region, langRef.current), emergency: emergencyFor(region), mode: "open" });
   }
   async function notUseful(m: Msg) {
     await fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ at: m.at, kind: m.kind }) });
@@ -358,6 +374,7 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
           <button onClick={() => voiceMode ? stopVoiceMode() : startVoiceMode()} className={`clay-btn px-3 py-2 text-xs ${voiceMode ? "bg-clay-coral" : ""}`} title={t("voiceChat", lang)}>
             {voiceMode ? <PxMicoff className="pxicon" /> : <PxMic className="pxicon" />} <span className="hidden sm:inline">{voiceMode ? t("endVoice", lang) : t("voiceChat", lang)}</span>
           </button>
+          <button onClick={openHelp} className="clay-btn help-btn px-3 py-2 text-xs" aria-label={t("helpNow", lang)}><PxShield className="pxicon" /> <span className="hidden sm:inline">{t("helpNow", lang)}</span></button>
           <button onClick={() => setShowMirror(true)} className="clay-btn px-3 py-2 text-xs"><PxMirror className="pxicon" /> <span className="hidden sm:inline">{t("mirror", lang)}</span></button>
           <ProfileMenu name={name} email={email} lang={lang} speak={speak} onSpeak={setSpeak} onLanguage={setLanguage} onMirror={() => setShowMirror(true)} onLogout={logout} />
         </div>
@@ -365,6 +382,13 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
 
       <div ref={listRef} className="thin-scroll relative z-[1] flex-1 overflow-y-auto px-4 sm:px-6">
         <div className="mx-auto flex max-w-2xl flex-col gap-3 py-4">
+          {notice && (
+            <p className="chat-notice" role="note">
+              {notice === "steadier" ? t("noteSteadier", lang) : t("noteShorter", lang)}{" "}
+              <a href="/how-it-works">{t("noteWhy", lang)}</a>
+              <button type="button" onClick={() => setNotice(null)} aria-label={t("close", lang)}>×</button>
+            </p>
+          )}
           {messages.map((m, i) => (
             <div key={m.at + ":" + i} className={`animate-rise flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
               <div className={`max-w-[92%] sm:max-w-[85%] whitespace-pre-wrap text-[15px] leading-relaxed ${m.role === "user" ? "bubble-user" : m.proactive ? "bubble-proactive" : "bubble-ai"}`}>
@@ -373,16 +397,17 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
                 {m.proactive && !m.pending && <button onClick={() => notUseful(m)} className="mt-2 block text-[11px] text-clay-muted underline decoration-dotted">{t("notUseful", lang)}</button>}
               </div>
               {m.insight && <InsightLine kind={m.insight} lang={lang} />}
-              {m.newMemories?.map((mem) => <MemoryCard key={mem.id} m={mem} lang={lang} onForget={forget} />)}
-              {m.reason && <ReasonStrip r={m.reason} lang={lang} />}
+              {m.brought?.slice(0, 2).map((mem) => <MemoryCard key={"b" + mem.id} m={mem} lang={lang} mode="brought" />)}
+              {m.proposed?.map((mem) => <MemoryCard key={"p" + mem.id} m={mem} lang={lang} mode={(mem as MemoryLite & { kept?: boolean }).kept ? "kept" : "proposed"} />)}
+              {m.caption && <MirrorCaption c={m.caption} lang={lang} replyAt={m.at} replyLength={m.content.length} />}
             </div>
           ))}
-          {crisis && <CrisisCard helplines={crisis.helplines} emergency={crisis.emergency} lang={lang} />}
+          {crisis && crisis.mode !== "open" && <CrisisCard key={crisis.mode} helplines={crisis.helplines} emergency={crisis.emergency} lang={lang} mode={crisis.mode} onClose={() => setCrisis(null)} />}
           {offer && !tech && <TechniqueOffer lang={lang} reason={offer.reason} suggested={offer.suggested} onPick={(k) => { setTech(k); setOffer(null); }} onDismiss={() => setOffer(null)} />}
           {screening && <ScreeningCard lang={lang} offer={screening} onDismiss={() => setScreening(null)} onDone={(r: ScreeningResult) => {
             setScreening(null);
             setMessages((m) => [...m, { role: "assistant", content: r.message, at: Date.now() }]);
-            if (r.crisis && r.helplines) setCrisis({ helplines: r.helplines as Helpline[], emergency: r.emergency });
+            if (r.crisis && r.helplines) setCrisis({ helplines: r.helplines as Helpline[], emergency: r.emergency, mode: "show" });
             if (speak) say(r.message);
             scroll();
           }} />}
@@ -419,6 +444,11 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
         </p>
       </footer>
 
+      {crisis?.mode === "open" && (
+        <div className="crisis-sheet" role="dialog" aria-modal="true" aria-label={t("helpNow", lang)} tabIndex={-1} ref={sheetRef} onKeyDown={(e) => { if (e.key === "Escape") setCrisis(null); }} onClick={(e) => { if (e.target === e.currentTarget) setCrisis(null); }}>
+          <CrisisCard helplines={crisis.helplines} emergency={crisis.emergency} lang={lang} mode="open" onClose={() => setCrisis(null)} />
+        </div>
+      )}
       <ChatDrawer open={drawer} lang={lang} sessions={sessions} currentId={currentId} onClose={() => setDrawer(false)} onNew={newChat} onPick={pickChat} onDelete={deleteChat} />
       {showMirror && <MirrorPanel lang={lang} mirror={mirror} onClose={() => setShowMirror(false)} onSettings={settings} onLogout={logout} busy={busy} push={push} />}
       {toast && <div className="clay-dark fixed bottom-24 left-1/2 z-40 -translate-x-1/2 px-4 py-2 text-sm">{toast}</div>}
