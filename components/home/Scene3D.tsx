@@ -81,13 +81,13 @@ function makeFrames(n: number, read: number[]): Record<string, Frame> {
 
 const VERT = `
 attribute vec3 posB; attribute vec3 colA; attribute vec3 colB; attribute float sizeA; attribute float sizeB;
-uniform float uMix; uniform float uTime; uniform float uPixel; varying vec3 vCol; varying float vAlpha;
+uniform float uMix; uniform float uTime; uniform float uPixel; uniform float uDim; varying vec3 vCol; varying float vAlpha;
 void main() {
   float m = smoothstep(0.0, 1.0, uMix);
   vec3 p = mix(position, posB, m);
   p += 0.035 * vec3(sin(uTime * 0.7 + p.y * 2.1), cos(uTime * 0.6 + p.x * 1.7), sin(uTime * 0.5 + p.z * 3.0));
   float s = mix(sizeA, sizeB, m);
-  vCol = mix(colA, colB, m); vAlpha = clamp(s, 0.0, 1.0);
+  vCol = mix(colA, colB, m); vAlpha = clamp(s, 0.0, 1.0) * uDim;
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_PointSize = s * uPixel * (10.0 / -mv.z);
   gl_Position = projectionMatrix * mv;
@@ -103,7 +103,7 @@ void main() {
 const ORDER = ["hero", "why", "demo", "start", "details"] as const;
 /** Where the cloud sits per section: to the right of the copy on wide screens, low behind the headline on phones. */
 const OFFSET: Record<string, [number, number]> = { hero: [2.4, 0], why: [2.7, 0.2], demo: [2.4, 0.6], start: [0, 0], details: [0, 0] };
-const OFFSET_PHONE: Record<string, [number, number]> = { hero: [0, -0.9], why: [0, -1.4], demo: [0, 1.2], start: [0, 0], details: [0, 0] };
+const OFFSET_PHONE: Record<string, [number, number]> = { hero: [1.4, -0.3], why: [0.4, -1.5], demo: [0, 1.3], start: [0, 0], details: [0, 0] };
 
 export default function Scene3D() {
   const host = useRef<HTMLDivElement>(null);
@@ -133,7 +133,7 @@ export default function Scene3D() {
     geo.setAttribute("colB", attr(frames.why.col.slice(), 3));
     geo.setAttribute("sizeA", attr(frames.hero.size.slice(), 1));
     geo.setAttribute("sizeB", attr(frames.why.size.slice(), 1));
-    const mat = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { uMix: { value: 0 }, uTime: { value: 0 }, uPixel: { value: renderer.getPixelRatio() * (phone ? 2.2 : 2.8) } } });
+    const mat = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { uMix: { value: 0 }, uTime: { value: 0 }, uPixel: { value: renderer.getPixelRatio() * (phone ? 2.2 : 2.8) }, uDim: { value: phone ? 0.62 : 1 } } });
     const points = new THREE.Points(geo, mat); scene.add(points);
 
     let segA = "hero", segB = "why";
