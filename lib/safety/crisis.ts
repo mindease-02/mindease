@@ -106,14 +106,25 @@ const PATTERNS: [RiskTier, RegExp, number, string][] = [
 
   // Tamil and Hindi, script and common romanisations. Word boundaries do not apply to these scripts, so the
   // phrases are specific on purpose; the model's second opinion covers what a list cannot.
-  ["active", /தற்கொலை|செத்து ?விடலாம்|செத்துடலாம்|சாக ?(வேணும்|வேண்டும்|ணும்)|உயிரை ?மாய்த்து|என்னை ?(முடிச்சு|முடித்து)க்/u, 0.85, "active ideation (Tamil)"],
-  ["passive", /வாழ ?(விருப்பம் ?இல்லை|வேண்டாம்|ணும்னு ?தோணல)|இருக்கவே ?வேண்டாம்|நான் ?இல்லாம ?இருந்தா|எல்லாம் ?வீண்/u, 0.7, "passive ideation (Tamil)"],
-  ["active", /\b(tharkolai|saaganum|saaganum|sethudalam|sethu ?dalam|uyira ?mai)/i, 0.8, "active ideation (Tanglish)"],
-  ["passive", /\b(vaazha ?(virupam ?illa|vendam)|irukave ?vendam)/i, 0.65, "passive ideation (Tanglish)"],
-  ["active", /आत्महत्या|मरना ?चाहत|मर ?जाना ?चाहत|खुद ?को ?(खत्म|मार)|जान ?दे ?द(ूँ|ूं|ो)|ज़िंदगी ?खत्म ?कर/u, 0.85, "active ideation (Hindi)"],
-  ["passive", /जीना ?नहीं ?चाहत|जीने ?का ?मन ?नहीं|काश ?मैं ?(मर|न ?होत)|मैं ?न ?रह(ूँ|ूं)|सब ?बेकार ?है/u, 0.7, "passive ideation (Hindi)"],
-  ["active", /\b(marna ?chahta|mar ?jana ?chahta|khud ?ko ?khatam|jaan ?de ?d(u|oon))/i, 0.8, "active ideation (Hinglish)"],
-  ["passive", /\b(jeena ?nahi ?chaht|jeene ?ka ?man ?nahi)/i, 0.65, "passive ideation (Hinglish)"],
+  // Tamil script.
+  ["plan", /மாத்திரை.{0,20}(சேர்த்து|சேகரி|சேத்து)|(இன்னைக்கு|இன்னிக்கு|இன்று|இன்னைக்கி) ?(ராத்திரி|இரவு|நைட்).{0,20}(முடிஞ்சிடும்|முடிந்துவிடும்|முடியும்|முடிஞ்சிரும்)/u, 0.9, "means or a time (Tamil)"],
+  ["active", /தற்கொலை|செத்து ?விடலாம்|செத்துடலாம்|சாக ?(வேணும்|வேண்டும்|ணும்)|உயிரை ?மாய்த்து|என்னை ?(முடிச்சு|முடித்து)க்|எல்லாத்தையும் ?முடி(ச்சு|த்து)க்?(கலாம்|கிடலாம்)|எல்லாம் ?முடிச்சுக்கலாம்/u, 0.85, "active ideation (Tamil)"],
+  ["passive", /வாழ ?(விருப்பம் ?இல்லை|வேண்டாம்|ணும்னு ?தோணல|பிடிக்கல)|இருக்கவே ?வேண்டாம்|நான் ?இல்லாம ?இருந்தா|எல்லாம் ?வீண்|யாருக்கும் ?தேவை ?இல்ல|நான் ?(ஒரு ?)?(பாரம்|சுமை)/u, 0.7, "passive ideation (Tamil)"],
+  // Tanglish (Tamil in Latin letters). Spellings vary, so the stems are loose on purpose.
+  ["plan", /\bma[at]h?t?h?irai\w*.{0,14}(serthu|sethu ?vach|sekar)|\b(innai?kk?u|innikk?u|inniki|today|tonight) ?(night|raa?thiri|ravu)?[^.?!]{0,20}\bellam ?mudinj/i, 0.9, "means or a time (Tanglish)"],
+  ["active", /\b(tharkolai|saaganum|sethudalam|sethu ?dalam|uyira ?mai|ella(th|dh)\w* ?mudi(chu|chi|chi)\w* ?(nu|n) ?(irukku|iruku|thonuthu|thonudhu|thonum))/i, 0.8, "active ideation (Tanglish)"],
+  ["passive", /\b(vaazha? ?(virupam ?illa|vendam|pidikk?ala|pidikk?alai)|irukave ?vendam|naan? ?illa(ma|mal|mai) ?irundha|naan? ?(oru ?)?(bharam|baaram|paaram|sumai)|ya+ru?kk?um ?(thevai|theva) ?illa)/i, 0.65, "passive ideation (Tanglish)"],
+  // Hindi script.
+  ["plan", /(गोलियाँ|गोलियां|गोलियों|गोली|दवाइयाँ|दवाइयां|दवाई|दवा).{0,16}(इकट्ठ|इकठ्ठ|जमा)|आज ?रात.{0,16}(खत्म|ख़त्म) ?कर ?(दूँगा|दूंगा|दूँगी|दूंगी|लूँगा|लूंगा|लूँगी|लूंगी)/u, 0.9, "means or a time (Hindi)"],
+  ["active", /आत्महत्या|मरना ?चाहत|मर ?जाना ?चाहत|खुद ?को ?(खत्म|ख़त्म|मार)|जान ?दे ?द(ूँ|ूं|ो)|ज़िंदगी ?खत्म ?कर|सब ?(कुछ ?)?(खत्म|ख़त्म) ?कर ?(दूँगा|दूंगा|दूँगी|दूंगी|लूँगा|लूंगा|लूँगी|लूंगी)|मैं ?(अब|कल ?से) ?नहीं ?रह(ूँगा|ूंगा|ूँगी|ूंगी)|(अब|कल ?से) ?मैं ?नहीं ?रह(ूँगा|ूंगा|ूँगी|ूंगी)/u, 0.85, "active ideation (Hindi)"],
+  ["passive", /जीना ?नहीं ?चाहत|जीने ?का ?मन ?नहीं|काश ?मैं ?(मर|न ?होत)|पैदा ?(ही ?)?(न|ना|नहीं) ?हु(आ|ई) ?होत|मैं ?न ?रह(ूँ|ूं)|सब ?बेकार ?है|मेरे ?बिना ?(सब ?)?(बेहतर|अच्छ|खुश)|(सब|सबको|लोग) ?मेरे ?बिना|बोझ ?(हूँ|हूं)|मैं ?(एक ?)?बोझ/u, 0.7, "passive ideation (Hindi)"],
+  // Hinglish (Hindi in Latin letters).
+  ["plan", /\b(goliy(an|aan|on)|goli|dawai(yan|yaan)?|tablets?|pills)\b.{0,16}(ikatth|ikath|jama|collect)|\b(aaj ?raat|tonight)\b[^.?!]{0,16}\bkhat?am ?kar ?(d|l)(unga|ungi|oonga|oongi)|\bkhat?am ?kar ?(d|l)(unga|ungi|oonga|oongi)\b[^.?!]{0,16}\b(tonight|aaj ?raat)\b/i, 0.9, "means or a time (Hinglish)"],
+  ["active", /\b(marna ?chaht|mar ?jana ?chaht|khud ?ko ?khat?am|jaan ?de ?d(u|oon)|sab ?(kuch ?)?khat?am ?kar ?(d|l)(unga|ungi|oonga|oongi)|(main|mai|mein) ?(ab|kal ?se) ?nah?i ?rah(unga|ungi|oonga|oongi)|(ab|kal ?se) ?(main|mai|mein) ?nah?i ?rah(unga|ungi|oonga|oongi))/i, 0.8, "active ideation (Hinglish)"],
+  ["passive", /\b(jeena ?nah?i ?chaht|jeene ?ka ?mann? ?nah?i|kaash? ?(main|mai|mein) ?paida ?(hi ?)?(na|nah?i|nhi) ?hu(a|i)|mere ?bina ?(sab ?)?(better|behtar|khush|acch)|(sab|sabko|log) ?mere ?bina|(main|mai|mein) ?(sab ?ke ?liye ?|sabke ?liye ?|sab ?pe ?|sab ?par ?)?(ek ?)?bojh|bojh ?(hoon|hun|hu))/i, 0.65, "passive ideation (Hinglish)"],
+  // Telugu, Kannada and Malayalam: the plainest phrasings only; the model's second opinion covers the rest.
+  ["active", /ఆత్మహత్య|చనిపోవాలని|చచ్చిపోవాలని|ಆತ್ಮಹತ್ಯೆ|ಸಾಯಬೇಕು|ಸಾಯಬೇಕೆಂದು|ആത്മഹത്യ|മരിക്കണം|മരിക്കാൻ ?തോന്ന/u, 0.85, "active ideation (Telugu, Kannada or Malayalam)"],
+  ["passive", /బతకాలని ?లేదు|జీవించాలని ?లేదు|ಬದುಕಲು ?ಇಷ್ಟವಿಲ್ಲ|ಬದುಕೋಕೆ ?ಇಷ್ಟ ?ಇಲ್ಲ|ജീവിക്കാൻ ?തോന്നുന്നില്ല|ജീവിക്കണ്ട/u, 0.7, "passive ideation (Telugu, Kannada or Malayalam)"],
   ["distress", /\b(i\s+)?(have|haven'?t|hasn'?t|not)\s+(not\s+)?(slept|eaten)\s+(properly\s+)?(in|for|since)\s+\w+(\s+days?)?\b/i, 0.5, "basic needs unmet"],
 ];
 

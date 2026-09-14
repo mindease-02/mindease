@@ -19,7 +19,7 @@ function Status({ hours, lang }: { hours: Helpline["hours"]; lang: string }) {
  * supplies a number. "confirm" asks first (implicit signals); "show" and
  * "open" (the Help button) put everything on screen at once.
  */
-export default function CrisisCard({ helplines, emergency, lang = "en", mode = "show", onClose }: { helplines: Helpline[]; emergency: string; lang?: string; mode?: "show" | "confirm" | "open"; onClose?: () => void }) {
+export default function CrisisCard({ helplines, emergency, lang = "en", mode = "show", onClose, headingLevel = 3 }: { helplines: Helpline[]; emergency: string; lang?: string; mode?: "show" | "confirm" | "open"; onClose?: () => void; headingLevel?: 2 | 3 }) {
   const [asked, setAsked] = useState(mode !== "confirm");
   const [situations, setSituations] = useState(false);
   const local = helplines.filter((h) => h.region !== "*");
@@ -41,7 +41,7 @@ export default function CrisisCard({ helplines, emergency, lang = "en", mode = "
   return (
     <div className="crisis" role="region" aria-label={t("crisisEyebrow", lang)}>
       <div className="crisis-head">
-        <h3>{t("crisisEyebrow", lang)}</h3>
+        {headingLevel === 2 ? <h2>{t("crisisEyebrow", lang)}</h2> : <h3>{t("crisisEyebrow", lang)}</h3>}
         {mode === "open" && onClose && <button type="button" className="crisis-link" onClick={onClose}>{t("close", lang)}</button>}
       </div>
       <p className="crisis-p">{t("crisisP", lang, { emergency })}</p>

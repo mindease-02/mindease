@@ -178,7 +178,7 @@ body:has(> .world) { background: var(--bg, #07080b); }
 /* Footer */
 .world footer { position: relative; z-index: 1; padding: 56px 0 40px; border-top: 1px solid var(--line); }
 .world .foot { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; }
-.world .foot h5 { margin: 0 0 12px; font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; }
+.world .foot h5, .world .foot .foot-h { margin: 0 0 12px; font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; }
 .world .foot a { display: block; color: var(--ink-2); text-decoration: none; padding: 4px 0; font-size: .95rem; transition: color .3s; }
 .world .foot a:hover { color: var(--ink); }
 .world .foot-bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: .8rem; }
@@ -501,7 +501,7 @@ body:has(> .world) { background: var(--bg, #07080b); }
 .world .sec-head h2, .world .cta h2, .world .feat h3, .world .story blockquote { font-size: clamp(1.15rem, 2.8vw, 2.1rem); line-height: 1.4; }
 .world .story blockquote em { font-style: normal; }
 .world .theme-frame .label .emotion { font-family: var(--font-display), "Iowan Old Style", Georgia, serif; font-size: clamp(1rem, 2vw, 1.4rem); }
-.world h3, .world h4, .world h5, .world .btn, .world .clay-btn, .world .clay-btn-primary, .world .eyebrow, .world .steps-ind, .world .nav-links a, .world .label, .world .chip-mem .k, .world .t-tab, .world .offer-opt b, .world .mood b .k, .world .device-head, .world .device-foot .ctl, .world .foot h5, .world .gate b { font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif; letter-spacing: .04em; }
+.world h3, .world h4, .world h5, .world .btn, .world .clay-btn, .world .clay-btn-primary, .world .eyebrow, .world .steps-ind, .world .nav-links a, .world .label, .world .chip-mem .k, .world .t-tab, .world .offer-opt b, .world .mood b .k, .world .device-head, .world .device-foot .ctl, .world .foot h5, .world .foot .foot-h, .world .gate b { font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif; letter-spacing: .04em; }
 .world .eyebrow { font-size: .62rem; letter-spacing: .18em; }
 .world .btn, .world .clay-btn, .world .clay-btn-primary { font-size: .78rem; text-transform: uppercase; }
 .world p, .world li, .world .lede, .world .muted { font-size: 1.05rem; line-height: 1.6; font-weight: 400; }
@@ -1174,14 +1174,14 @@ html { scroll-behavior: smooth; }
 }
 
 /* Sentence case everywhere: no tracked all-caps labels. */
-.world .eyebrow, .world .steps-ind, .world .foot h5, .world .drawer-label, .world .chip-mem .k, .world .msg .k,
+.world .eyebrow, .world .steps-ind, .world .foot h5, .world .foot .foot-h, .world .drawer-label, .world .chip-mem .k, .world .msg .k,
 .world .nav-signout, .world .story .frame .label, .world .sheet-table th, .world.chat-world .clay-sm h3,
 .world.chat-world .t-ring span, .world .btn, .world .clay-btn, .world .clay-btn-primary, .world.chat-world aside nav button,
 .world.chat-world .offer-opt, .world.chat-world .t-tab, .world.chat-world .clay-chip, .world .sticker {
   text-transform: none !important; letter-spacing: 0 !important;
 }
 .world .eyebrow, .world .steps-ind { font-size: .85rem; }
-.world .foot h5, .world .drawer-label, .world .chip-mem .k { font-size: .82rem; }
+.world .foot h5, .world .foot .foot-h, .world .drawer-label, .world .chip-mem .k { font-size: .82rem; }
 .world.chat-world .clay-sm h3 { font-size: .92rem; color: var(--ink); font-weight: 600; }
 .world .chat-sub-link { margin-left: 8px; }
 .world .foot-bottom span + span { margin-left: 0; }

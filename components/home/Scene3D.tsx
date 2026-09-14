@@ -16,7 +16,13 @@ import * as THREE from "three";
  *
  * The pointer tilts the camera a little. On phones the count is lower and the
  * pixel ratio is capped; with reduced motion the scene is drawn once, still.
+ *
+ * A governor watches the frame time. When frames stay slow it steps the scene
+ * down: half the particles at 1x pixels, then a quarter, then still (drawn
+ * only when the scroll position changes). Weak phones start one step down.
+ * The current step is on the host as data-quality so it can be checked.
  */
+const QUALITY = ["full", "half", "quarter", "still"] as const;
 const AXES = ["joy", "trust", "fear", "surprise", "sadness", "disgust", "anger", "anticipation"] as const;
 const AXIS_COLORS = ["#f2c572", "#8fcf9a", "#b9a6e0", "#7fd0e0", "#8fb3e8", "#a9bd72", "#f0876a", "#e8a0bf"];
 const TEAL = new THREE.Color("#7fd0e0"), CORAL = new THREE.Color("#f0876a"), INK = new THREE.Color("#9a9aa3");
@@ -159,6 +165,31 @@ export default function Scene3D() {
     const mat = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { uMix: { value: 0 }, uTime: { value: 0 }, uPixel: { value: renderer.getPixelRatio() * (phone ? 2.2 : 2.8) }, uDim: { value: phone ? 0.62 : 1 }, uOrbit: { value: 0 }, uRx: { value: ringRx }, uRy: { value: ringRy }, uWave: { value: 0 } } });
     const points = new THREE.Points(geo, mat); scene.add(points);
 
+    // Quality governor. Weak phones (few cores, little memory, data saver) start one step down.
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    const weak = phone && ((nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4);
+    let level = nav.connection?.saveData ? 2 : weak ? 1 : 0;
+    let still = false;
+    const applyQuality = () => {
+      still = level >= 3;
+      const share = level === 0 ? 1 : level === 1 ? 0.5 : 0.28;
+      geo.setDrawRange(0, Math.floor(n * share));
+      const dpr = level === 0 ? Math.min(window.devicePixelRatio, phone ? 1.5 : 2) : 1;
+      renderer.setPixelRatio(dpr); renderer.setSize(el.clientWidth, el.clientHeight);
+      // Fewer points draw a little larger so the shapes keep their density.
+      mat.uniforms.uPixel.value = dpr * (phone ? 2.2 : 2.8) * (level ? 1.3 : 1);
+      el.dataset.quality = QUALITY[level];
+    };
+    applyQuality();
+    let warm = 0, slowRun = 0, avg = 16;
+    const govern = (dt: number) => {
+      if (level >= 3) return;
+      if (warm < 90) { warm++; return; } // let shaders compile and the first frames settle
+      avg += (dt * 1000 - avg) * 0.1;
+      slowRun = avg > 34 ? slowRun + 1 : 0; // under ~30 fps
+      if (slowRun >= 45) { level++; slowRun = 0; warm = 30; avg = 16; applyQuality(); }
+    };
+
     let segA = "hero", segB = "why";
     const load = (a: string, b: string) => {
       if (a === segA && b === segB) return; segA = a; segB = b;
@@ -190,6 +221,7 @@ export default function Scene3D() {
       tox = a[0] + (b[0] - a[0]) * t; toy = a[1] + (b[1] - a[1]) * t;
       const ra = ROT[ORDER[i]], rb = ROT[ORDER[i + 1]];
       tRotX = ra[0] + (rb[0] - ra[0]) * t; tRotY = ra[1] + (rb[1] - ra[1]) * t;
+      if (still && !pending && visible) { pending = true; raf = requestAnimationFrame(tick); }
     };
     const onPointer = (e: PointerEvent) => { px = (e.clientX / window.innerWidth - 0.5) * 0.35; py = (e.clientY / window.innerHeight - 0.5) * 0.25; };
     const onRead = (e: Event) => {
@@ -200,22 +232,26 @@ export default function Scene3D() {
     };
     const onResize = () => { renderer.setSize(el.clientWidth, el.clientHeight); camera.aspect = el.clientWidth / el.clientHeight; camera.updateProjectionMatrix(); anchors = tops(); onScroll(); };
 
-    let raf = 0, last = performance.now(), visible = true;
+    let raf = 0, last = performance.now(), visible = true, pending = false;
     const tick = (now: number) => {
+      pending = false;
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      if (!reduced) govern(dt);
+      if (still) { mix = targetMix; rotX = tRotX; rotY = tRotY; ox = tox; oy = toy; }
       mix += (targetMix - mix) * Math.min(1, dt * 6);
       rotY += (tRotY + px - rotY) * Math.min(1, dt * 3); rotX += (tRotX + py - rotX) * Math.min(1, dt * 3);
       points.rotation.set(rotX, rotY, 0);
       ox += (tox - ox) * Math.min(1, dt * 4); oy += (toy - oy) * Math.min(1, dt * 4);
       points.position.set(ox, oy, 0);
-      mat.uniforms.uMix.value = mix; mat.uniforms.uTime.value = reduced ? 0 : now / 1000;
+      const frozen = reduced || still;
+      mat.uniforms.uMix.value = mix; mat.uniforms.uTime.value = frozen ? 0 : now / 1000;
       const w = (id: string) => (segB === id ? mix : segA === id ? 1 - mix : 0);
-      mat.uniforms.uOrbit.value = reduced ? 0 : w("start");
-      mat.uniforms.uWave.value = reduced ? 0 : w("details") + (segA === "details" && segB === "details" ? 1 : 0);
+      mat.uniforms.uOrbit.value = frozen ? 0 : w("start");
+      mat.uniforms.uWave.value = frozen ? 0 : w("details") + (segA === "details" && segB === "details" ? 1 : 0);
       renderer.render(scene, camera);
-      if (!reduced && visible) raf = requestAnimationFrame(tick);
+      if (!frozen && visible) raf = requestAnimationFrame(tick);
     };
-    const onVis = () => { visible = !document.hidden; if (visible && !reduced) { last = performance.now(); raf = requestAnimationFrame(tick); } };
+    const onVis = () => { visible = !document.hidden; if (visible && !reduced && !still) { last = performance.now(); raf = requestAnimationFrame(tick); } };
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);

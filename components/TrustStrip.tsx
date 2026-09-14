@@ -7,8 +7,10 @@ import { t } from "@/lib/i18n";
 export default function TrustStrip({ lang, className = "" }: { lang: string; className?: string }) {
   const line = t("trustLine", lang);
   const parts = line.split(/(14416|112)/);
+  // Inside the landing header it sits in the banner landmark; elsewhere it is its own.
+  const inNav = className.includes("in-nav");
   return (
-    <div className={`trust-strip ${className}`} role="note">
+    <div className={`trust-strip ${className}`} role={inNav ? "note" : "complementary"} aria-label={inNav ? undefined : t("helpNow", lang)}>
       <span>
         {parts.map((p, i) => p === "14416" || p === "112"
           ? <a key={i} href={`tel:${p}`}>{p}</a>

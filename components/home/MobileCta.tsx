@@ -13,5 +13,5 @@ export default function MobileCta({ href, label = "Start talking" }: { href: str
     io.observe(end); if (top) io.observe(top);
     return () => io.disconnect();
   }, []);
-  return <a href={href} className={`mobile-cta btn-primary ${off ? "off" : ""}`} aria-hidden={off}>{label} <PxArrow className="pxicon" /></a>;
+  return <a href={href} className={`mobile-cta btn-primary ${off ? "off" : ""}`} aria-hidden={off} tabIndex={off ? -1 : 0}>{label} <PxArrow className="pxicon" /></a>;
 }

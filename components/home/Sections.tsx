@@ -235,9 +235,9 @@ export function Footer({ lang }: L) {
             <div className="display" style={{ fontSize: "1.6rem" }}>MindEase</div>
             <p className="muted" style={{ maxWidth: "24rem", fontWeight: 300, lineHeight: 1.6, marginTop: 10 }}>{t("footBlurb", lang)}</p>
           </div>
-          <div><h5>{t("product", lang)}</h5><a href="#why">{t("navWhy", lang)}</a><a href="#demo">{t("seeIt", lang)}</a><a href="#start">{t("navStart", lang)}</a><a href="#details">{t("navDetails", lang)}</a></div>
-          <div><h5>{t("crisisLines", lang)}</h5><a href="tel:14416">Tele-MANAS 14416</a><a href="tel:+917893078930">1Life +91 78930 78930</a><a href="tel:+919999666555">Vandrevala +91 9999 666 555</a><a href="tel:112">Emergency 112</a></div>
-          <div><h5>{t("hwTitle", lang)}</h5><a href="/how-it-works">{t("hwTitle", lang)}</a><a href="/help">{t("helpNow", lang)}</a><a href="https://github.com/mindease-02/mindease" target="_blank" rel="noreferrer">{t("source", lang)}</a><Link href="/login">{t("signIn", lang)}</Link></div>
+          <div><p className="foot-h">{t("product", lang)}</p><a href="#why">{t("navWhy", lang)}</a><a href="#demo">{t("seeIt", lang)}</a><a href="#start">{t("navStart", lang)}</a><a href="#details">{t("navDetails", lang)}</a></div>
+          <div><p className="foot-h">{t("crisisLines", lang)}</p><a href="tel:14416">Tele-MANAS 14416</a><a href="tel:+917893078930">1Life +91 78930 78930</a><a href="tel:+919999666555">Vandrevala +91 9999 666 555</a><a href="tel:112">Emergency 112</a></div>
+          <div><p className="foot-h">{t("hwTitle", lang)}</p><a href="/how-it-works">{t("hwTitle", lang)}</a><a href="/help">{t("helpNow", lang)}</a><a href="https://github.com/mindease-02/mindease" target="_blank" rel="noreferrer">{t("source", lang)}</a><Link href="/login">{t("signIn", lang)}</Link></div>
         </div>
         <div className="foot-bottom" data-reveal><span>© {new Date().getFullYear()} MindEase</span><span>{t("icons", lang)}: <a href="https://lucide.dev" target="_blank" rel="noreferrer" style={{ display: "inline" }}>Lucide</a> (ISC)</span><span>{t("footNot", lang)}</span></div>
       </Reveal>

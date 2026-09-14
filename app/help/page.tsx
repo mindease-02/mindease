@@ -33,7 +33,7 @@ export default async function HelpPage() {
       <main className="container help-page" id="main">
         <h1 className="display">{t("helpTitle", lang)}</h1>
         <p className="muted help-sub">{known || country === "IN" ? t("helpSub", lang) : t("helpOutside", lang)}</p>
-        <CrisisCard helplines={helplinesFor(region, lang)} emergency={emergencyFor(region)} lang={lang} mode="show" />
+        <CrisisCard helplines={helplinesFor(region, lang)} emergency={emergencyFor(region)} lang={lang} mode="show" headingLevel={2} />
         <p className="muted help-foot">{t("helpVerified", lang)} <Link href="/how-it-works#crisis">{t("noteWhy", lang)}</Link></p>
       </main>
     </div>

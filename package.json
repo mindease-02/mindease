@@ -12,8 +12,10 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "eval": "node --env-file-if-exists=.env.local --import tsx evals/run-eval.mts",
     "eval:language": "node --env-file-if-exists=.env.local --import tsx evals/run-language.mts",
-    "gate": "npm test && npm run eval && npm run eval:language",
-    "prebuild": "npm test"
+    "gate": "npm test && npm run eval:crisis-langs && npm run eval && npm run eval:language",
+    "prebuild": "npm run offline-help && npm test",
+    "eval:crisis-langs": "node --import tsx evals/run-crisis-langs.mts",
+    "offline-help": "node --import tsx scripts/offline-help.mts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

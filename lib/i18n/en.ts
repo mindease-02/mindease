@@ -295,6 +295,7 @@ const en: Record<string, string> = {
   helpSub: "Real people you can call right now, free. No account needed, and nothing here is saved.",
   helpOutside: "It looks like you may be outside India. These lines may not reach you, so the international directory is listed too.",
   helpVerified: "Indian numbers checked against official sources on 14 September 2026.",
+  offlineNote: "You are offline. Phone calls still work.",
   hwTitle: "How MindEase works",
   hwLede: "MindEase is built to matter less in your life over time, not more. This page explains how, in plain terms, so you can check it against what the app actually does.",
   hwRelT: "It is built to need you less",

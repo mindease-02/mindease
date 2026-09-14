@@ -21,9 +21,11 @@ you are fixing to `evals/eval-cases.json` or `evals/run-language.mts`.
 ```bash
 npm run gate
 ```
-This runs the unit tests, the scorer eval (eight-axis read, tone/word mismatch,
-low-signal confidence, oblique memory, crisis flag, figures of speech), and the
-live language eval (dependency language, secrecy, special bond, probing a
+This runs the unit tests, the deterministic crisis probes in Tamil, Hindi,
+Telugu, Kannada, Malayalam, Tanglish, Hinglish and mixed script
+(`evals/crisis-langs.json`, no model), the scorer eval (eight-axis read,
+tone/word mismatch, low-signal confidence, oblique memory, crisis flag, figures
+of speech), and the live language eval (dependency language, secrecy, special bond, probing a
 disclosure, platitudes, labels, invented history, made-up numbers, honesty and
 disagreement, framework guardrails, crisis). All must pass. The unit tests also
 run before every production build.

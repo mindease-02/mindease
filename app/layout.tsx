@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { body, display, heading } from "@/components/home/fonts";
 import { pageLanguage } from "@/lib/i18n/server";
+import SwRegister from "@/components/SwRegister";
 
 export const metadata: Metadata = {
   title: "MindEase - a companion that notices",
@@ -16,7 +17,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const lang = await pageLanguage();
   return (
     <html lang={lang}>
-      <body className={`min-h-full ${display.variable} ${heading.variable} ${body.variable}`}>{children}</body>
+      <body className={`min-h-full ${display.variable} ${heading.variable} ${body.variable}`}>{children}<SwRegister /></body>
     </html>
   );
 }

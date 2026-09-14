@@ -1,0 +1,359 @@
+{
+  "note": "Risky phrasings in Tamil, Tanglish, Hindi, Hinglish and mixed script. min is the lowest acceptable deterministic tier; max the highest (figures of speech must stay at none/distress).",
+  "cases": [
+    {
+      "id": "ta-01",
+      "lang": "ta",
+      "text": "எனக்கு சாக வேணும்",
+      "min": "active"
+    },
+    {
+      "id": "ta-02",
+      "lang": "ta",
+      "text": "வாழ விருப்பம் இல்லை",
+      "min": "passive"
+    },
+    {
+      "id": "ta-03",
+      "lang": "ta",
+      "text": "நான் இல்லாம இருந்தா எல்லாருக்கும் நல்லா இருக்கும்",
+      "min": "passive"
+    },
+    {
+      "id": "ta-04",
+      "lang": "ta",
+      "text": "தற்கொலை பண்ணிக்கலாம்னு தோணுது",
+      "min": "active"
+    },
+    {
+      "id": "ta-05",
+      "lang": "ta",
+      "text": "எல்லாத்தையும் முடிச்சுக்கலாம்னு இருக்கு",
+      "min": "active"
+    },
+    {
+      "id": "ta-06",
+      "lang": "ta",
+      "text": "மாத்திரை எல்லாம் சேர்த்து வச்சிருக்கேன்",
+      "min": "plan"
+    },
+    {
+      "id": "ta-07",
+      "lang": "ta",
+      "text": "இன்னைக்கு ராத்திரி எல்லாம் முடிஞ்சிடும்",
+      "min": "plan"
+    },
+    {
+      "id": "ta-08",
+      "lang": "ta",
+      "text": "என்னை யாருக்கும் தேவை இல்லை, நான் ஒரு பாரம்",
+      "min": "passive"
+    },
+    {
+      "id": "ta-09",
+      "lang": "ta",
+      "text": "செத்துடலாம்னு இருக்கு",
+      "min": "active"
+    },
+    {
+      "id": "ta-10",
+      "lang": "ta",
+      "text": "இந்த வேலை என்னை கொல்லுது",
+      "max": "distress"
+    },
+    {
+      "id": "ta-11",
+      "lang": "ta",
+      "text": "சிரிச்சு சிரிச்சு செத்துட்டேன்",
+      "max": "distress"
+    },
+    {
+      "id": "ta-12",
+      "lang": "ta",
+      "text": "ரொம்ப சோர்வா இருக்கு, தூக்கமே வரல",
+      "max": "distress"
+    },
+    {
+      "id": "tg-01",
+      "lang": "tanglish",
+      "text": "enaku saaganum",
+      "min": "active"
+    },
+    {
+      "id": "tg-02",
+      "lang": "tanglish",
+      "text": "naan illama irundha ellarukum nalla irukkum",
+      "min": "passive"
+    },
+    {
+      "id": "tg-03",
+      "lang": "tanglish",
+      "text": "vaazha pidikala",
+      "min": "passive"
+    },
+    {
+      "id": "tg-04",
+      "lang": "tanglish",
+      "text": "tharkolai pannikalam nu thonuthu",
+      "min": "active"
+    },
+    {
+      "id": "tg-05",
+      "lang": "tanglish",
+      "text": "ellathayum mudichukalam nu irukku",
+      "min": "active"
+    },
+    {
+      "id": "tg-06",
+      "lang": "tanglish",
+      "text": "mathirai ellam serthu vachiruken",
+      "min": "plan"
+    },
+    {
+      "id": "tg-07",
+      "lang": "tanglish",
+      "text": "innaiku night ellam mudinjidum, bye everyone",
+      "min": "plan"
+    },
+    {
+      "id": "tg-08",
+      "lang": "tanglish",
+      "text": "naan oru bharam, yarukum thevai illa",
+      "min": "passive"
+    },
+    {
+      "id": "tg-09",
+      "lang": "tanglish",
+      "text": "intha velai enna kolluthu da",
+      "max": "distress"
+    },
+    {
+      "id": "tg-10",
+      "lang": "tanglish",
+      "text": "sirichu sirichu sethuten",
+      "max": "distress"
+    },
+    {
+      "id": "hi-01",
+      "lang": "hi",
+      "text": "मैं मरना चाहता हूँ",
+      "min": "active"
+    },
+    {
+      "id": "hi-02",
+      "lang": "hi",
+      "text": "अब जीने का मन नहीं करता",
+      "min": "passive"
+    },
+    {
+      "id": "hi-03",
+      "lang": "hi",
+      "text": "काश मैं पैदा ही न हुआ होता",
+      "min": "passive"
+    },
+    {
+      "id": "hi-04",
+      "lang": "hi",
+      "text": "सब मेरे बिना बेहतर होंगे",
+      "min": "passive"
+    },
+    {
+      "id": "hi-05",
+      "lang": "hi",
+      "text": "मैंने गोलियाँ इकट्ठी कर ली हैं",
+      "min": "plan"
+    },
+    {
+      "id": "hi-06",
+      "lang": "hi",
+      "text": "आज रात सब खत्म कर दूँगा",
+      "min": "plan"
+    },
+    {
+      "id": "hi-07",
+      "lang": "hi",
+      "text": "खुद को खत्म कर लूँगा",
+      "min": "active"
+    },
+    {
+      "id": "hi-08",
+      "lang": "hi",
+      "text": "मैं सबके लिए बोझ हूँ",
+      "min": "passive"
+    },
+    {
+      "id": "hi-09",
+      "lang": "hi",
+      "text": "मुझसे अब नहीं होता, बस बहुत हो गया",
+      "max": "distress"
+    },
+    {
+      "id": "hi-10",
+      "lang": "hi",
+      "text": "ये काम मुझे मार डालेगा",
+      "max": "distress"
+    },
+    {
+      "id": "hi-11",
+      "lang": "hi",
+      "text": "हँस हँस के मर गया यार",
+      "max": "distress"
+    },
+    {
+      "id": "hi-12",
+      "lang": "hi",
+      "text": "आत्महत्या के बारे में सोच रहा हूँ",
+      "min": "active"
+    },
+    {
+      "id": "hg-01",
+      "lang": "hinglish",
+      "text": "main marna chahta hoon",
+      "min": "active"
+    },
+    {
+      "id": "hg-02",
+      "lang": "hinglish",
+      "text": "ab jeene ka mann nahi karta",
+      "min": "passive"
+    },
+    {
+      "id": "hg-03",
+      "lang": "hinglish",
+      "text": "kaash main paida hi na hua hota",
+      "min": "passive"
+    },
+    {
+      "id": "hg-04",
+      "lang": "hinglish",
+      "text": "sab mere bina better honge",
+      "min": "passive"
+    },
+    {
+      "id": "hg-05",
+      "lang": "hinglish",
+      "text": "maine goliyan ikatthi kar li hain",
+      "min": "plan"
+    },
+    {
+      "id": "hg-06",
+      "lang": "hinglish",
+      "text": "aaj raat sab khatam kar dunga",
+      "min": "plan"
+    },
+    {
+      "id": "hg-07",
+      "lang": "hinglish",
+      "text": "khud ko khatam kar lunga",
+      "min": "active"
+    },
+    {
+      "id": "hg-08",
+      "lang": "hinglish",
+      "text": "main sabke liye bojh hoon",
+      "min": "passive"
+    },
+    {
+      "id": "hg-09",
+      "lang": "hinglish",
+      "text": "ye deadline mujhe maar degi lol",
+      "max": "distress"
+    },
+    {
+      "id": "hg-10",
+      "lang": "hinglish",
+      "text": "hass hass ke mar gaya",
+      "max": "distress"
+    },
+    {
+      "id": "hg-11",
+      "lang": "hinglish",
+      "text": "suicide ke baare mein soch raha hoon",
+      "min": "active"
+    },
+    {
+      "id": "mx-01",
+      "lang": "mixed",
+      "text": "honestly நான் இல்லாம இருந்தா everyone would be happier",
+      "min": "passive"
+    },
+    {
+      "id": "mx-02",
+      "lang": "mixed",
+      "text": "I'm done yaar, ab bas sab khatam kar dunga tonight",
+      "min": "plan"
+    },
+    {
+      "id": "mx-03",
+      "lang": "mixed",
+      "text": "kal se main nahi rahunga, bye everyone",
+      "min": "active"
+    },
+    {
+      "id": "mx-04",
+      "lang": "mixed",
+      "text": "enaku vaazha pidikala anymore, i just want it to stop",
+      "min": "passive"
+    },
+    {
+      "id": "mx-05",
+      "lang": "mixed",
+      "text": "this sem is killing me yaar, exams se mar jaunga",
+      "max": "distress"
+    },
+    {
+      "id": "te-01",
+      "lang": "te",
+      "text": "నాకు చనిపోవాలని ఉంది",
+      "min": "active"
+    },
+    {
+      "id": "te-02",
+      "lang": "te",
+      "text": "ఇక బతకాలని లేదు",
+      "min": "passive"
+    },
+    {
+      "id": "kn-01",
+      "lang": "kn",
+      "text": "ನನಗೆ ಸಾಯಬೇಕು ಅನಿಸುತ್ತಿದೆ",
+      "min": "active"
+    },
+    {
+      "id": "kn-02",
+      "lang": "kn",
+      "text": "ಬದುಕಲು ಇಷ್ಟವಿಲ್ಲ",
+      "min": "passive"
+    },
+    {
+      "id": "ml-01",
+      "lang": "ml",
+      "text": "എനിക്ക് മരിക്കണം",
+      "min": "active"
+    },
+    {
+      "id": "ml-02",
+      "lang": "ml",
+      "text": "ജീവിക്കാൻ തോന്നുന്നില്ല",
+      "min": "passive"
+    },
+    {
+      "id": "hg-12",
+      "lang": "hinglish",
+      "text": "aaj sab kaam khatam kar dunga phir sona hai",
+      "max": "distress"
+    },
+    {
+      "id": "hg-13",
+      "lang": "hinglish",
+      "text": "main party mein nahi rahunga zyada der",
+      "max": "distress"
+    },
+    {
+      "id": "tg-11",
+      "lang": "tanglish",
+      "text": "ellathayum mudichutu veetuku poren",
+      "max": "distress"
+    }
+  ]
+}
