@@ -1446,3 +1446,68 @@ html { scroll-behavior: smooth; }
 }
 @media (max-width: 720px) { .world .hero-plain { min-height: 0; } .world .scroll-hint { display: none; } }
 @keyframes hover { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+/* =====================================================================
+   The lower half, animated: a tilting Start card with a rotating glint,
+   sparks on orbit and a breathing button; details rows lit by the pointer;
+   the wordmark rising letter by letter with a shimmer.
+   ===================================================================== */
+.world .cta-stage { perspective: 1400px; }
+.world .cta { transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transform-style: preserve-3d; transition: transform .35s var(--ease); will-change: transform; }
+.world .cta .planet { animation: planet-breathe 9s ease-in-out infinite; }
+@keyframes planet-breathe { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.04); } }
+.world .cta .glint { position: absolute; inset: -30%; pointer-events: none; background: conic-gradient(from 0deg, transparent 0 40%, rgba(255,255,255,.14) 50%, transparent 60% 100%); animation: glint-spin 14s linear infinite; mix-blend-mode: screen; }
+@keyframes glint-spin { to { transform: rotate(360deg); } }
+.world .cta .orbit { position: absolute; left: 50%; top: 50%; width: min(130%, 1100px); aspect-ratio: 2.2; margin: 0; transform: translate(-50%, -50%) rotate(-8deg); border-radius: 50%; pointer-events: none; }
+.world .cta .orbit i { position: absolute; left: 50%; top: 0; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: #ffd7c4; box-shadow: 0 0 14px 4px rgba(255, 181, 154, .7); offset-path: ellipse(50% 50% at 50% 50%); animation: orbit-run 12s linear infinite; }
+.world .cta .orbit.o2 { width: min(110%, 900px); transform: translate(-50%, -50%) rotate(6deg); } .world .cta .orbit.o2 i { animation-duration: 17s; animation-delay: -6s; width: 7px; height: 7px; }
+.world .cta .orbit.o3 { width: min(150%, 1300px); transform: translate(-50%, -50%) rotate(-3deg); } .world .cta .orbit.o3 i { animation-duration: 23s; animation-delay: -11s; width: 6px; height: 6px; opacity: .8; }
+@keyframes orbit-run { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+.world .btn-halo { position: relative; }
+.world .btn-halo::after { content: ""; position: absolute; inset: -6px; border-radius: 999px; border: 2px solid rgba(255, 181, 154, .7); animation: halo 2.4s var(--ease) infinite; pointer-events: none; }
+@keyframes halo { 0% { transform: scale(.9); opacity: .8; } 70% { transform: scale(1.25); opacity: 0; } 100% { transform: scale(1.25); opacity: 0; } }
+
+.world .dt { position: relative; overflow: hidden; }
+.world .dt::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(260px 160px at var(--mx, -400px) var(--my, -400px), rgba(var(--accent-rgb), .13), transparent 70%); opacity: 0; transition: opacity .35s; }
+.world .dt:hover::before { opacity: 1; }
+.world .dt summary { position: relative; transition: padding-left .35s var(--ease), color .3s; }
+.world .dt summary::before { content: ""; position: absolute; left: 0; bottom: 12px; height: 2px; width: 0; background: linear-gradient(90deg, var(--color-primary), var(--color-secondary)); transition: width .5s var(--ease); }
+.world .dt summary:hover::before, .world .dt[open] summary::before { width: 56px; }
+.world .dt summary:hover { padding-left: 10px; }
+.world .dt summary::after { transition: transform .35s var(--ease), color .3s; }
+.world .dt summary:hover::after { color: var(--color-primary); transform: rotate(90deg); }
+.world .dt[open] summary:hover::after { transform: rotate(135deg); }
+.world .dt[open] .dt-body > * { animation: rise .7s var(--ease) both; }
+.world .dt[open] .dt-body > * + * { animation-delay: .12s; }
+
+.world .wordmark .big { display: flex; justify-content: center; }
+.world .wordmark .ltr { display: inline-block; background: linear-gradient(110deg, var(--coral-2) 0%, #ffd7c4 35%, var(--coral-2) 55%, var(--color-secondary) 100%); background-size: 240% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: ltr-in .9s var(--ease) both, shimmer 7s linear infinite; animation-delay: calc(var(--i, 0) * 70ms), calc(var(--i, 0) * -300ms); }
+@keyframes ltr-in { from { opacity: 0; transform: translateY(40%) rotateX(40deg); } to { opacity: 1; transform: none; } }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -40% 0; } }
+.world .wordmark .float { animation: hover 8s ease-in-out infinite !important; opacity: 0; animation-name: hover, dot-in; animation-duration: 8s, .8s; animation-fill-mode: both; animation-delay: 0s, 1.2s; }
+.world .wordmark .path { width: 0; transition: width 1.6s var(--ease); }
+.world .wordmark .path.in { width: 100%; }
+.world .foot > div { animation: pop .8s var(--ease) both !important; }
+.world .foot > div:nth-child(2) { animation-delay: .1s; } .world .foot > div:nth-child(3) { animation-delay: .2s; } .world .foot > div:nth-child(4) { animation-delay: .3s; }
+@media (prefers-reduced-motion: reduce) {
+  .world .cta, .world .cta .planet, .world .cta .glint, .world .cta .orbit i, .world .btn-halo::after, .world .wordmark .ltr, .world .wordmark .float, .world .foot > div, .world .dt[open] .dt-body > * { animation: none !important; transform: none !important; opacity: 1; }
+}
+@media (max-width: 720px) { .world .cta .orbit { display: none; } .world .cta-stage { perspective: none; } }
+
+/* The colour-changing ball, now in 3D, under the reliance chart. */
+.world .orb-band { position: relative; z-index: 1; margin-top: clamp(28px, 5vh, 56px); display: grid; grid-template-columns: 340px 1fr; gap: 28px; align-items: center; }
+.world .orb-stage { background: none; border: 0; padding: 0; cursor: pointer; border-radius: 50%; width: 340px; height: 340px; display: grid; place-items: center; }
+.world .orb-stage:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 6px; }
+.world .orb-canvas { width: 340px; height: 340px; filter: drop-shadow(0 30px 60px rgba(var(--accent-rgb), .35)); }
+.world .orb-canvas canvas { display: block; }
+.world .orb-swatches { position: static; }
+.world .orb-swatches .label .emotion { animation: rise .5s var(--ease) both; }
+@media (max-width: 720px) {
+  .world .orb-band { grid-template-columns: 1fr; justify-items: center; gap: 16px; }
+  .world .orb-stage, .world .orb-canvas { width: 240px; height: 240px; }
+  .world .orb-swatches { width: 100%; }
+}
+.world .orb-swatches { background: color-mix(in srgb, var(--surface) 90%, transparent); }
+.world .orb-swatches .label { display: grid; gap: 4px; text-transform: none; letter-spacing: 0; margin-top: 6px; }
+.world .orb-swatches .label .emotion { font-family: var(--font-display), "Iowan Old Style", Georgia, serif; font-size: clamp(1.5rem, 2.6vw, 2.1rem); line-height: 1.05; color: var(--coral-2); }
+.world .orb-swatches .label .muted { font-size: .85rem; }

@@ -1,5 +1,6 @@
 import { t } from "@/lib/i18n";
 import Reveal from "./Reveal";
+import Spotlight from "./Spotlight";
 import TryMirror from "./TryMirror";
 import Compare from "./Compare";
 import { FeatCheckins, FeatMemory } from "./Sections";
@@ -12,6 +13,7 @@ import { FeatCheckins, FeatMemory } from "./Sections";
 export default function Details({ lang }: { lang: string }) {
   return (
     <Reveal as="section" id="details" className="block details" aria-labelledby="details-title">
+      <Spotlight />
       <div className="container">
         <div className="sec-head" data-reveal>
           <h2 id="details-title" className="display">{t("detailsTitle", lang)}</h2>

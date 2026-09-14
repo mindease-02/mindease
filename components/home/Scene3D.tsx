@@ -25,7 +25,7 @@ function rand(seed: number) { let s = seed; return () => { s = (s * 16807) % 214
 
 type Frame = { pos: Float32Array; col: Float32Array; size: Float32Array };
 
-function makeFrames(n: number, read: number[]): Record<string, Frame> {
+function makeFrames(n: number, read: number[], ringRx: number, ringRy: number): Record<string, Frame> {
   const r = rand(7);
   const base = Array.from({ length: n }, () => ({ a: r(), b: r(), c: r(), d: r() }));
   const frame = (): Frame => ({ pos: new Float32Array(n * 3), col: new Float32Array(n * 3), size: new Float32Array(n) });
@@ -61,30 +61,50 @@ function makeFrames(n: number, read: number[]): Record<string, Frame> {
     }
     return f;
   };
-  const ring = (): Frame => {
-    const f = frame();
+  // Two rings around the call-to-action card, plus a few bright comets on a wider orbit. The shader spins them.
+  const ring = (rx: number, ry: number): Frame => {
+    const f = frame(); const glow = new THREE.Color("#ffb59a");
     for (let i = 0; i < n; i++) {
       const { a, b, c, d } = base[i];
-      const ang = b * Math.PI * 2, rad = 2.6 + (c - 0.5) * 0.35 + (a < 0.15 ? (d - 0.5) * 1.6 : 0);
-      const warm = CORAL.clone().lerp(new THREE.Color("#ffb59a"), c);
-      set(f, i, Math.cos(ang) * rad, Math.sin(ang) * rad * 0.62, (d - 0.5) * 0.8, warm, 0.5 + c * 1.2);
+      const ang = b * Math.PI * 2;
+      const band = a < 0.55 ? 1 : a < 0.92 ? 1.12 : 1.3 + (d - 0.5) * 0.2;
+      const warm = CORAL.clone().lerp(glow, c);
+      const size = a >= 0.92 ? 2.6 + c * 1.8 : 0.9 + c * 1.3;
+      set(f, i, Math.cos(ang) * rx * band + (c - 0.5) * 0.08, Math.sin(ang) * ry * band + (d - 0.5) * 0.08, (d - 0.5) * 0.9, warm, size);
     }
     return f;
   };
-  const drift = (): Frame => {
+  // A field the shader rolls into waves under the details, teal at one edge, coral at the other.
+  const wave = (): Frame => {
     const f = frame();
-    for (let i = 0; i < n; i++) { const { a, b, c, d } = base[i]; set(f, i, (a - 0.5) * 9, (b - 0.5) * 6, (c - 0.5) * 4, INK, 0.3 + d * 0.5); }
+    for (let i = 0; i < n; i++) {
+      const { a, b, c, d } = base[i];
+      const x = (a - 0.5) * 11, z = (b - 0.5) * 6;
+      set(f, i, x, -2.2 + (c - 0.5) * 0.15, z, TEAL.clone().lerp(CORAL, (x + 5.5) / 11), 0.35 + d * 0.9);
+    }
     return f;
   };
-  return { hero: wheel([0.55, 0.7, 0.5, 0.4, 0.6, 0.35, 0.45, 0.65]), why: ribbons(), demo: wheel(read, 0.2), start: ring(), details: drift() };
+  return { hero: wheel([0.55, 0.7, 0.5, 0.4, 0.6, 0.35, 0.45, 0.65]), why: ribbons(), demo: wheel(read, 0.2), start: ring(ringRx, ringRy), details: wave() };
 }
 
 const VERT = `
 attribute vec3 posB; attribute vec3 colA; attribute vec3 colB; attribute float sizeA; attribute float sizeB;
-uniform float uMix; uniform float uTime; uniform float uPixel; uniform float uDim; varying vec3 vCol; varying float vAlpha;
+uniform float uMix; uniform float uTime; uniform float uPixel; uniform float uDim;
+uniform float uOrbit; uniform float uRx; uniform float uRy; uniform float uWave;
+varying vec3 vCol; varying float vAlpha;
 void main() {
   float m = smoothstep(0.0, 1.0, uMix);
   vec3 p = mix(position, posB, m);
+  // Orbit around the call-to-action card: rotate in ring-normalised space so the ellipse keeps its shape.
+  if (uOrbit > 0.001) {
+    vec2 nrm = vec2(p.x / uRx, p.y / uRy);
+    float a = uTime * 0.22 * uOrbit + length(nrm) * 0.6;
+    float c = cos(a), s = sin(a);
+    nrm = mat2(c, -s, s, c) * nrm;
+    p.xy = mix(p.xy, vec2(nrm.x * uRx, nrm.y * uRy), uOrbit);
+  }
+  // Rolling waves under the details.
+  p.y += uWave * (0.45 * sin(p.x * 0.9 + uTime * 1.1) * cos(p.z * 1.3 - uTime * 0.7) + 0.18 * sin(p.x * 2.3 - uTime * 1.6));
   p += 0.035 * vec3(sin(uTime * 0.7 + p.y * 2.1), cos(uTime * 0.6 + p.x * 1.7), sin(uTime * 0.5 + p.z * 3.0));
   float s = mix(sizeA, sizeB, m);
   vCol = mix(colA, colB, m); vAlpha = clamp(s, 0.0, 1.0) * uDim;
@@ -104,6 +124,8 @@ const ORDER = ["hero", "why", "demo", "start", "details"] as const;
 /** Where the cloud sits per section: to the right of the copy on wide screens, low behind the headline on phones. */
 const OFFSET: Record<string, [number, number]> = { hero: [2.4, 0], why: [2.7, 0.2], demo: [2.4, 0.6], start: [0, 0], details: [0, 0] };
 const OFFSET_PHONE: Record<string, [number, number]> = { hero: [1.4, -0.3], why: [0.4, -1.5], demo: [0, 1.3], start: [0, 0], details: [0, 0] };
+/** Camera angle per section, in radians: the wheel turns as you scroll, the ring is seen face-on, the wave slightly from above. */
+const ROT: Record<string, [number, number]> = { hero: [0.05, 0.1], why: [0.1, 0.6], demo: [0.0, 1.15], start: [0.22, 0.0], details: [0.55, 0.15] };
 
 export default function Scene3D() {
   const host = useRef<HTMLDivElement>(null);
@@ -113,7 +135,8 @@ export default function Scene3D() {
     const phone = window.matchMedia("(max-width: 720px)").matches;
     const n = phone ? 2600 : 5200;
     let read = [0.55, 0.7, 0.5, 0.4, 0.6, 0.35, 0.45, 0.65];
-    let frames = makeFrames(n, read);
+    const ringRx = phone ? 2.3 : 4.9, ringRy = phone ? 3.4 : 2.7;
+    let frames = makeFrames(n, read, ringRx, ringRy);
 
     let renderer: THREE.WebGLRenderer;
     try { renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: "low-power" }); }
@@ -133,7 +156,7 @@ export default function Scene3D() {
     geo.setAttribute("colB", attr(frames.why.col.slice(), 3));
     geo.setAttribute("sizeA", attr(frames.hero.size.slice(), 1));
     geo.setAttribute("sizeB", attr(frames.why.size.slice(), 1));
-    const mat = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { uMix: { value: 0 }, uTime: { value: 0 }, uPixel: { value: renderer.getPixelRatio() * (phone ? 2.2 : 2.8) }, uDim: { value: phone ? 0.62 : 1 } } });
+    const mat = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { uMix: { value: 0 }, uTime: { value: 0 }, uPixel: { value: renderer.getPixelRatio() * (phone ? 2.2 : 2.8) }, uDim: { value: phone ? 0.62 : 1 }, uOrbit: { value: 0 }, uRx: { value: ringRx }, uRy: { value: ringRy }, uWave: { value: 0 } } });
     const points = new THREE.Points(geo, mat); scene.add(points);
 
     let segA = "hero", segB = "why";
@@ -160,15 +183,19 @@ export default function Scene3D() {
       const span = Math.max(1, anchors[i + 1] - anchors[i]);
       const t = Math.min(1, Math.max(0, (y - anchors[i]) / span));
       load(ORDER[i], ORDER[i + 1]); targetMix = t;
+      // Past the details, the camera drifts back and the field keeps rolling under the footer.
+      const past = Math.max(0, (y - anchors[ORDER.length - 1]) / Math.max(1, document.body.scrollHeight - anchors[ORDER.length - 1]));
+      camera.position.z = 8.5 + past * 2.5;
       const a = offsets[ORDER[i]], b = offsets[ORDER[i + 1]];
       tox = a[0] + (b[0] - a[0]) * t; toy = a[1] + (b[1] - a[1]) * t;
-      tRotY = (i + t) * 0.55; tRotX = Math.sin((i + t) * 1.3) * 0.18;
+      const ra = ROT[ORDER[i]], rb = ROT[ORDER[i + 1]];
+      tRotX = ra[0] + (rb[0] - ra[0]) * t; tRotY = ra[1] + (rb[1] - ra[1]) * t;
     };
     const onPointer = (e: PointerEvent) => { px = (e.clientX / window.innerWidth - 0.5) * 0.35; py = (e.clientY / window.innerHeight - 0.5) * 0.25; };
     const onRead = (e: Event) => {
       const axes = (e as CustomEvent<Record<string, number>>).detail; if (!axes) return;
       read = AXES.map((a) => axes[a] ?? 0);
-      frames = { ...frames, demo: makeFrames(n, read).demo };
+      frames = { ...frames, demo: makeFrames(n, read, ringRx, ringRy).demo };
       const a = segA, b = segB; segA = ""; load(a, b);
     };
     const onResize = () => { renderer.setSize(el.clientWidth, el.clientHeight); camera.aspect = el.clientWidth / el.clientHeight; camera.updateProjectionMatrix(); anchors = tops(); onScroll(); };
@@ -182,6 +209,9 @@ export default function Scene3D() {
       ox += (tox - ox) * Math.min(1, dt * 4); oy += (toy - oy) * Math.min(1, dt * 4);
       points.position.set(ox, oy, 0);
       mat.uniforms.uMix.value = mix; mat.uniforms.uTime.value = reduced ? 0 : now / 1000;
+      const w = (id: string) => (segB === id ? mix : segA === id ? 1 - mix : 0);
+      mat.uniforms.uOrbit.value = reduced ? 0 : w("start");
+      mat.uniforms.uWave.value = reduced ? 0 : w("details") + (segA === "details" && segB === "details" ? 1 : 0);
       renderer.render(scene, camera);
       if (!reduced && visible) raf = requestAnimationFrame(tick);
     };

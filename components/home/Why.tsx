@@ -1,5 +1,6 @@
 import { t } from "@/lib/i18n";
 import Reveal, { Words } from "./Reveal";
+import MoodOrb from "./MoodOrbMount";
 
 /**
  * The reason MindEase exists, drawn: over eight weeks the people in someone's
@@ -38,6 +39,9 @@ export default function Why({ lang }: { lang: string }) {
           </svg>
           <figcaption>{t("whyCaption", lang)}</figcaption>
         </figure>
+      </div>
+      <div className="container" data-reveal style={{ ["--d" as string]: "240ms" }}>
+        <MoodOrb lang={lang} />
       </div>
     </Reveal>
   );
