@@ -355,7 +355,7 @@ const en: Record<string, string> = {
   noteShorter: "I'm keeping my replies shorter for a while. You've been leaning on me more lately, and I'd rather you had more than me.",
   noteWhy: "Why",
   pplLog: "I talked to someone",
-  pplLogged: "Logged. That counts toward your week.",
+  pplLogged: "Logged.",
   sitCaste: "Caste-based violence or discrimination",
   sitWomen: "Violence against women",
   sitChild: "A child in danger",
