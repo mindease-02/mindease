@@ -37,6 +37,7 @@ export const HELPLINES: Helpline[] = [
   { region: "IN", name: "Vandrevala Foundation", contact: "Call or WhatsApp +91 9999 666 555", url: "https://www.vandrevalafoundation.com", note: "24/7" },
   { region: "IN", name: "1Life", contact: "Call +91 78930 78930", url: "https://1life.org.in", note: "24/7, 12 Indian languages" },
   { region: "IN", name: "AASRA", contact: "Call +91 22 2754 6669", url: "https://www.aasra.info", note: "24 hours" },
+  { region: "IN", name: "Hitguj helpline (KEM Hospital, Mumbai)", contact: "Call 022 2413 1212", url: "https://www.kem.edu/public/psychiatry", note: "24/7" },
   { region: "IN", name: "iCall (TISS)", contact: "Call +91 91529 87821", url: "https://icallhelpline.org", note: "Mon-Sat, 8am-9pm", hours: { from: 8, to: 21, days: "mon-sat", timeZone: "Asia/Kolkata" } },
   { region: "AU", name: "Lifeline Australia", contact: "Call 13 11 14", url: "https://www.lifeline.org.au" },
   { region: "CA", name: "9-8-8 Suicide Crisis Helpline", contact: "Call or text 988", url: "https://988.ca" },
