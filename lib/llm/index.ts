@@ -18,6 +18,8 @@ export interface LlmConfig {
   apiKey: string;
   chatModel: string;
   fastModel: string;
+  /** The safety second opinion. On Groq this is a third model so it never queues behind the others: rate limits there are per model. */
+  safetyModel: string;
   provider: "groq" | "openrouter";
 }
 
@@ -31,6 +33,7 @@ export function llmConfig(): LlmConfig | null {
       apiKey: openrouter,
       chatModel: process.env.LLM_CHAT_MODEL ?? "meta-llama/llama-3.3-70b-instruct",
       fastModel: process.env.LLM_FAST_MODEL ?? "meta-llama/llama-3.1-8b-instruct",
+      safetyModel: process.env.LLM_SAFETY_MODEL ?? process.env.LLM_FAST_MODEL ?? "meta-llama/llama-3.1-8b-instruct",
     };
   }
   if (groq) {
@@ -40,13 +43,15 @@ export function llmConfig(): LlmConfig | null {
       apiKey: groq,
       chatModel: process.env.LLM_CHAT_MODEL ?? "openai/gpt-oss-120b",
       fastModel: process.env.LLM_FAST_MODEL ?? "openai/gpt-oss-20b",
+      // Scored 8/10 against gpt-oss-20b's 7/10 on the triage eval, and has its own free-tier budget.
+      safetyModel: process.env.LLM_SAFETY_MODEL ?? "qwen/qwen3.8-27b",
     };
   }
   return null;
 }
 
 export interface CompletionOptions {
-  tier?: "chat" | "fast";
+  tier?: "chat" | "fast" | "safety";
   temperature?: number;
   maxTokens?: number;
   json?: boolean;
@@ -71,8 +76,8 @@ async function post(cfg: LlmConfig, model: string, messages: ChatMessage[], opts
   const body: Record<string, unknown> = {
     model,
     messages,
-    temperature: opts.temperature ?? (opts.tier === "fast" ? 0.2 : 0.7),
-    max_tokens: opts.maxTokens ?? (opts.tier === "fast" ? 900 : 800),
+    temperature: opts.temperature ?? (opts.tier === "chat" || !opts.tier ? 0.7 : 0.2),
+    max_tokens: opts.maxTokens ?? (opts.tier === "chat" || !opts.tier ? 800 : 900),
   };
   if (opts.json) body.response_format = { type: "json_object" };
   // gpt-oss models reason before answering; keep that short so it neither eats
@@ -98,15 +103,18 @@ async function post(cfg: LlmConfig, model: string, messages: ChatMessage[], opts
 export async function complete(messages: ChatMessage[], opts: CompletionOptions = {}): Promise<string> {
   const cfg = llmConfig();
   if (!cfg) throw new Error("No LLM configured. Set GROQ_API_KEY (or OPENROUTER_API_KEY).");
-  const primary = opts.tier === "fast" ? cfg.fastModel : cfg.chatModel;
+  const primary = opts.tier === "fast" ? cfg.fastModel : opts.tier === "safety" ? cfg.safetyModel : cfg.chatModel;
 
   let res = await post(cfg, primary, messages, opts);
   if (res.status === 429) {
     const text = await res.text();
     const wait = retryAfterSeconds(res, text);
-    if (wait !== null && wait <= MAX_WAIT_S[opts.tier === "fast" ? "fast" : "chat"]) {
+    if (wait !== null && wait <= MAX_WAIT_S[opts.tier === "chat" || !opts.tier ? "chat" : "fast"]) {
       await sleep(Math.ceil(wait * 1000) + 150);
       res = await post(cfg, primary, messages, opts);
+    } else if (opts.tier === "safety" && cfg.safetyModel !== cfg.fastModel) {
+      // The safety model is out of budget: the fast model takes the triage rather than skipping it.
+      res = await post(cfg, cfg.fastModel, messages, opts);
     } else {
       throw new Error(`LLM 429: ${text.slice(0, 300)}`);
     }

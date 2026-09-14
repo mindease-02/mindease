@@ -1408,3 +1408,41 @@ html { scroll-behavior: smooth; }
   .world main { padding-bottom: 84px; }
   .world .dt-body .feat { gap: 18px; }
 }
+
+.world .crisis-status { font-style: normal; font-size: .74rem; }
+.world .crisis-status.open { color: #8fcf9a; }
+.world .crisis-status.closed { color: var(--ink-3); }
+
+.world .nearby-state { display: grid; gap: 6px; font-size: .84rem; color: var(--ink-2); }
+.world .nearby-state .field { padding: 10px 12px; font-size: 16px; }
+
+/* The 3D scene sits behind the page; sections keep their own stacking above it. */
+.world .scene3d { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.world .scene3d canvas { display: block; width: 100%; height: 100%; }
+.world .hero-plain, .world section.block, .world .why, .world .details, .world footer { position: relative; z-index: 1; }
+.world .why-fig, .world .device, .world .cta, .world .try-box, .world .cmp-wrap, .world .feat-visual { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+
+/* Motion, turned back on: reveals, word-by-word titles, a scroll hint, floating chips. */
+.world .chip-mem { animation: hover 8s ease-in-out infinite !important; }
+.world .chip-mem:nth-child(2) { animation-delay: 1.3s; } .world .chip-mem:nth-child(3) { animation-delay: 2.6s; } .world .chip-mem:nth-child(4) { animation-delay: 3.9s; }
+.world .scroll-hint { position: absolute; left: 50%; bottom: 18px; width: 26px; height: 42px; margin-left: -13px; border-radius: 14px; border: 1px solid var(--line-2); display: grid; place-items: center; }
+.world .scroll-hint i { position: absolute; width: 4px; height: 8px; border-radius: 2px; background: var(--color-primary); top: 8px; animation: scroll-dot 1.8s var(--ease) infinite; }
+.world .scroll-hint i + i { animation-delay: .9s; opacity: .5; }
+@keyframes scroll-dot { 0% { transform: translateY(0); opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(18px); opacity: 0; } }
+.world .hero-plain { min-height: calc(100svh - 118px); }
+html { scroll-behavior: smooth; }
+.world .rail a i { transition: background .4s var(--ease), transform .4s var(--ease); }
+.world .rail a.on i { transform: scaleY(1.6); }
+.world .dt[open] .dt-body { animation: rise .6s var(--ease) both; }
+.world .btn:hover .pxicon { transform: translateX(3px); transition: transform .4s var(--ease); }
+.world .why-fig svg path { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: draw-line 2.2s var(--ease) forwards; animation-delay: .3s; }
+.world .why-fig svg path + path { animation-delay: .5s; }
+.world .why-fig svg circle { opacity: 0; animation: dot-in .5s var(--ease) forwards; animation-delay: calc(1.6s + var(--i, 0) * 60ms); }
+@keyframes draw-line { to { stroke-dashoffset: 0; } }
+@keyframes dot-in { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .world .chip-mem, .world .scroll-hint i, .world .why-fig svg path, .world .why-fig svg circle, .world .dt[open] .dt-body { animation: none !important; opacity: 1; stroke-dashoffset: 0; }
+  html { scroll-behavior: auto; }
+}
+@media (max-width: 720px) { .world .hero-plain { min-height: 0; } .world .scroll-hint { display: none; } }
+@keyframes hover { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }

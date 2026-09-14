@@ -20,7 +20,7 @@ export async function secondOpinion(text: string, regex: RiskAssessment): Promis
   try {
     const raw = await complete(
       [{ role: "system", content: SYSTEM }, { role: "user", content: text }],
-      { tier: "fast", json: true, temperature: 0, maxTokens: 200 },
+      { tier: "safety", json: true, temperature: 0, maxTokens: 200 },
     );
     const j = parseJsonObject<{ tier?: string; reason?: string }>(raw);
     const t = j?.tier as RiskTier | undefined;

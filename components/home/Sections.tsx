@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { popIn } from "@/lib/motion";
+import Reveal, { Words } from "./Reveal";
 import DemoGauge from "./DemoGauge";
 import { sentences, t } from "@/lib/i18n";
 import { PxEye, PxBrain, PxShield, PxPlay, PxRefresh, PxHand, PxArrow, PxCheck } from "./pixelIcons";
@@ -69,14 +70,14 @@ export function Demo({ lang }: L) {
   const gaugeTarget = current ? current.axes : ZERO_READ;
 
   return (
-    <section id="demo" className="block" aria-labelledby="demo-title">
+    <Reveal as="section" id="demo" className="block" aria-labelledby="demo-title">
       <div className="container">
         <div className="sec-head">
-          <div className="eyebrow">{t("seeIt", lang)}</div>
-          <h2 id="demo-title" className="display">{t("demoTitle", lang)}</h2>
+          <div className="eyebrow" data-reveal>{t("seeIt", lang)}</div>
+          <h2 id="demo-title" className="display" data-reveal style={{ ["--d" as string]: "80ms" }}><Words text={t("demoTitle", lang)} step={45} /></h2>
         </div>
         <div className="demo">
-          <div ref={host} className="device" role="region" aria-label={t("demoLabel", lang)}>
+          <div ref={host} className="device" data-reveal role="region" aria-label={t("demoLabel", lang)}>
             <div className="device-head"><span className="dot" aria-hidden />MindEase <span className="muted">{t("demoLabel", lang)}</span></div>
             {!started && (
               <button type="button" className="demo-play" onClick={() => { setStarted(true); setPlaying(true); }} aria-label={t("playSub", lang)}>
@@ -103,10 +104,10 @@ export function Demo({ lang }: L) {
               </div>
             </div>
           </div>
-          <div className="demo-copy">
+          <div className="demo-copy" data-reveal style={{ ["--d" as string]: "120ms" }}>
             <h3>{t("demoH3", lang)}</h3>
             <p>{t("demoP", lang)}</p>
-            <div className="list">
+            <div className="list" data-stagger>
               <div>{I.eye}<div><b>{t("readT", lang)}</b><p>{t("readP", lang)}</p></div></div>
               <div>{I.shield}<div><b>{t("gapT", lang)}</b><p>{t("gapP", lang)}</p></div></div>
               <div>{I.memory}<div><b>{t("rememberT", lang)}</b><p>{t("rememberP", lang)}</p></div></div>
@@ -114,7 +115,7 @@ export function Demo({ lang }: L) {
           </div>
         </div>
       </div>
-    </section>
+    </Reveal>
   );
 }
 
@@ -129,7 +130,7 @@ export function FeatMemory({ lang, embedded = false }: L & { embedded?: boolean 
         <ul><li>{t("f2L1", lang)}</li><li>{t("f2L2", lang)}</li><li>{t("f2L3", lang)}</li></ul>
       </div>
       <div className="feat-visual" aria-hidden>
-        <div className="chips">
+        <div className="chips" data-stagger>
           {chips.map(([k, v]) => (
             <div className="chip-mem" key={v}><span className="k">{t(k, lang)}</span>{t(v, lang)}<span className="x">{t("forget", lang)}</span></div>
           ))}
@@ -194,11 +195,11 @@ export function FeatCheckins({ lang, embedded = false }: L & { embedded?: boolea
 /* --------------------------------------------------------------------- CTA */
 export function Cta({ chatHref, lang }: { chatHref: string } & L) {
   return (
-    <section id="start" className="block">
+    <Reveal as="section" id="start" className="block">
       <div className="container">
-        <div className="cta">
+        <div className="cta" data-reveal>
           <div className="light" /><div className="planet" />
-          <h2 className="display">{t("ctaTitle", lang)}</h2>
+          <h2 className="display"><Words text={t("ctaTitle", lang)} step={50} /></h2>
           <p>{t("ctaP", lang)}</p>
           <div className="ctas">
             <a href={chatHref} className="btn btn-primary">{t("startTalking", lang)} {I.arrow}</a>
@@ -206,7 +207,7 @@ export function Cta({ chatHref, lang }: { chatHref: string } & L) {
           <p className="cta-note">{sentences(t("footNot", lang), t("priceLine", lang))}</p>
         </div>
       </div>
-    </section>
+    </Reveal>
   );
 }
 

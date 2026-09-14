@@ -13,6 +13,7 @@ export default function DemoGauge({ target, lang, confidence }: { target: Vals; 
   const [vals, setVals] = useState<Vals>(AXES.map(() => 0));
   const from = useRef<Vals>(vals);
   useEffect(() => {
+    window.dispatchEvent(new CustomEvent("me:read", { detail: Object.fromEntries(AXES.map((a, i) => [a, target[i]])) }));
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) { setVals(target); from.current = target; return; }
     const start = performance.now(), dur = 900, a = from.current;

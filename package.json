@@ -18,11 +18,13 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.115.0",
+    "@types/three": "^0.170.0",
     "animejs": "^4.5.0",
     "lucide-react": "^1.41.0",
     "next": "^15.5.25",
     "react": "19.1.1",
     "react-dom": "19.1.1",
+    "three": "^0.170.0",
     "web-push": "^3.6.7"
   },
   "devDependencies": {

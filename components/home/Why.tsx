@@ -1,4 +1,5 @@
 import { t } from "@/lib/i18n";
+import Reveal, { Words } from "./Reveal";
 
 /**
  * The reason MindEase exists, drawn: over eight weeks the people in someone's
@@ -11,13 +12,13 @@ export default function Why({ lang }: { lang: string }) {
   const W = 326, H = 196, top = 24, base = 150;
   const dots = [22, 34, 46, 58, 104, 116, 128, 186, 198, 280];
   return (
-    <section id="why" className="block why" aria-labelledby="why-title">
+    <Reveal as="section" id="why" className="block why" aria-labelledby="why-title">
       <div className="container why-grid">
         <div>
-          <div className="eyebrow">{t("whyExists", lang)}</div>
-          <h2 id="why-title" className="display">{t("storyQ1", lang)}<em>{t("storyEm", lang)}</em>{t("storyQ2", lang)}</h2>
+          <div className="eyebrow" data-reveal>{t("whyExists", lang)}</div>
+          <h2 id="why-title" className="display" data-reveal style={{ ["--d" as string]: "80ms" }}><Words text={t("storyQ1", lang)} step={40} /><em><Words text={t("storyEm", lang)} step={40} /></em><Words text={t("storyQ2", lang)} step={40} /></h2>
         </div>
-        <figure className="why-fig">
+        <figure className="why-fig" data-reveal style={{ ["--d" as string]: "160ms" }}>
           <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={t("whyAlt", lang)}>
             <defs>
               <linearGradient id="why-fill" x1="0" y1="0" x2="0" y2="1">
@@ -31,13 +32,13 @@ export default function Why({ lang }: { lang: string }) {
             <path d={`M10 40 C 60 46, 110 62, 150 84 S 250 118, ${W - 10} 128`} fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" />
             <text x={W - 20} y={top} fill="var(--color-secondary)" fontSize="11" textAnchor="end">{t("whyPeople", lang)}</text>
             <text x={W - 10} y={base - 6} fill="var(--color-primary)" fontSize="11" textAnchor="end">{t("whyApp", lang)}</text>
-            {dots.map((x) => <circle key={x} cx={x} cy={172} r="3.5" fill="var(--color-primary)" fillOpacity=".85" />)}
+            {dots.map((x, i) => <circle key={x} cx={x} cy={172} r="3.5" fill="var(--color-primary)" fillOpacity=".85" style={{ ["--i" as string]: i }} />)}
             <text x="10" y={H - 4} fill="currentColor" fillOpacity=".5" fontSize="10">{t("whyWeek1", lang)}</text>
             <text x={W - 10} y={H - 4} fill="currentColor" fillOpacity=".5" fontSize="10" textAnchor="end">{t("whyWeek8", lang)}</text>
           </svg>
           <figcaption>{t("whyCaption", lang)}</figcaption>
         </figure>
       </div>
-    </section>
+    </Reveal>
   );
 }
