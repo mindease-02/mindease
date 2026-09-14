@@ -9,7 +9,7 @@ interface Read { states: { name: string; intensity: number }[]; need: string | n
  * The landing page's live read: one line in, the Mirror's caption out. It calls
  * the same analyser the chat uses, stores nothing, and is rate-limited.
  */
-export default function TryMirror({ lang }: { lang: string }) {
+export default function TryMirror({ lang, embedded = false }: { lang: string; embedded?: boolean }) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [read, setRead] = useState<Read | null>(null);
@@ -29,6 +29,27 @@ export default function TryMirror({ lang }: { lang: string }) {
     finally { setBusy(false); }
   }
 
+  const box = (
+    <div className="try-box">
+      <form onSubmit={go} className="try-form">
+        <label htmlFor="try-line" className="sr-only">{t("tryTitle", lang)}</label>
+        <input id="try-line" className="field" value={text} onChange={(e) => setText(e.target.value.slice(0, 300))} placeholder={t("tryPh", lang)} autoComplete="off" />
+        <button className="btn btn-primary" type="submit" disabled={busy || text.trim().length < 3}>{busy ? t("tryReading", lang) : t("tryBtn", lang)} <PxArrow className="pxicon" /></button>
+      </form>
+      {err && <p className="try-err" role="alert">{err}</p>}
+      {read && (
+        <div className="try-read" aria-live="polite">
+          <div className="try-cap"><b>{t("tryStates", lang)}</b>
+            <span className="try-chips">{read.states.slice(0, 3).map((s) => <span key={s.name} className="try-chip">{s.name}</span>)}</span>
+          </div>
+          {read.need && <div className="try-cap"><b>{t("tryNeed", lang)}</b><span>{read.need}</span></div>}
+          {read.why && <p className="try-why">{read.why}</p>}
+          {(read.masking ?? 0) > 0.5 && read.maskingNote && <p className="try-why">{read.maskingNote}</p>}
+        </div>
+      )}
+    </div>
+  );
+  if (embedded) return <><p className="try-sub" style={{ marginTop: 0 }}>{t("trySub", lang)}</p>{box}</>;
   return (
     <section id="try" className="block try-block" aria-labelledby="try-title">
       <div className="container try-grid">
@@ -36,24 +57,7 @@ export default function TryMirror({ lang }: { lang: string }) {
           <h2 id="try-title" className="display">{t("tryTitle", lang)}</h2>
           <p className="try-sub">{t("trySub", lang)}</p>
         </div>
-        <div className="try-box">
-          <form onSubmit={go} className="try-form">
-            <label htmlFor="try-line" className="sr-only">{t("tryTitle", lang)}</label>
-            <input id="try-line" className="field" value={text} onChange={(e) => setText(e.target.value.slice(0, 300))} placeholder={t("tryPh", lang)} autoComplete="off" />
-            <button className="btn btn-primary" type="submit" disabled={busy || text.trim().length < 3}>{busy ? t("tryReading", lang) : t("tryBtn", lang)} <PxArrow className="pxicon" /></button>
-          </form>
-          {err && <p className="try-err" role="alert">{err}</p>}
-          {read && (
-            <div className="try-read" aria-live="polite">
-              <div className="try-cap"><b>{t("tryStates", lang)}</b>
-                <span className="try-chips">{read.states.slice(0, 3).map((s) => <span key={s.name} className="try-chip">{s.name}</span>)}</span>
-              </div>
-              {read.need && <div className="try-cap"><b>{t("tryNeed", lang)}</b><span>{read.need}</span></div>}
-              {read.why && <p className="try-why">{read.why}</p>}
-              {(read.masking ?? 0) > 0.5 && read.maskingNote && <p className="try-why">{read.maskingNote}</p>}
-            </div>
-          )}
-        </div>
+        {box}
       </div>
     </section>
   );

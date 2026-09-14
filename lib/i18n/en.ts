@@ -62,7 +62,7 @@ const en: Record<string, string> = {
   // story + cta + footer
   whyExists: "Why it exists", storyQ1: "A companion that is ", storyEm: "always there", storyQ2: " can quietly become the only one there. We built the opposite.",
   storyP: "MindEase measures how much you lean on it. When that climbs, it gets shorter, says so, and points you back toward people. It is software and never pretends otherwise. Success is this mattering less over time.",
-  ctaTitle: "Tell it how you're arriving.", ctaP: "Pick a mood, say a line if you want, and MindEase meets you there. No account, no password — a name is enough.",
+  ctaTitle: "Tell it how you're arriving.", ctaP: "Pick a mood, say a line if you want, and MindEase meets you there.",
   footBlurb: "MindEase is software, and says so. If you're in crisis, call a helpline — the app shows real Indian lines automatically, and never invents a number.",
   product: "Product", crisisLines: "Crisis lines in India", source: "Source", signIn: "Sign in", footNot: "Not therapy, not a person, not private from you", icons: "icons",
   // login
@@ -389,5 +389,15 @@ const en: Record<string, string> = {
   ciHint: "MindEase may write first when something has changed, within a small budget. Turn this off and it only replies.",
   morningTitle: "Morning hello",
   morningHint: "A short message on mornings you haven't written yet. Off unless you turn it on.",
+  navDetails: "Details",
+  whyCaption: "Dots are check-ins. As people come up more, MindEase writes first less, and says so.",
+  whyPeople: "people in your life",
+  whyApp: "leaning on MindEase",
+  whyWeek1: "week 1",
+  whyWeek8: "week 8",
+  whyAlt: "Two lines over eight weeks. People in your life rises. Leaning on MindEase falls. The check-in dots thin out.",
+  ciGlyphCap: "It writes first only when all three line up, and stops if you stop replying.",
+  detailsTitle: "The details",
+  detailsSub: "How it works, in detail. Open what you want.",
 };
 export default en;

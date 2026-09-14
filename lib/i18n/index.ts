@@ -199,3 +199,8 @@ export function greetingFor(name: string, arrival: { label: string; note?: strin
   const line = g.by[arrival.label] ?? g.other.replace("{label}", arrival.label);
   return arrival.note ? line + g.note.replace("{note}", arrival.note) : line;
 }
+
+/** Joins short sentences from separate keys, adding a full stop where a language's string has none. */
+export function sentences(...parts: string[]): string {
+  return parts.map((x) => x.trim()).filter(Boolean).map((x) => (/[.!?।]$/.test(x) ? x : x + ".")).join(" ");
+}

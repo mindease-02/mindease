@@ -4,15 +4,10 @@ import { t } from "@/lib/i18n";
  * The contrast section: what MindEase does against what companion apps tend
  * to do. Patterns, not names; nothing here grades a competitor.
  */
-export default function Compare({ lang }: { lang: string }) {
+export default function Compare({ lang, embedded = false }: { lang: string; embedded?: boolean }) {
   const rows = [1, 2, 3, 4, 5, 6];
-  return (
-    <section id="compare" className="block cmp-block" aria-labelledby="cmp-title">
-      <div className="container">
-        <div className="sec-head">
-          <p className="cmp-eyebrow">{t("cmpEyebrow", lang)}</p>
-          <h2 id="cmp-title" className="display">{t("cmpTitle", lang)}</h2>
-        </div>
+  const table = (
+    <>
         <div className="cmp-wrap">
           <table className="cmp">
             <thead>
@@ -30,6 +25,17 @@ export default function Compare({ lang }: { lang: string }) {
           </table>
         </div>
         <p className="cmp-note">{t("cmpNote", lang)}</p>
+    </>
+  );
+  if (embedded) return table;
+  return (
+    <section id="compare" className="block cmp-block" aria-labelledby="cmp-title">
+      <div className="container">
+        <div className="sec-head">
+          <p className="cmp-eyebrow">{t("cmpEyebrow", lang)}</p>
+          <h2 id="cmp-title" className="display">{t("cmpTitle", lang)}</h2>
+        </div>
+        {table}
       </div>
     </section>
   );

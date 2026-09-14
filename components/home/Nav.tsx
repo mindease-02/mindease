@@ -1,14 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import Magnetic from "./Magnetic";
 import LanguageSwitch from "../LanguageSwitch";
 import TrustStrip from "../TrustStrip";
 import { PxMenu, PxRemove, PxArrow } from "./pixelIcons";
 import { t } from "@/lib/i18n";
 
 export default function Nav({ chatHref, signedIn, name, lang }: { chatHref: string; signedIn: boolean; name?: string; lang: string }) {
-  const LINKS: [string, string][] = [["#demo", t("navExperience", lang)], ["#features", t("navWhat", lang)], ["#story", t("navWhy", lang)], ["#start", t("navStart", lang)]];
+  const LINKS: [string, string][] = [["#why", t("navWhy", lang)], ["#demo", t("seeIt", lang)], ["#start", t("navStart", lang)], ["#details", t("navDetails", lang)]];
   async function signOut() { await fetch("/api/auth/logout", { method: "POST" }).catch(() => {}); window.location.href = "/login"; }
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -33,13 +32,13 @@ export default function Nav({ chatHref, signedIn, name, lang }: { chatHref: stri
             <span className="block h-7 w-7 rounded-full" style={{ background: "radial-gradient(circle at 35% 30%, #fff, rgba(255,255,255,0) 40%), linear-gradient(145deg, var(--coral-2), var(--accent-mid) 60%, var(--accent-deep))" }} aria-hidden />
             <span className="display" style={{ fontSize: ".95rem" }}>MindEase</span>
           </Link>
-          <nav className="nav-links glass" aria-label="Primary">
-            {LINKS.map(([h, l]) => <a key={h} href={h} aria-current={active === h ? "true" : undefined} className="swap"><span data-t={l}>{l}</span></a>)}
+          <nav className="rail" aria-label="Sections">
+            {LINKS.map(([h, l], i) => { const idx = LINKS.findIndex(([x]) => x === active); return <a key={h} href={h} aria-current={active === h ? "true" : undefined} className={active === h ? "on" : idx > i ? "done" : ""}><i aria-hidden />{l}</a>; })}
           </nav>
           <div className="nav-cta">
             <LanguageSwitch lang={lang} signedIn={signedIn} compact />
             {signedIn && <button type="button" className="linkish nav-signout" onClick={signOut} title={name ? t("signedInAs", lang, { name }) : undefined}>{t("signOut", lang)}</button>}
-            <Magnetic href={chatHref} className="btn-primary">{cta} <PxArrow className="pxicon" /></Magnetic>
+            <Link href={chatHref} className="btn btn-primary">{cta} <PxArrow className="pxicon" /></Link>
             <button className="burger" aria-label={open ? t("closeMenu", lang) : t("openMenu", lang)} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
               {open ? <PxRemove className="pxicon" style={{ fontSize: 20 }} /> : <PxMenu className="pxicon" style={{ fontSize: 20 }} />}
             </button>

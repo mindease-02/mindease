@@ -3,15 +3,14 @@ import { currentSession } from "@/lib/auth";
 import { body, display, heading } from "@/components/home/fonts";
 import Nav from "@/components/home/Nav";
 import Hero from "@/components/home/Hero";
-import { Cta, Demo, FeatureRows, Footer, Story } from "@/components/home/Sections";
+import { Cta, Demo, Footer } from "@/components/home/Sections";
+import Why from "@/components/home/Why";
+import Details from "@/components/home/Details";
 import ThemeInit from "@/components/home/ThemeInit";
-import Marquee from "@/components/home/Marquee";
 import MobileCta from "@/components/home/MobileCta";
-import TryMirror from "@/components/home/TryMirror";
-import Compare from "@/components/home/Compare";
 import { getStore } from "@/lib/store";
 import { pageLanguage } from "@/lib/i18n/server";
-import { t, tickerItems } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 
 export default async function Home() {
   const session = await currentSession();
@@ -26,13 +25,10 @@ export default async function Home() {
       <Nav chatHref={chatHref} signedIn={!!session} name={session?.name} lang={lang} />
       <main id="main" tabIndex={-1}>
         <Hero chatHref={chatHref} lang={lang} />
-        <Marquee items={tickerItems(lang)} />
+        <Why lang={lang} />
         <Demo lang={lang} />
-        <TryMirror lang={lang} />
-        <FeatureRows chatHref={chatHref} lang={lang} />
-        <Compare lang={lang} />
-        <Story lang={lang} />
         <Cta chatHref={chatHref} lang={lang} />
+        <Details lang={lang} />
       </main>
       <Footer lang={lang} />
       <MobileCta href={chatHref} label={t("startTalking", lang)} />
