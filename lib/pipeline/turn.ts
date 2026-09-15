@@ -405,7 +405,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
       reply = fallbackReply(risk, state.displayName);
     }
   } else {
-    reply = `(${AGENT_NAME} is not connected to a language model yet - add GROQ_API_KEY to .env.local.) ` + fallbackReply(risk, state.displayName);
+    reply = `(${AGENT_NAME} is not connected to a language model yet - add ANTHROPIC_API_KEY (or GROQ_API_KEY) to .env.local.) ` + fallbackReply(risk, state.displayName);
   }
 
   // 8. Persist.

@@ -1,11 +1,16 @@
 /**
- * LLM client. OpenAI-compatible chat completions, so the same code talks to
- * Groq (default) or OpenRouter. No SDK - one fetch per call.
+ * LLM client. One fetch per call, no SDK. Talks to Anthropic (preferred when
+ * ANTHROPIC_API_KEY is set), or to Groq / OpenRouter through their
+ * OpenAI-compatible chat completions.
  *
- * Two model tiers (defaults are current Groq models; override with LLM_CHAT_MODEL / LLM_FAST_MODEL):
- *   chat - the voice of the companion. Quality matters more than latency.
- *   fast - structured JSON jobs (affect analysis, memory extraction). Called on
- *          every turn, so it should be cheap and quick.
+ * Three model tiers (override with LLM_CHAT_MODEL / LLM_FAST_MODEL / LLM_SAFETY_MODEL):
+ *   chat   - the voice of the companion. Quality matters more than latency.
+ *   fast   - structured JSON jobs (affect analysis, memory extraction). Called on
+ *            every turn, so it should be cheap and quick.
+ *   safety - the crisis second opinion. Accuracy first.
+ *
+ * On Anthropic the long system prompt is marked for prompt caching, so the
+ * persona is billed once per five minutes rather than on every turn.
  */
 
 export interface ChatMessage {
@@ -20,13 +25,25 @@ export interface LlmConfig {
   fastModel: string;
   /** The safety second opinion. On Groq this is a third model so it never queues behind the others: rate limits there are per model. */
   safetyModel: string;
-  provider: "groq" | "openrouter";
+  provider: "anthropic" | "groq" | "openrouter";
 }
 
 export function llmConfig(): LlmConfig | null {
+  const anthropic = process.env.ANTHROPIC_API_KEY;
   const groq = process.env.GROQ_API_KEY;
   const openrouter = process.env.OPENROUTER_API_KEY;
-  if (openrouter) {
+  const forced = process.env.LLM_PROVIDER;
+  if (anthropic && (!forced || forced === "anthropic")) {
+    return {
+      provider: "anthropic",
+      baseUrl: "https://api.anthropic.com/v1",
+      apiKey: anthropic,
+      chatModel: process.env.LLM_CHAT_MODEL ?? "claude-sonnet-5",
+      fastModel: process.env.LLM_FAST_MODEL ?? "claude-haiku-4-5-20251001",
+      safetyModel: process.env.LLM_SAFETY_MODEL ?? "claude-sonnet-5",
+    };
+  }
+  if (openrouter && (!forced || forced === "openrouter")) {
     return {
       provider: "openrouter",
       baseUrl: "https://openrouter.ai/api/v1",
@@ -36,7 +53,7 @@ export function llmConfig(): LlmConfig | null {
       safetyModel: process.env.LLM_SAFETY_MODEL ?? process.env.LLM_FAST_MODEL ?? "meta-llama/llama-3.1-8b-instruct",
     };
   }
-  if (groq) {
+  if (groq && (!forced || forced === "groq")) {
     return {
       provider: "groq",
       baseUrl: "https://api.groq.com/openai/v1",
@@ -72,7 +89,46 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /** Longest we will wait inside one request for a rate-limit window to reopen. Replies wait longer than background jobs. */
 const MAX_WAIT_S = { fast: 6, chat: 12 } as const;
 
+const JSON_ONLY = "Reply with one JSON object and nothing else: no prose before or after it, no code fence.";
+
+/**
+ * Anthropic's Messages API: system apart from the turns, turns strictly
+ * alternating user/assistant, the first one from the user. For JSON jobs the
+ * assistant turn is prefilled with "{" so the reply is the object itself.
+ */
+function anthropicBody(model: string, messages: ChatMessage[], opts: CompletionOptions): Record<string, unknown> {
+  const system = messages.filter((m) => m.role === "system").map((m) => m.content.trim()).filter(Boolean).join("\n\n");
+  const turns: { role: "user" | "assistant"; content: string }[] = [];
+  for (const m of messages) {
+    if (m.role === "system") continue;
+    const content = m.content.trim(); if (!content) continue;
+    const last = turns[turns.length - 1];
+    if (last && last.role === m.role) last.content += "\n\n" + content; else turns.push({ role: m.role, content });
+  }
+  if (!turns.length || turns[0].role !== "user") turns.unshift({ role: "user", content: "(begin)" });
+  if (opts.json) {
+    if (turns[turns.length - 1].role === "assistant") turns[turns.length - 1].content += "\n\n{"; else turns.push({ role: "assistant", content: "{" });
+  }
+  const sys = (opts.json ? `${system}\n\n${JSON_ONLY}` : system).trim();
+  return {
+    model,
+    max_tokens: opts.maxTokens ?? (opts.tier === "chat" || !opts.tier ? 800 : 900),
+    temperature: opts.temperature ?? (opts.tier === "chat" || !opts.tier ? 0.7 : 0.2),
+    // The persona is long and the same on every turn: cache it.
+    ...(sys ? { system: [{ type: "text", text: sys, ...(sys.length > 2000 ? { cache_control: { type: "ephemeral" } } : {}) }] } : {}),
+    messages: turns,
+  };
+}
+
 async function post(cfg: LlmConfig, model: string, messages: ChatMessage[], opts: CompletionOptions): Promise<Response> {
+  if (cfg.provider === "anthropic") {
+    return fetch(`${cfg.baseUrl}/messages`, {
+      method: "POST",
+      headers: { "x-api-key": cfg.apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
+      body: JSON.stringify(anthropicBody(model, messages, opts)),
+      signal: opts.signal,
+    });
+  }
   const body: Record<string, unknown> = {
     model,
     messages,
@@ -102,10 +158,15 @@ async function post(cfg: LlmConfig, model: string, messages: ChatMessage[], opts
  */
 export async function complete(messages: ChatMessage[], opts: CompletionOptions = {}): Promise<string> {
   const cfg = llmConfig();
-  if (!cfg) throw new Error("No LLM configured. Set GROQ_API_KEY (or OPENROUTER_API_KEY).");
+  if (!cfg) throw new Error("No LLM configured. Set ANTHROPIC_API_KEY (or GROQ_API_KEY / OPENROUTER_API_KEY).");
   const primary = opts.tier === "fast" ? cfg.fastModel : opts.tier === "safety" ? cfg.safetyModel : cfg.chatModel;
 
   let res = await post(cfg, primary, messages, opts);
+  if (res.status === 529) {
+    // Anthropic is briefly overloaded: one short wait, then try again.
+    await res.text(); await sleep(1500);
+    res = await post(cfg, primary, messages, opts);
+  }
   if (res.status === 429) {
     const text = await res.text();
     const wait = retryAfterSeconds(res, text);
@@ -123,6 +184,11 @@ export async function complete(messages: ChatMessage[], opts: CompletionOptions 
     const text = await res.text();
     throw new Error(`LLM ${res.status}: ${text.slice(0, 300)}`);
   }
+  if (cfg.provider === "anthropic") {
+    const json = (await res.json()) as { content?: { type: string; text?: string }[] };
+    const text = (json.content ?? []).filter((b) => b.type === "text").map((b) => b.text ?? "").join("").trim();
+    return opts.json && !text.startsWith("{") ? `{${text}` : text;
+  }
   const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
   return json.choices?.[0]?.message?.content?.trim() ?? "";
 }
@@ -139,7 +205,7 @@ export function parseJsonObject<T>(text: string): T | null {
   return null;
 }
 
-/** Groq-hosted Whisper. Audio never touches any other service. */
+/** Groq-hosted Whisper. Audio never touches any other service. Anthropic has no speech-to-text, so the Groq key stays for this. */
 export async function transcribe(file: Blob, filename = "audio.webm", language?: string): Promise<string> {
   const key = process.env.GROQ_API_KEY;
   if (!key) throw new Error("GROQ_API_KEY is required for speech-to-text.");

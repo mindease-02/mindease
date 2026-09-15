@@ -38,7 +38,7 @@ Next.js 15 (App Router) · Groq (gpt-oss-120b chat, gpt-oss-20b analysis, Whispe
 ## Run locally
 
 ```bash
-cp .env.example .env.local   # then paste your GROQ_API_KEY
+cp .env.example .env.local   # then paste your ANTHROPIC_API_KEY (and a GROQ_API_KEY for voice)
 npm install
 npm run dev                  # http://localhost:3000
 npm test                     # crisis, safety-eval, trajectory, policy, memory, octant, parity
@@ -49,7 +49,7 @@ source .venv/bin/activate && python training/train_text_heads.py   # retrain the
 ## Deploy to Vercel
 
 1. Push this repo to GitHub, then **Import** it at vercel.com/new.
-2. In *Environment Variables* add `GROQ_API_KEY`, `SESSION_SECRET` (any long random string), `CRON_SECRET` (same), and — for proactive check-ins to work when nobody has the tab open — `KV_REST_API_URL` + `KV_REST_API_TOKEN` from the Upstash integration (Marketplace → Upstash → Redis).
+2. In *Environment Variables* add `ANTHROPIC_API_KEY` (Claude for replies, triage and the emotion read), `GROQ_API_KEY` (Whisper for voice), `SESSION_SECRET` (any long random string), `CRON_SECRET` (same), and — for proactive check-ins to work when nobody has the tab open — `KV_REST_API_URL` + `KV_REST_API_TOKEN` from the Upstash integration (Marketplace → Upstash → Redis).
 3. **Accounts and durable data (recommended):** create a free Supabase project, run `supabase/schema.sql` in its SQL editor, and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. In Supabase → Authentication → URL configuration, set the Site URL to your Vercel domain and add `https://<your-domain>/auth/callback` to the redirect list.
 4. Optional hardening: `DATA_ENCRYPTION_KEY` (`openssl rand -hex 32`) and `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` (`npx web-push generate-vapid-keys`) for push.
 5. `vercel.json` schedules `/api/checkin/sweep` daily at 09:00 UTC (the Hobby plan allows one run per day; change it to `0 * * * *` on Pro). The in-app scheduler evaluates every 10 minutes while the tab is open.
