@@ -7,7 +7,7 @@ import { moodText } from "@/lib/i18n";
 /**
  * The colour-changing ball, kept and improved: a 3D sphere that takes the
  * colour of the mood you pick, floats, follows the pointer, and turns the
- * whole site that colour. Tap the ball to move to the next mood; tap a
+ * whole site that colour. No ring around it. Tap the ball to move to the next mood; tap a
  * swatch to pick one. The same eight moods the chat asks about on arrival.
  *
  * The surface changes with the mood, not only the colour: angry grows
@@ -110,8 +110,6 @@ export default function MoodOrb({ lang }: { lang: string }) {
     const seg = phone ? 64 : 96;
     const ball = new THREE.Mesh(new THREE.SphereGeometry(1.15, seg, seg), mat); scene.add(ball);
     const halo = new THREE.Mesh(new THREE.SphereGeometry(1.42, seg / 2, seg / 2), new THREE.MeshBasicMaterial({ color: target.current.accent2, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, side: THREE.BackSide, depthWrite: false })); scene.add(halo);
-    const ringGeo = new THREE.TorusGeometry(1.75, 0.012, 8, 160);
-    const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: target.current.cool, transparent: true, opacity: 0.7 })); ring.rotation.x = Math.PI / 2.4; scene.add(ring);
     const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(3, 4, 5); scene.add(key);
     const rim = new THREE.DirectionalLight(target.current.cool, 1.6); rim.position.set(-4, -2, -3); scene.add(rim);
     scene.add(new THREE.HemisphereLight(0xffffff, 0x101018, 0.9));
@@ -140,7 +138,7 @@ export default function MoodOrb({ lang }: { lang: string }) {
       govern(dt);
       const t = target.current, want = skin.current;
       (mat.color as THREE.Color).lerp(t.accent, dt * 4); (mat.emissive as THREE.Color).lerp(t.accent, dt * 4); (mat.sheenColor as THREE.Color).lerp(t.accent2, dt * 4);
-      (halo.material as THREE.MeshBasicMaterial).color.lerp(t.accent2, dt * 4); (ring.material as THREE.MeshBasicMaterial).color.lerp(t.cool, dt * 4); rim.color.lerp(t.cool, dt * 4);
+      (halo.material as THREE.MeshBasicMaterial).color.lerp(t.accent2, dt * 4); rim.color.lerp(t.cool, dt * 4);
       // The skin follows the mood: every dial eases toward its target.
       const k = Math.min(1, dt * 3.2);
       for (const key of Object.keys(live) as (keyof Skin)[]) live[key] += (want[key] - live[key]) * k;
@@ -155,7 +153,6 @@ export default function MoodOrb({ lang }: { lang: string }) {
       ball.position.set((Math.random() - 0.5) * jitter, Math.sin(s * 0.9) * 0.08 * (1 - live.droop * 0.7) - live.droop * 0.12 + (Math.random() - 0.5) * jitter, 0);
       ball.rotation.set(ty * 0.6, tx * 0.8 + s * live.spin, 0);
       pulse = Math.max(0, pulse - dt * 1.6); const sc = 1 + Math.sin(pulse * Math.PI) * 0.12 + Math.sin(s * live.pulse) * 0.012 * live.pulse; ball.scale.setScalar(sc); halo.scale.setScalar(sc * (1 + Math.sin(s * 1.3) * 0.03));
-      ring.rotation.z = s * 0.35; ring.rotation.x = Math.PI / 2.4 + ty * 0.3; ring.scale.setScalar(1 + live.ghost * 0.25);
       renderer.render(scene, camera);
       if (rest && now > awakeUntil) { running = false; return; }
       raf = requestAnimationFrame(tick);
@@ -163,7 +160,7 @@ export default function MoodOrb({ lang }: { lang: string }) {
     raf = requestAnimationFrame(tick);
     const onResize = () => { renderer.setSize(size(), size()); };
     window.addEventListener("resize", onResize);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", onResize); el.removeEventListener("pointermove", onMove); el.removeEventListener("pointerleave", onLeave); el.removeEventListener("me:orb-pulse", onPulse); ball.geometry.dispose(); mat.dispose(); ringGeo.dispose(); renderer.dispose(); el.removeChild(renderer.domElement); };
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", onResize); el.removeEventListener("pointermove", onMove); el.removeEventListener("pointerleave", onLeave); el.removeEventListener("me:orb-pulse", onPulse); ball.geometry.dispose(); mat.dispose(); renderer.dispose(); el.removeChild(renderer.domElement); };
   }, []);
 
   const pick = (x: Palette, el?: HTMLElement) => {
