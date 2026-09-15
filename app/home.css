@@ -1650,3 +1650,66 @@ html[data-ch="why"] .world .bars, html[data-ch="demo"] .world .bars, html[data-c
   .world .cta p { font-size: .95rem; margin-top: 10px; }
   .world .cta .ctas { margin-top: 20px; }
 }
+
+/* =====================================================================
+   Component refinements, same layout and palette: a floating help button
+   with the crisis card as a sheet; memory cards you can forget; the
+   comparison as two cards; the sandbox with suggestions and a soft track.
+   ===================================================================== */
+.world .glass-card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); backdrop-filter: blur(20px) saturate(130%); -webkit-backdrop-filter: blur(20px) saturate(130%); border-radius: 22px; box-shadow: 0 30px 80px -40px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.07); }
+.world .btn, .world .swatch, .world .mem-forget, .world .help-fab, .world .try-pill { min-height: 44px; }
+
+.world .help-fab { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 48; display: inline-flex; align-items: center; gap: 8px; padding: 0 18px 0 14px; border-radius: 999px; border: 1px solid rgba(var(--accent2-rgb), .5); background: linear-gradient(135deg, var(--coral-2), var(--accent-mid)); color: var(--on-accent); font-weight: 600; font-size: .9rem; box-shadow: 0 16px 40px -14px rgba(var(--accent-rgb), .8); cursor: pointer; transition: transform .3s var(--ease), bottom .8s var(--ease); }
+html[data-ch="top"] .world .help-fab, html[data-ch="start"] .world .help-fab { bottom: calc(18px + 5vh); }
+.world .help-fab:hover { transform: translateY(-2px); }
+.world .help-fab:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.world .help-fab-ico { font-size: 1.05rem; }
+.world .help-backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(4,5,9,.62); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); display: grid; place-items: center; padding: 16px; animation: fab-fade .25s both; }
+@keyframes fab-fade { from { opacity: 0; } }
+.world .help-modal { width: min(640px, 100%); max-height: min(88svh, 900px); overflow: auto; padding: 8px 8px 14px; animation: rise .45s var(--ease) both; }
+.world .help-modal .crisis { margin: 0; }
+.world .help-foot { margin: 6px 18px 4px; font-size: .84rem; line-height: 1.6; color: var(--ink-3); }
+
+.world .feat-visual-mem { min-height: 0; padding: 0; background: none; border: 0; box-shadow: none; transform: none !important; backdrop-filter: none; }
+.world .mem-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.world .mem-card { position: relative; display: grid; gap: 8px; padding: 16px 16px 14px; border-radius: 18px; transition: transform .38s var(--ease), opacity .38s, filter .38s; }
+.world .mem-card.bye { transform: scale(.88) translateY(8px); opacity: 0; filter: blur(3px); }
+.world .mem-kind { display: inline-flex; align-items: center; gap: 6px; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; }
+.world .mem-card p { margin: 0; font-size: .92rem; line-height: 1.5; color: var(--ink); }
+.world .mem-forget { justify-self: start; min-height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--glass); color: var(--ink-2); font-size: .8rem; cursor: pointer; transition: background .25s, color .25s, transform .25s; }
+.world .mem-forget:hover { background: rgba(var(--accent-rgb), .18); color: var(--ink); transform: translateY(-1px); }
+.world .mem-note { grid-column: 1 / -1; margin: 0; padding: 14px 16px; border-radius: 16px; background: rgba(var(--cool-rgb), .1); border: 1px solid rgba(var(--cool-rgb), .3); color: var(--ink); font-size: .92rem; line-height: 1.5; animation: rise .5s var(--ease) both; }
+.world .mem-note .linkish { color: var(--cyan); font-weight: 600; margin-left: 6px; }
+
+.world .bento { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+.world .bento-card { padding: 20px 20px 16px; border-radius: 20px; }
+.world .bento-card.us { background: linear-gradient(160deg, rgba(var(--accent-rgb), .14), rgba(var(--cool-rgb), .05)); border-color: rgba(var(--accent-rgb), .35); }
+.world .bento-card h3 { margin: 0 0 12px; font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif; font-weight: 600; font-size: 1rem; letter-spacing: 0; }
+.world .bento-card ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.world .bento-card li { display: grid; gap: 2px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,.04); font-size: .92rem; line-height: 1.45; color: var(--ink); }
+.world .bento-card.them li { color: var(--ink-2); }
+.world .bento-k { font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.world .cmp-note { margin-top: 12px; }
+
+.world .try-form { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.world .try-area { resize: vertical; min-height: 88px; line-height: 1.6; font-size: 1rem; }
+.world .try-quick { display: flex; flex-wrap: wrap; gap: 8px; }
+.world .try-pill { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--glass); color: var(--ink-2); font: inherit; font-size: .84rem; cursor: pointer; transition: background .3s var(--ease), color .3s, transform .3s var(--ease); }
+.world .try-pill:hover { background: rgba(var(--accent-rgb), .16); color: var(--ink); transform: translateY(-1px); }
+.world .try-form .btn { justify-self: start; }
+.world .try-strength { align-items: center; }
+.world .try-track { display: block; flex: 1; height: 8px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+.world .try-track i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--cyan), var(--coral-2)); transition: width .8s var(--ease); }
+.world .soft-pulse { animation: soft-pulse 1.4s ease-in-out infinite; }
+@keyframes soft-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+
+@media (prefers-reduced-motion: reduce) { .world .help-backdrop, .world .help-modal, .world .mem-note, .world .soft-pulse { animation: none !important; } }
+@media (max-width: 720px) {
+  .world .help-fab { right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); width: 52px; height: 52px; padding: 0; justify-content: center; transition: transform .5s var(--ease), opacity .4s; }
+  /* On the title card the header already carries the crisis line; the button arrives with the next chapter. */
+  html[data-ch="top"] .world .help-fab { bottom: calc(14px + env(safe-area-inset-bottom)); transform: translateY(110px); opacity: 0; pointer-events: none; }
+  .world .help-fab-txt { display: none; }
+  .world .help-backdrop { align-items: end; padding: 0; }
+  .world .help-modal { border-radius: 24px 24px 0 0; max-height: 92svh; }
+  .world .bento, .world .mem-cards { grid-template-columns: 1fr; }
+}

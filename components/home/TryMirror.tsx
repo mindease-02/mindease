@@ -7,13 +7,17 @@ interface Read { states: { name: string; intensity: number }[]; need: string | n
 
 /**
  * The landing page's live read: one line in, the Mirror's caption out. It calls
- * the same analyser the chat uses, stores nothing, and is rate-limited.
+ * the same analyser the chat uses, stores nothing, and is rate-limited. Three
+ * suggested lines sit under the box. The read is shown as it really is: the
+ * states it saw, what it thinks you need, and how strongly it reads, never a
+ * diagnosis.
  */
 export default function TryMirror({ lang, embedded = false }: { lang: string; embedded?: boolean }) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [read, setRead] = useState<Read | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const quick = [1, 2, 3].map((i) => t(`tryQ${i}s`, lang));
 
   async function go(e: React.FormEvent) {
     e.preventDefault();
@@ -33,8 +37,11 @@ export default function TryMirror({ lang, embedded = false }: { lang: string; em
     <div className="try-box">
       <form onSubmit={go} className="try-form">
         <label htmlFor="try-line" className="sr-only">{t("tryTitle", lang)}</label>
-        <input id="try-line" className="field" value={text} onChange={(e) => setText(e.target.value.slice(0, 300))} placeholder={t("tryPh", lang)} autoComplete="off" />
-        <button className="btn btn-primary" type="submit" disabled={busy || text.trim().length < 3}>{busy ? t("tryReading", lang) : t("tryBtn", lang)} <PxArrow className="pxicon" /></button>
+        <textarea id="try-line" className="field try-area" rows={3} value={text} onChange={(e) => setText(e.target.value.slice(0, 300))} placeholder={t("tryPh", lang)} autoComplete="off" />
+        <div className="try-quick">
+          {quick.map((q) => <button key={q} type="button" className="try-pill" onClick={() => setText(q)}>{q}</button>)}
+        </div>
+        <button className={`btn btn-primary ${busy ? "soft-pulse" : ""}`} type="submit" disabled={busy || text.trim().length < 3}>{busy ? t("tryReading", lang) : t("tryBtn", lang)} <PxArrow className="pxicon" /></button>
       </form>
       {err && <p className="try-err" role="alert">{err}</p>}
       {read && (
@@ -43,6 +50,9 @@ export default function TryMirror({ lang, embedded = false }: { lang: string; em
             <span className="try-chips">{read.states.slice(0, 3).map((s) => <span key={s.name} className="try-chip">{s.name}</span>)}</span>
           </div>
           {read.need && <div className="try-cap"><b>{t("tryNeed", lang)}</b><span>{read.need}</span></div>}
+          <div className="try-cap try-strength"><b>{t("tryStrength", lang)}</b>
+            <span className="try-track" role="img" aria-label={`${t("tryStrength", lang)} ${Math.round(read.intensity * 100)}%`}><i style={{ width: `${Math.round(Math.max(0.04, Math.min(1, read.intensity)) * 100)}%` }} /></span>
+          </div>
           {read.why && <p className="try-why">{read.why}</p>}
           {(read.masking ?? 0) > 0.5 && read.maskingNote && <p className="try-why">{read.maskingNote}</p>}
         </div>

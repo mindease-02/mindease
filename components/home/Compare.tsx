@@ -2,32 +2,27 @@ import { t } from "@/lib/i18n";
 
 /**
  * The contrast section: what MindEase does against what companion apps tend
- * to do. Patterns, not names; nothing here grades a competitor.
+ * to do, as two cards side by side. Patterns, not names; nothing here grades
+ * a competitor.
  */
 export default function Compare({ lang, embedded = false }: { lang: string; embedded?: boolean }) {
   const rows = [1, 2, 3, 4, 5, 6];
-  const table = (
+  const cards = (
     <>
-        <div className="cmp-wrap">
-          <table className="cmp">
-            <thead>
-              <tr><th scope="col"><span className="sr-only">Topic</span></th><th scope="col" className="cmp-us">{t("cmpCol1", lang)}</th><th scope="col">{t("cmpCol2", lang)}</th></tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r}>
-                  <th scope="row">{t(`cmpR${r}`, lang)}</th>
-                  <td className="cmp-us" data-label={t("cmpCol1", lang)}>{t(`cmpR${r}a`, lang)}</td>
-                  <td data-label={t("cmpCol2", lang)}>{t(`cmpR${r}b`, lang)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="bento">
+        <div className="bento-card us glass-card">
+          <h3>{t("cmpCol1", lang)}</h3>
+          <ul>{rows.map((r) => <li key={r}><span className="bento-k">{t(`cmpR${r}`, lang)}</span><span>{t(`cmpR${r}a`, lang)}</span></li>)}</ul>
         </div>
-        <p className="cmp-note">{t("cmpNote", lang)}</p>
+        <div className="bento-card them glass-card">
+          <h3>{t("cmpCol2", lang)}</h3>
+          <ul>{rows.map((r) => <li key={r}><span className="bento-k">{t(`cmpR${r}`, lang)}</span><span>{t(`cmpR${r}b`, lang)}</span></li>)}</ul>
+        </div>
+      </div>
+      <p className="cmp-note">{t("cmpNote", lang)}</p>
     </>
   );
-  if (embedded) return table;
+  if (embedded) return cards;
   return (
     <section id="compare" className="block cmp-block" aria-labelledby="cmp-title">
       <div className="container">
@@ -35,7 +30,7 @@ export default function Compare({ lang, embedded = false }: { lang: string; embe
           <p className="cmp-eyebrow">{t("cmpEyebrow", lang)}</p>
           <h2 id="cmp-title" className="display">{t("cmpTitle", lang)}</h2>
         </div>
-        {table}
+        {cards}
       </div>
     </section>
   );

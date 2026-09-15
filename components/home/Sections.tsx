@@ -5,6 +5,7 @@ import { popIn } from "@/lib/motion";
 import Reveal from "./Reveal";
 import Chapter from "./Chapter";
 import DemoGauge from "./DemoGauge";
+import MemoryCards from "./MemoryCards";
 import { sentences, t } from "@/lib/i18n";
 import { PxEye, PxBrain, PxShield, PxPlay, PxRefresh, PxHand, PxArrow, PxCheck, PxHeart, PxStar, PxMoon, PxMessage } from "./pixelIcons";
 
@@ -123,7 +124,6 @@ export function Demo({ lang }: L) {
 }
 
 export function FeatMemory({ lang, embedded = false }: L & { embedded?: boolean }) {
-  const chips = [["f2c1k", "f2c1"], ["f2c2k", "f2c2"], ["f2c3k", "f2c3"], ["f2c4k", "f2c4"]];
   return (
     <div className="feat flip">
       <div>
@@ -131,12 +131,8 @@ export function FeatMemory({ lang, embedded = false }: L & { embedded?: boolean 
         <p>{t("f2P", lang)}</p>
         <ul><li>{t("f2L1", lang)}</li><li>{t("f2L2", lang)}</li><li>{t("f2L3", lang)}</li></ul>
       </div>
-      <div className="feat-visual" aria-hidden>
-        <div className="chips" data-stagger>
-          {chips.map(([k, v]) => (
-            <div className="chip-mem" key={v}><span className="k">{t(k, lang)}</span>{t(v, lang)}<span className="x">{t("forget", lang)}</span></div>
-          ))}
-        </div>
+      <div className="feat-visual feat-visual-mem">
+        <MemoryCards lang={lang} />
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import Details from "@/components/home/Details";
 import SceneMount from "@/components/home/SceneMount";
 import ThemeInit from "@/components/home/ThemeInit";
 import MobileCta from "@/components/home/MobileCta";
+import HelpFab from "@/components/home/HelpFab";
 import { getStore } from "@/lib/store";
 import { pageLanguage } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n";
@@ -33,6 +34,7 @@ export default async function Home() {
       </main>
       <Footer lang={lang} />
       <MobileCta href={chatHref} label={t("startTalking", lang)} />
+      <HelpFab lang={lang} />
     </div>
   );
 }

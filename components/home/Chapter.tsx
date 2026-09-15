@@ -30,6 +30,8 @@ export default function Chapter({ id, length = 2.6, className = "", label, child
       el.style.setProperty("--p", p.toFixed(4));
       const onStage = r.top < vh * 0.5 && r.bottom > vh * 0.5;
       if (onStage) document.documentElement.dataset.ch = id;
+      // Jumped straight past this chapter (an anchor link, a restored scroll position): give the stage up.
+      else if (document.documentElement.dataset.ch === id) document.documentElement.dataset.ch = r.bottom <= vh * 0.5 ? "past" : "before";
       let top: HTMLElement | null = null, topK = 0;
       for (const b of beats) {
         const a = parseFloat(b.dataset.in ?? "0"), z = parseFloat(b.dataset.out ?? "1"), f = parseFloat(b.dataset.fade ?? "0.1");
