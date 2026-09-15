@@ -1,0 +1,133 @@
+/* landing-hero: styles for the landing page, layered after home.css. */
+
+/* =====================================================================
+   Title card: the accent word breathes, the headline block drifts a few
+   pixels with the pointer, a typing example card sits in the right column
+   on wide screens, and the price line becomes icon pills.
+   ===================================================================== */
+.world .ch-hero .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr); align-items: end; column-gap: 48px; }
+@media (min-width: 1100px) { .world .ch-hero .hero-grid { grid-template-columns: minmax(0, 1fr) 340px; } }
+.world .ch-hero .hero-inner { max-width: 56rem; min-width: 0; }
+.world .ch-hero .hero-para { will-change: transform; }
+
+/* The accent word, with a slow breath of light behind it */
+.world .ch-hero .hero-accent { position: relative; display: inline-block; isolation: isolate; }
+.world .ch-hero .hero-accent::before { content: ""; position: absolute; inset: -28% -16%; z-index: -1; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, rgba(var(--accent-rgb), .42), rgba(var(--accent-rgb), .14) 55%, transparent 100%); filter: blur(22px); opacity: .7; animation: hero-accent-breathe 6s ease-in-out infinite; will-change: transform, opacity; }
+@keyframes hero-accent-breathe { 0%, 100% { transform: scale(.92); opacity: .5; } 50% { transform: scale(1.08); opacity: .95; } }
+
+/* Buttons: the primary carries the halo and a magnetic pull, the secondary is a ghost */
+.world .ch-hero .hero-ctas { margin-top: 26px; }
+.world .ch-hero .btn-magnet { transition-property: background, border-color, box-shadow; }
+.world .ch-hero .btn-ghost { background: rgba(255,255,255,.03); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.world .ch-hero .btn-ghost:hover { background: var(--glass-2); }
+
+/* The price line as pills, the honesty note under them */
+.world .ch-hero .hero-pills { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; padding: 0; }
+.world .ch-hero .pill { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 6px 12px 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--ink-2); font-size: .82rem; letter-spacing: .01em; white-space: nowrap; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.world .ch-hero .pill .pxicon { color: var(--coral-2); font-size: 14px; flex: none; }
+.world .ch-hero .hero-note { margin-top: 12px; font-size: .86rem; line-height: 1.5; color: var(--ink-3); max-width: 34rem; }
+
+/* The typing example, right column, wide screens only */
+.world .ch-hero .hero-loop { display: none; }
+@media (min-width: 1100px) { .world .ch-hero .hero-loop { display: grid; gap: 12px; width: 340px; padding: 16px 18px 18px; border-radius: 20px; justify-self: end; align-self: end; margin-bottom: 52px; } }
+.world .ch-hero .loop-head { display: flex; align-items: center; gap: 8px; font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif; font-size: .74rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.world .ch-hero .loop-dot { width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, rgba(255,255,255,0) 40%), linear-gradient(145deg, var(--coral-2), var(--accent-mid) 60%, var(--accent-deep)); }
+.world .ch-hero .loop-tag { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 500; font-size: .74rem; color: var(--ink-2); padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); }
+.world .ch-hero .loop-body { display: grid; gap: 12px; transition: opacity .45s var(--ease); }
+.world .ch-hero .hero-loop[data-phase="out"] .loop-body { opacity: 0; }
+.world .ch-hero .loop-you { margin: 0; min-height: calc(2 * 1.5em + 20px); font-size: .98rem; line-height: 1.5; color: var(--ink); padding: 10px 12px; border-radius: 14px 14px 14px 4px; background: rgba(var(--accent-rgb), .12); border: 1px solid rgba(var(--accent2-rgb), .18); overflow-wrap: anywhere; }
+.world .ch-hero .loop-caret { display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -0.15em; background: var(--coral-2); animation: loop-caret 1s steps(2, start) infinite; }
+.world .ch-hero .hero-loop[data-phase="read"] .loop-caret, .world .ch-hero .hero-loop[data-phase="out"] .loop-caret { display: none; }
+@keyframes loop-caret { to { visibility: hidden; } }
+.world .ch-hero .loop-read { display: grid; grid-template-rows: 0fr; opacity: 0; transform: translateY(6px); transition: grid-template-rows .5s var(--ease), opacity .5s var(--ease), transform .5s var(--ease); }
+.world .ch-hero .loop-read > div { display: grid; gap: 8px; min-height: 0; overflow: hidden; }
+.world .ch-hero .hero-loop[data-phase="read"] .loop-read { grid-template-rows: 1fr; opacity: 1; transform: none; }
+.world .ch-hero .loop-k { font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif; font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+.world .ch-hero .loop-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.world .ch-hero .loop-chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px 5px 9px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid var(--line); font-size: .78rem; color: var(--ink-2); opacity: 0; transform: translateY(4px); transition: opacity .4s var(--ease), transform .4s var(--ease); transition-delay: calc(var(--j, 0) * 90ms); }
+.world .ch-hero .hero-loop[data-phase="read"] .loop-chip { opacity: 1; transform: none; }
+.world .ch-hero .loop-chip b { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.world .ch-hero .loop-bar { position: relative; width: 26px; height: 3px; border-radius: 2px; background: rgba(255,255,255,.12); overflow: hidden; flex: none; }
+.world .ch-hero .loop-bar::after { content: ""; position: absolute; inset: 0 auto 0 0; width: calc(var(--v, 0) * 100%); background: var(--coral-2); border-radius: 2px; }
+
+/* Phone: everything inside the stage, buttons side by side, pills in one scrolling row */
+@media (max-width: 720px) {
+  .world .ch-hero .beat-title { padding-bottom: 64px; }
+  .world .ch-hero .hero-sub { margin-top: 12px; }
+  .world .ch-hero .hero-ctas { flex-wrap: nowrap; gap: 10px; margin-top: 16px; }
+  .world .ch-hero .hero-ctas .btn { flex: 1 1 0; width: auto; min-width: 0; padding-inline: 12px; white-space: nowrap; font-size: .92rem; justify-content: center; }
+  .world .ch-hero .hero-pills { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin: 14px -16px 0; padding: 2px 16px; }
+  .world .ch-hero .hero-pills::-webkit-scrollbar { display: none; }
+  .world .ch-hero .pill { flex: none; min-height: 30px; font-size: .78rem; }
+  .world .ch-hero .hero-note { font-size: .78rem; margin-top: 10px; }
+}
+
+/* =====================================================================
+   The focus room: a brand orb breathing inside the particle rings, three
+   sparks on orbit, mood chips that carry the mood to the arrival page, and
+   one call to action.
+   ===================================================================== */
+.world .ch-start .cta-stage { display: grid; justify-items: center; perspective: none; }
+.world .ch-start .room { position: relative; display: grid; justify-items: center; text-align: center; width: min(100%, 720px); }
+.world .ch-start .orb-wrap { position: relative; width: 220px; height: 220px; margin-bottom: 26px; display: grid; place-items: center; }
+.world .ch-start .orb-wrap::before { content: ""; position: absolute; inset: -34%; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, rgba(var(--accent-rgb), .34), rgba(var(--accent-rgb), .08) 45%, transparent 70%); filter: blur(18px); animation: orb-halo 7s ease-in-out infinite; }
+.world .ch-start .brand-orb { position: relative; width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, rgba(255,255,255,0) 40%), linear-gradient(145deg, var(--coral-2), var(--accent-mid) 60%, var(--accent-deep)); box-shadow: 0 30px 80px -20px rgba(var(--accent-rgb), .75), inset 0 0 0 1px rgba(255,255,255,.08), inset -18px -24px 40px rgba(0,0,0,.28); animation: orb-breathe 7s ease-in-out infinite; will-change: transform; }
+@keyframes orb-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.045); } }
+@keyframes orb-halo { 0%, 100% { opacity: .7; transform: scale(.96); } 50% { opacity: 1; transform: scale(1.06); } }
+
+/* Sparks on orbit around the orb (the markup is the old card's, the paths are new) */
+.world .ch-start .room .orbit { position: absolute; left: 50%; top: 50%; width: 330px; aspect-ratio: 1.55; margin: 0; transform: translate(-50%, -50%) rotate(-16deg); border-radius: 50%; pointer-events: none; }
+.world .ch-start .room .orbit i { position: absolute; left: 50%; top: 0; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #ffd7c4; box-shadow: 0 0 12px 3px rgba(var(--accent2-rgb), .7); offset-path: ellipse(50% 50% at 50% 50%); animation: orbit-run 14s linear infinite; }
+.world .ch-start .room .orbit.o2 { width: 290px; aspect-ratio: 1.3; transform: translate(-50%, -50%) rotate(28deg); }
+.world .ch-start .room .orbit.o2 i { animation-duration: 19s; animation-delay: -7s; width: 6px; height: 6px; margin: -3px 0 0 -3px; }
+.world .ch-start .room .orbit.o3 { width: 380px; aspect-ratio: 1.9; transform: translate(-50%, -50%) rotate(-4deg); }
+.world .ch-start .room .orbit.o3 i { animation-duration: 25s; animation-delay: -12s; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; opacity: .8; }
+
+/* Words under the orb */
+.world .ch-start .room h2 { position: relative; margin: 0; font-size: clamp(2rem, 4.4vw, 3.8rem); line-height: 1.05; letter-spacing: -0.02em; max-width: 14ch; text-wrap: balance; text-shadow: 0 30px 80px rgba(0,0,0,.7); }
+.world .ch-start .room-p { position: relative; text-shadow: 0 1px 14px rgba(7,8,11,.9); margin: 14px auto 0; max-width: 30rem; color: var(--ink-2); font-weight: 300; line-height: 1.55; font-size: clamp(.98rem, 1.3vw, 1.1rem); }
+.world .ch-start .mood-chips { position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 22px; }
+.world .ch-start .mood-chip { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding: 8px 16px 8px 12px; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(255,255,255,.05); color: var(--ink); text-decoration: none; font-size: .92rem; font-weight: 500; letter-spacing: .01em; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform .4s var(--ease), background .3s, border-color .3s, box-shadow .4s var(--ease); }
+.world .ch-start .mood-chip .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; background: var(--c); box-shadow: 0 0 10px 1px color-mix(in srgb, var(--c) 60%, transparent), inset -2px -3px 4px rgba(0,0,0,.35), inset 1px 1px 2px rgba(255,255,255,.4); }
+.world .ch-start .mood-chip:hover { transform: translateY(-2px); background: rgba(255,255,255,.09); border-color: color-mix(in srgb, var(--c) 55%, transparent); box-shadow: 0 12px 30px -16px color-mix(in srgb, var(--c) 70%, transparent); }
+.world .ch-start .mood-chip:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 3px; }
+.world .ch-start .ctas { position: relative; display: flex; justify-content: center; margin-top: 24px; }
+.world .ch-start .cta-note { margin: 16px auto 0; max-width: 30rem; font-size: .86rem; line-height: 1.5; color: var(--ink-3); text-shadow: 0 1px 14px rgba(7,8,11,.95), 0 0 28px rgba(7,8,11,.9); }
+
+@media (max-width: 720px) {
+  .world .ch-start .beat-cta { padding-bottom: 104px; }
+  .world .ch-start .orb-wrap { width: 150px; height: 150px; margin-bottom: 12px; }
+  .world .ch-start .room .orbit { width: 230px; }
+  .world .ch-start .room .orbit.o2 { width: 200px; }
+  .world .ch-start .room .orbit.o3 { width: 262px; }
+  .world .ch-start .room h2 { font-size: 1.75rem; }
+  .world .ch-start .room-p { font-size: .9rem; margin-top: 6px; }
+  .world .ch-start .mood-chips { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; width: calc(100% + 32px); margin: 14px -16px 0; padding: 2px 16px; }
+  .world .ch-start .mood-chips::-webkit-scrollbar { display: none; }
+  .world .ch-start .mood-chip { flex: none; padding: 6px 14px 6px 10px; font-size: .88rem; }
+  .world .ch-start .ctas { margin-top: 14px; }
+  .world .ch-start .cta-note { font-size: .78rem; margin-top: 8px; }
+}
+
+/* Short desktop viewports (laptops): a smaller orb so the room still clears the nav and the letterbox */
+@media (min-width: 721px) and (max-height: 780px) {
+  .world .ch-start .beat-cta { padding-bottom: calc(5vh + 24px); }
+  .world .ch-start .orb-wrap { width: 172px; height: 172px; margin-bottom: 16px; }
+  .world .ch-start .room .orbit { width: 270px; }
+  .world .ch-start .room .orbit.o2 { width: 236px; }
+  .world .ch-start .room .orbit.o3 { width: 310px; }
+  .world .ch-start .room h2 { font-size: clamp(1.9rem, 3.6vw, 3rem); }
+  .world .ch-start .room-p { margin-top: 10px; }
+  .world .ch-start .mood-chips { margin-top: 16px; }
+  .world .ch-start .ctas { margin-top: 18px; }
+  .world .ch-start .cta-note { margin-top: 12px; }
+}
+
+/* Reduced motion: no breathing, no orbit, no caret, no drift; everything visible */
+@media (prefers-reduced-motion: reduce) {
+  .world .ch-hero .hero-accent::before, .world .ch-start .brand-orb, .world .ch-start .orb-wrap::before, .world .ch-start .room .orbit i, .world .ch-hero .loop-caret { animation: none !important; }
+  .world .ch-hero .hero-accent::before { opacity: .6; transform: none; }
+  .world .ch-hero .hero-para { transform: none !important; }
+  .world .ch-hero .loop-caret { display: none; }
+  .world .ch-hero .loop-body, .world .ch-hero .loop-read, .world .ch-hero .loop-chip, .world .ch-start .mood-chip { transition: none; }
+}

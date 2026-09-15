@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import LanguageSwitch from "../LanguageSwitch";
 import TrustStrip from "../TrustStrip";
+import ProgressRail from "./ProgressRail";
 import { PxMenu, PxRemove, PxArrow } from "./pixelIcons";
 import { t } from "@/lib/i18n";
 
@@ -46,6 +47,7 @@ export default function Nav({ chatHref, signedIn, name, lang }: { chatHref: stri
         </div>
         <TrustStrip lang={lang} className="in-nav" />
       </header>
+      <ProgressRail lang={lang} />
       {open && (
         <div className="mobile-menu glass" role="dialog" aria-label="Menu">
           {LINKS.map(([h, l]) => <a key={h} href={h} onClick={() => setOpen(false)}>{l}</a>)}

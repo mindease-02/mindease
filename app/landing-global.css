@@ -1,0 +1,129 @@
+/* landing-global: the global layer of the landing film, loaded after home.css
+   and before the chapter sheets (hero, demo, details). Tokens, the type scale,
+   spacing, the header's glass, the left progress rail, chapter snapping and
+   the why chapter's counter. Specificity stays at .world plus a class or two
+   so the chapter sheets can still override anything here. */
+
+/* Tokens ------------------------------------------------------------------ */
+.world {
+  --ink: #f2f1ec;
+  --ink-2: #a9a8b1;            /* 8.5:1 on --bg */
+  --ink-3: #8e8f9a;            /* 6.2:1 on --bg: the quietest text still clears AA */
+  --line: rgba(255, 255, 255, .08);
+  --line-2: rgba(255, 255, 255, .15);
+  --color-foreground: var(--ink);
+  --color-muted-foreground: var(--ink-2);
+  --stagger: 120ms;
+  --navh: 100px;               /* the header measures 99px with the trust strip; beats clear it */
+  --gutter: 24px;              /* the chapters' copy starts here; the rail lives in it on wide screens */
+  /* Type scale: one display size for the chapters' h1/h2, a lead, the sentence
+     copy, eyebrows and captions. Fraunces carries the display, Manrope the rest. */
+  --fs-hero: clamp(2.6rem, 6.6vw, 5.9rem);
+  --fs-display: clamp(2.1rem, 5.4vw, 4.7rem);
+  --fs-title: clamp(1.7rem, 3.4vw, 2.9rem);
+  --fs-lead: clamp(1.3rem, 2.5vw, 2.05rem);
+  --fs-copy: clamp(.95rem, 1.15vw, 1.06rem);
+  --fs-caption: clamp(.82rem, .95vw, .9rem);
+  --fs-eyebrow: clamp(.66rem, .8vw, .74rem);
+}
+@media (max-width: 720px) { .world { --navh: 108px; } }
+@media (max-width: 640px) { .world { --gutter: 16px; } }
+@media (min-width: 1024px) { .world { --gutter: max(120px, calc((100% - 1200px) / 2)); } }
+/* The header keeps the full-width container; the film and the footer leave the gutter free. */
+.world main .container, .world footer .container { width: min(1200px, calc(100% - 2 * var(--gutter))); }
+
+/* Type scale and spacing --------------------------------------------------- */
+.world .eyebrow { font-size: var(--fs-eyebrow); letter-spacing: .2em; }
+.world .beat-line .eyebrow { margin: 0 0 10px; }
+.world .beat-line .line { font-size: var(--fs-display); line-height: 1.04; letter-spacing: -0.022em; }
+.world .beat-line .line-cap { margin-top: 14px; font-size: var(--fs-copy); line-height: 1.5; }
+.world .beat-orb .eyebrow { font-size: var(--fs-lead); }
+.world .ch-hero .hero-title { font-size: var(--fs-hero); }
+.world .cta h2 { font-size: var(--fs-display); }
+.world .sec-head { gap: 10px; }
+.world .sec-head h2 { font-size: var(--fs-title); line-height: 1.12; }
+.world .sec-head p { font-size: var(--fs-copy); line-height: 1.55; }
+.world .details .sec-head { margin-bottom: 16px; }
+.world .why-labels .wl { font-size: var(--fs-caption); }
+@media (max-width: 720px) {
+  .world .eyebrow { font-size: .62rem; letter-spacing: .16em; }
+  .world .beat-line .line { font-size: clamp(1.8rem, 8.4vw, 2.6rem); }
+  .world .beat-line .line-cap { font-size: .9rem; margin-top: 12px; }
+  .world .beat-orb .eyebrow { font-size: 1.3rem; }
+  .world .cta h2 { font-size: 1.9rem; }
+  .world .why-labels .wl { font-size: .7rem; }
+}
+
+/* Motion: a breathing atmosphere, a lift on buttons, one stagger ------------ */
+@keyframes atmos-breathe { 0%, 100% { opacity: .84; } 50% { opacity: 1; } }
+.world .atmos::before { animation: aurora 24s ease-in-out infinite alternate, atmos-breathe 6s ease-in-out infinite; }
+.world .btn:hover, .world .nav-cta .btn-primary:hover { transform: scale(1.02); }
+.world .btn:active, .world .nav-cta .btn-primary:active { transform: scale(.97); }
+.world .feat.in ul li:nth-child(2) { transition-delay: var(--stagger); }
+.world .feat.in ul li:nth-child(3) { transition-delay: calc(2 * var(--stagger)); }
+.world .foot > div:nth-child(2) { animation-delay: var(--stagger); }
+.world .foot > div:nth-child(3) { animation-delay: calc(2 * var(--stagger)); }
+.world .foot > div:nth-child(4) { animation-delay: calc(3 * var(--stagger)); }
+.world .dt[open] .dt-body > * + * { animation-delay: var(--stagger); }
+
+/* Header: glass that arrives smoothly once the reader scrolls -------------- */
+.world .nav { border-bottom: 1px solid transparent; transition: background .35s var(--ease), border-color .35s var(--ease), box-shadow .35s var(--ease), backdrop-filter .35s var(--ease), -webkit-backdrop-filter .35s var(--ease); }
+.world .nav.scrolled { background: color-mix(in srgb, var(--bg) 74%, transparent); backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); border-bottom-color: var(--line); box-shadow: 0 14px 40px -28px rgba(0, 0, 0, .85); }
+.world .nav .trust-strip.in-nav { color: var(--ink-2); }
+.world .nav .trust-strip.in-nav a { color: var(--ink); }
+.world .nav.scrolled .trust-strip.in-nav { border-top-color: var(--line); }
+
+/* Chapter snapping: gentle, only while the film is on the page, never under
+   reduced motion. Proximity means a chapter's start only pulls when the
+   reader stops near it; the scrub in between is untouched. --------------- */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.world .ch) { scroll-snap-type: y proximity; scroll-padding-top: 100px; }
+  .world .ch { scroll-snap-align: start; }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 720px) {
+  html:has(.world .ch) { scroll-padding-top: 108px; }
+}
+
+/* Left progress rail (1024px and up): a track in the gutter that fills from
+   the top between Why and Details, a dot and a label at each chapter's share
+   of the way. The current chapter is bright, passed chapters quieter. ------ */
+.world .prail { position: fixed; left: 28px; top: 50%; translate: 0 -50%; z-index: 46; width: 2px; height: min(240px, 36vh); display: none; }
+@media (min-width: 1024px) { .world .prail { display: block; animation: prail-in .9s var(--ease) both; } }
+@keyframes prail-in { from { opacity: 0; translate: -8px -50%; } }
+.world .prail-track { position: absolute; inset: 0; border-radius: 2px; background: var(--line-2); overflow: hidden; box-shadow: 0 0 0 2px rgba(7, 8, 11, .55); }
+.world .prail-fill { position: absolute; inset: 0; border-radius: 2px; background: linear-gradient(180deg, var(--coral-2), var(--accent-mid)); transform-origin: top; transform: scaleY(var(--pr, 0)); }
+.world .prail ol { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; }
+.world .prail li { position: absolute; left: 0; top: calc(var(--at, 0) * 100%); translate: 0 -50%; white-space: nowrap; }
+.world .prail a { position: relative; display: inline-flex; align-items: center; min-height: 28px; margin-left: 12px; padding: 4px 8px; border-radius: 999px; font-size: .66rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); text-decoration: none; text-shadow: 0 0 6px rgba(7, 8, 11, 1), 0 0 14px rgba(7, 8, 11, .9), 0 1px 2px rgba(7, 8, 11, .9); transition: color .3s var(--ease), background .3s var(--ease); }
+.world .prail a::before { content: ""; position: absolute; left: -15px; top: 50%; width: 8px; height: 8px; margin-top: -4px; box-sizing: border-box; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--line-2); box-shadow: 0 0 0 3px rgba(7, 8, 11, .6); transition: background .3s var(--ease), border-color .3s var(--ease), box-shadow .3s var(--ease); }
+.world .prail a.done { color: var(--ink-3); }
+.world .prail a.done::before { background: var(--accent-mid); border-color: var(--accent-mid); box-shadow: 0 0 0 3px rgba(7, 8, 11, .6); }
+.world .prail a.on { color: var(--ink); }
+.world .prail a.on::before { background: var(--coral-2); border-color: var(--coral-2); box-shadow: 0 0 0 3px rgba(7, 8, 11, .7), 0 0 0 6px rgba(var(--accent-rgb), .25), 0 0 14px rgba(var(--accent-rgb), .6); }
+.world .prail a:hover { color: var(--ink); background: var(--glass-2); }
+.world .prail a:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 2px; color: var(--ink); }
+
+/* The why chapter's counter: a glass pill top-right of the stage, under the
+   header, counting check-ins down as the beats pass. Decorative. ----------- */
+.world .why-counter { position: absolute; z-index: 3; top: calc(var(--navh) + 12px); right: 24px; display: inline-flex; align-items: baseline; gap: 10px; padding: 8px 14px 8px 16px; border-radius: 999px; background: color-mix(in srgb, var(--bg) 55%, transparent); border: 1px solid var(--line); backdrop-filter: blur(14px) saturate(130%); -webkit-backdrop-filter: blur(14px) saturate(130%); box-shadow: 0 14px 34px -22px rgba(0, 0, 0, .9), inset 0 1px 0 rgba(255, 255, 255, .06); font-size: .7rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); pointer-events: none; opacity: 0; translate: 0 -6px; transition: opacity .6s var(--ease), translate .6s var(--ease); }
+.world .why-counter b { font-family: var(--font-display), "Iowan Old Style", Georgia, serif; font-weight: 400; font-size: 1.2rem; line-height: 1; letter-spacing: 0; text-transform: none; color: var(--ink); font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
+.world .why-counter b small { font-size: .7em; color: var(--coral-2); margin-left: 1px; }
+html[data-ch="why"] .world .why-counter { opacity: 1; translate: 0 0; }
+.world .ch.still .why-counter { display: none; }
+/* On narrower screens the rising ribbon's label reaches the top-right corner; the pill sits under it. */
+@media (max-width: 1279px) { .world .why-counter { top: calc(var(--navh) + 64px); } }
+@media (max-width: 720px) { .world .why-counter { display: none; } }
+
+/* Reduced motion: no lift, no breathing, no rail entrance ------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .world .btn:hover, .world .btn:active, .world .nav-cta .btn-primary:hover, .world .nav-cta .btn-primary:active { transform: none; }
+  .world .atmos::before { animation: none; }
+  .world .prail { animation: none; }
+  .world .prail a, .world .prail a::before, .world .why-counter, .world .nav { transition: none; }
+}
+
+/* Round 1 fixes: the ball beat clears the phone call-to-action pill. */
+@media (max-width: 720px) {
+  .world .beat-orb { padding-bottom: 104px; }
+  .world .beat-orb .orb-stage, .world .beat-orb .orb-canvas { width: 200px; height: 200px; }
+}

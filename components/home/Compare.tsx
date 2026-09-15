@@ -2,14 +2,15 @@ import { t } from "@/lib/i18n";
 
 /**
  * The contrast section: what MindEase does against what companion apps tend
- * to do, as two cards side by side. Patterns, not names; nothing here grades
- * a competitor.
+ * to do, as two cards side by side. The MindEase card carries a soft coral
+ * edge and the other sits back a little; the copy in each row is the same
+ * copy either way. Patterns, not names; nothing here grades a competitor.
  */
 export default function Compare({ lang, embedded = false }: { lang: string; embedded?: boolean }) {
   const rows = [1, 2, 3, 4, 5, 6];
   const cards = (
     <>
-      <div className="bento">
+      <div className="bento cmp-cards">
         <div className="bento-card us glass-card">
           <h3>{t("cmpCol1", lang)}</h3>
           <ul>{rows.map((r) => <li key={r}><span className="bento-k">{t(`cmpR${r}`, lang)}</span><span>{t(`cmpR${r}a`, lang)}</span></li>)}</ul>

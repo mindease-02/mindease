@@ -1,9 +1,15 @@
 import "./home.css";
+import "./landing-global.css";
+import "./landing-hero.css";
+import "./landing-demo.css";
+import "./landing-details.css";
 import { currentSession } from "@/lib/auth";
 import { body, display, heading } from "@/components/home/fonts";
 import Nav from "@/components/home/Nav";
 import Hero from "@/components/home/Hero";
-import { Cta, Demo, Footer } from "@/components/home/Sections";
+import { Footer } from "@/components/home/Sections";
+import Demo from "@/components/home/Demo";
+import Start from "@/components/home/Start";
 import Why from "@/components/home/Why";
 import Details from "@/components/home/Details";
 import SceneMount from "@/components/home/SceneMount";
@@ -29,7 +35,7 @@ export default async function Home() {
         <Hero chatHref={chatHref} lang={lang} />
         <Why lang={lang} />
         <Demo lang={lang} />
-        <Cta chatHref={chatHref} lang={lang} />
+        <Start chatHref={chatHref} lang={lang} />
         <Details lang={lang} />
       </main>
       <Footer lang={lang} />

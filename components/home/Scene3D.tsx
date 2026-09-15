@@ -132,7 +132,7 @@ void main() {
 
 const ORDER = ["hero", "why", "demo", "start", "details"] as const;
 /** Where the cloud sits per chapter, in world units: above the lower-third copy, or beside it on wide screens. */
-const OFFSET: Record<string, [number, number]> = { hero: [1.9, 0.55], why: [0, 0.95], demo: [1.9, 0.5], start: [0, 0.1], details: [0, 0] };
+const OFFSET: Record<string, [number, number]> = { hero: [1.9, 0.55], why: [0, 0.95], demo: [2.5, 0.9], start: [0, 0.1], details: [0, 0] };
 const OFFSET_PHONE: Record<string, [number, number]> = { hero: [0, 1.7], why: [0, 1.1], demo: [0, 1.75], start: [0, 0.3], details: [0, 0] };
 /** Camera angle per chapter, in radians: the wheel turns as you scroll, the ring is seen face-on, the wave slightly from above. */
 const ROT: Record<string, [number, number]> = { hero: [0.18, 0.35], why: [0.14, 0.22], demo: [0.12, 0.7], start: [0.24, 0.0], details: [0.55, 0.15] };

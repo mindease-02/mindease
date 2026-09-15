@@ -1,0 +1,113 @@
+/* landing-details: the details section as a tab set, layered after home.css.
+   One row of tabs, one panel at a time, nothing folded away. */
+
+.world .details .sec-head { margin-bottom: 26px; }
+
+/* ------------------------------------------------------------------ tabs */
+.world .dtabs { position: relative; }
+.world .dtabs-list {
+  display: flex; gap: 2px; align-items: stretch;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity; scroll-padding-inline: 4px;
+  padding: 4px 0 0;
+}
+.world .dtabs-list::-webkit-scrollbar { display: none; }
+.world .dtab {
+  position: relative; flex: 0 0 auto; min-height: 48px; margin: 0 0 -1px;
+  padding: 12px 16px 14px; border: 0; border-radius: 10px 10px 0 0; background: none;
+  color: var(--ink-2);
+  font-family: var(--font-display), "Iowan Old Style", Georgia, serif;
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem); letter-spacing: -0.01em; line-height: 1.2;
+  white-space: nowrap; cursor: pointer; scroll-snap-align: start;
+  transition: color .3s, background .3s;
+}
+.world .dtab::after {
+  content: ""; position: absolute; left: 16px; right: 16px; bottom: 0; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  transform: scaleX(0); transform-origin: left; transition: transform .5s var(--ease), opacity .3s; opacity: 0;
+}
+/* Hover only where a pointer can hover, so a tapped tab does not keep a stale tint on iOS. */
+@media (hover: hover) { .world .dtab:hover { color: var(--ink); background: var(--glass); } }
+.world .dtab[aria-selected="true"] { color: var(--ink); }
+.world .dtab[aria-selected="true"]::after { opacity: 1; transform: scaleX(1); }
+.world .dtab:focus-visible { outline: 2px solid var(--color-ring); outline-offset: -3px; }
+
+/* ---------------------------------------------------------------- panels */
+/* The panel keeps home.css's .dt class for the pointer light; the row chrome goes. */
+.world .dt-panel, .world .dt-panel:last-of-type { border: 0; overflow: visible; }
+.world .dt-panel { padding: 30px 0 4px; min-height: 400px; scroll-margin-top: 120px; border-radius: 12px; }
+.world .dt-panel[hidden] { display: none !important; }
+.world .dt-panel:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 6px; }
+.world .dt-panel .dt-body { padding: 0 4px 20px; }
+.world .dt-panel .feat { padding: 0; border-top: 0; gap: 44px; }
+/* The feature list was gated on a reveal class it never received inside the old accordion. */
+.world .dt-panel .feat ul li { opacity: 1; transform: none; }
+.world .dt-panel .feat ul { margin-top: 14px; }
+
+/* ---------------------------------------------------- try the read panel */
+.world .try-embed { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 24px 48px; align-items: start; }
+.world .try-embed .try-sub { margin: 0; max-width: 26rem; font-size: 1.05rem; }
+.world .dt-panel .try-box { max-width: none; }
+.world .try-live:empty { display: none; }
+.world .try-read { margin-top: 18px; display: grid; gap: 12px; }
+.world .try-states-cap { margin-bottom: -4px; }
+.world .try-states { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.world .try-state { display: grid; grid-template-columns: minmax(6.5rem, max-content) minmax(0, 1fr); align-items: center; gap: 12px; font-size: .92rem; }
+.world .try-state-name { color: var(--ink); overflow-wrap: anywhere; }
+.world .try-track { position: relative; background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); }
+.world .try-track-state { height: 10px; }
+.world .try-track-state i { background: linear-gradient(90deg, rgba(var(--cool-rgb), .85), var(--coral-2)); }
+.world .try-foot { margin: 2px 0 0; font-size: .8rem; line-height: 1.5; color: var(--ink-3); }
+@media (max-width: 900px) {
+  .world .try-embed { grid-template-columns: 1fr; gap: 14px; }
+  .world .try-embed .try-sub { max-width: none; font-size: 1rem; }
+}
+
+/* --------------------------------------------------------- comparison */
+.world .bento-card.us {
+  border-color: rgba(var(--accent-rgb), .45);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), .10), 0 0 48px -8px rgba(var(--accent-rgb), .42), 0 30px 80px -40px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.world .bento-card.them { opacity: .8; }
+.world .bento-card.them h3, .world .bento-card.them li, .world .bento-card.them .bento-k { color: var(--ink-2); }
+
+/* ----------------------------------------------------------------- motion */
+@keyframes dt-in { from { opacity: 0; transform: translateY(6px); } }
+@keyframes bar-in { from { width: 0; } }
+@keyframes glyph-dot { from { transform: scale(.2); opacity: 0; } }
+@keyframes glyph-sweep { to { stroke-dashoffset: 0; } }
+@keyframes glyph-hand { from { transform: rotate(-28deg); } }
+@keyframes glyph-pill { from { transform: translateX(-10px); opacity: 0; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .world .dt-panel .dt-body { animation: dt-in .55s var(--ease) both; }
+  .world .try-read .try-track i { animation: bar-in .8s var(--ease) both; animation-delay: calc(var(--i, 0) * 90ms); }
+  .world .try-read .try-strength .try-track i { animation-delay: calc(var(--i, 0) * 90ms + 60ms); }
+  .world .try-read > * { animation: dt-in .5s var(--ease) both; }
+  .world .try-read > * + * { animation-delay: .08s; }
+  .world .try-read > * + * + * { animation-delay: .16s; }
+  .world .try-read > * + * + * + * { animation-delay: .24s; }
+
+  /* Check-in glyphs, when their panel is shown: the dots fill, the dial sweeps, the pill slides in. */
+  .world .dt-panel .glyphs figure:nth-child(1) g circle { transform-box: fill-box; transform-origin: center; }
+  .world .dt-panel .glyphs figure:nth-child(1) g circle:nth-child(1) { animation: glyph-dot .6s var(--ease) .25s both; }
+  .world .dt-panel .glyphs figure:nth-child(1) g circle:nth-child(2) { animation: glyph-dot .6s var(--ease) .45s both; }
+  .world .dt-panel .glyphs figure:nth-child(2) svg path { stroke-dasharray: 72; stroke-dashoffset: 72; animation: glyph-sweep 1.1s var(--ease) .3s both; }
+  .world .dt-panel .glyphs figure:nth-child(2) svg line { transform-box: view-box; transform-origin: 22px 22px; animation: glyph-hand 1.1s var(--ease) .3s both; }
+  .world .dt-panel .glyphs figure:nth-child(3) svg rect:first-child { animation: glyph-pill .7s var(--ease) .5s both; }
+}
+
+/* ----------------------------------------------------------------- phones */
+@media (max-width: 720px) {
+  .world .details .sec-head { margin-bottom: 18px; }
+  /* One row that scrolls, bleeding to the screen edges, never wrapping. */
+  .world .dtabs-list { margin: 0 -16px; padding: 4px 16px 0; scroll-padding-inline: 16px; gap: 0; }
+  .world .dtab { font-size: 1.02rem; padding: 12px 12px 14px; min-height: 46px; }
+  .world .dtab::after { left: 12px; right: 12px; }
+  .world .dt-panel { padding-top: 22px; min-height: 0; }
+  .world .dt-panel .dt-body { padding: 0 0 12px; }
+  .world .dt-panel .feat { gap: 18px; }
+  .world .try-state { grid-template-columns: minmax(5.5rem, max-content) minmax(0, 1fr); gap: 10px; }
+}

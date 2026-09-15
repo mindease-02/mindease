@@ -1,6 +1,7 @@
 import { t } from "@/lib/i18n";
 import Chapter from "./Chapter";
 import MoodOrb from "./MoodOrbMount";
+import WhyCounter from "./WhyCounter";
 
 /**
  * Why MindEase exists, told over the two particle ribbons: people in your
@@ -19,7 +20,8 @@ export default function Why({ lang }: { lang: string }) {
   // Beats: the first line, the turn, the answer (if the copy has one), then the ball.
   const beats = last ? [[0, 0.24], [0.24, 0.46], [0.46, 0.7]] : [[0, 0.34], [0.34, 0.7]];
   return (
-    <Chapter id="why" length={3.6} className="ch-why" label={t("navWhy", lang)}>
+    <Chapter id="why" length={3.0} className="ch-why" label={t("navWhy", lang)}>
+      <WhyCounter lang={lang} />
       <div className="why-labels" aria-hidden data-beat data-in="0.05" data-out="0.72" data-fade="0.08">
         <span className="wl ppl" style={{ left: "var(--why-ppl-x)", top: "var(--why-ppl-y)" }}>{t("whyPeople", lang)}</span>
         <span className="wl app" style={{ left: "var(--why-app-x)", top: "var(--why-app-y)" }}>{t("whyApp", lang)}</span>
