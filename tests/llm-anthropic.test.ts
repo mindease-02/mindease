@@ -92,3 +92,16 @@ test("the safety tier falls back to the fast model when its own is out of budget
     } finally { f.restore(); }
   });
 });
+
+test("when Anthropic refuses for a reason other than rate limits, the Groq fallback answers", async () => {
+  await withEnv(ENV, async () => {
+    const f = stubFetch([{ status: 400, body: { error: { message: "credit balance too low" } } }, { status: 200, body: { choices: [{ message: { content: "from groq" } }] } }]);
+    const warn = console.warn; console.warn = () => {};
+    try {
+      assert.equal(await complete([{ role: "user", content: "hi" }], { tier: "chat" }), "from groq");
+      assert.equal(f.calls.length, 2);
+      assert.ok(f.calls[1].url.startsWith("https://api.groq.com/"));
+      assert.equal(JSON.parse(String(f.calls[1].init.body)).model, "openai/gpt-oss-120b");
+    } finally { f.restore(); console.warn = warn; }
+  });
+});

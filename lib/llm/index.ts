@@ -28,11 +28,11 @@ export interface LlmConfig {
   provider: "anthropic" | "groq" | "openrouter";
 }
 
-export function llmConfig(): LlmConfig | null {
+export function llmConfig(prefer?: "groq"): LlmConfig | null {
   const anthropic = process.env.ANTHROPIC_API_KEY;
   const groq = process.env.GROQ_API_KEY;
   const openrouter = process.env.OPENROUTER_API_KEY;
-  const forced = process.env.LLM_PROVIDER;
+  const forced = prefer ?? process.env.LLM_PROVIDER;
   if (anthropic && (!forced || forced === "anthropic")) {
     return {
       provider: "anthropic",
@@ -179,6 +179,20 @@ export async function complete(messages: ChatMessage[], opts: CompletionOptions 
     } else {
       throw new Error(`LLM 429: ${text.slice(0, 300)}`);
     }
+  }
+  if (!res.ok && cfg.provider === "anthropic" && res.status !== 429 && process.env.GROQ_API_KEY) {
+    // Anthropic refused (billing, an outage, a bad model id): the Groq fallback answers rather than nobody.
+    const text = await res.text();
+    console.warn(`LLM anthropic ${res.status}, falling back to groq: ${text.slice(0, 160)}`);
+    const back = llmConfig("groq");
+    if (back) {
+      const model = opts.tier === "fast" ? back.fastModel : opts.tier === "safety" ? back.safetyModel : back.chatModel;
+      const r2 = await post(back, model, messages, opts);
+      if (!r2.ok) throw new Error(`LLM ${r2.status}: ${(await r2.text()).slice(0, 300)}`);
+      const j2 = (await r2.json()) as { choices?: { message?: { content?: string } }[] };
+      return j2.choices?.[0]?.message?.content?.trim() ?? "";
+    }
+    throw new Error(`LLM ${res.status}: ${text.slice(0, 300)}`);
   }
   if (!res.ok) {
     const text = await res.text();
