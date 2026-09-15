@@ -11,9 +11,10 @@ import { moodText } from "@/lib/i18n";
  * swatch to pick one. The same eight moods the chat asks about on arrival.
  *
  * The surface changes with the mood, not only the colour: angry grows
- * spikes; heavy sags, goes wet and cracks; anxious trembles with a rough,
- * pale skin; restless throws sparks; hopeful shimmers; lonely thins to a
- * rim-lit ghost; numb goes frosted and matte; okay stays smooth and soft.
+ * spikes and throbs with heat; heavy sags, goes wet and drips; anxious
+ * trembles with a rough, pale skin; restless throws sparks and ripples;
+ * hopeful shimmers with dappled light; lonely thins to a rim-lit ghost;
+ * numb goes frosted and matte; okay swirls softly. No line patterns.
  * All of it is one material with a few dials, so it reads as the same ball.
  *
  * Phones get a lighter sphere. If frames stay slow the pixel ratio drops to 1
@@ -21,23 +22,23 @@ import { moodText } from "@/lib/i18n";
  * tap or a pointer move, then rests.
  */
 /** Surface dials per mood, 0..1 unless noted. Lerped, so a change of mood is a change of skin, not a cut. */
-type Skin = { spike: number; rough: number; droop: number; crack: number; tremble: number; spark: number; shimmer: number; ghost: number; pale: number; roughness: number; clearcoat: number; emissive: number; spin: number; pulse: number;
-  /** Surface details: a slow two-tone swirl, dappled light, drips at the bottom, a stain toward the bottom, breathing fog, goosebumps, flickering veins, ember-lit cracks, racing bands, ripples, static grain, and how the cracks are coloured. */
-  swirl: number; dapple: number; drips: number; stain: number; fog: number; bumps: number; veins: number; ember: number; bands: number; ripple: number; grain: number; crackMix: number; crackLum: number;
+type Skin = { spike: number; rough: number; droop: number; tremble: number; spark: number; shimmer: number; ghost: number; pale: number; roughness: number; clearcoat: number; emissive: number; spin: number; pulse: number;
+  /** Surface details: a slow two-tone swirl, dappled light, drips at the bottom, a stain toward the bottom, breathing fog, goosebumps, throbbing heat, racing bands, ripples, static grain. No line patterns anywhere. */
+  swirl: number; dapple: number; drips: number; stain: number; fog: number; bumps: number; heat: number; bands: number; ripple: number; grain: number;
   /** The halo: how bright, how wide, and what it does: flare in rays, flicker, sag, thin to a far ring, throw sparks. */
   halo: number; haloSpread: number; haloRays: number; haloFlicker: number; haloDroop: number; haloRing: number; haloSparks: number };
-const BASE: Skin = { spike: 0, rough: 0, droop: 0, crack: 0, tremble: 0, spark: 0, shimmer: 0, ghost: 0, pale: 0, roughness: 0.25, clearcoat: 1, emissive: 0.18, spin: 0.15, pulse: 1.3,
-  swirl: 0, dapple: 0, drips: 0, stain: 0, fog: 0, bumps: 0, veins: 0, ember: 0, bands: 0, ripple: 0, grain: 0, crackMix: 1, crackLum: 0.12,
+const BASE: Skin = { spike: 0, rough: 0, droop: 0, tremble: 0, spark: 0, shimmer: 0, ghost: 0, pale: 0, roughness: 0.25, clearcoat: 1, emissive: 0.18, spin: 0.15, pulse: 1.3,
+  swirl: 0, dapple: 0, drips: 0, stain: 0, fog: 0, bumps: 0, heat: 0, bands: 0, ripple: 0, grain: 0,
   halo: 0.55, haloSpread: 1, haloRays: 0, haloFlicker: 0, haloDroop: 0, haloRing: 0, haloSparks: 0 };
 const SKINS: Record<string, Partial<Skin>> = {
   okay: { swirl: 1, shimmer: 0.2, roughness: 0.22 },
   hopeful: { shimmer: 1, dapple: 1, spark: 0.7, emissive: 0.36, roughness: 0.16, spin: 0.25, halo: 0.85, haloSpread: 1.12 },
-  heavy: { droop: 1, drips: 1, stain: 1, crack: 1, crackLum: 0.02, roughness: 0.04, emissive: 0.05, spin: 0.05, pulse: 0.6, halo: 0.5, haloSpread: 1.0, haloDroop: 1 },
+  heavy: { droop: 1, drips: 1, stain: 1, roughness: 0.04, emissive: 0.05, spin: 0.05, pulse: 0.6, halo: 0.5, haloSpread: 1.0, haloDroop: 1 },
   lonely: { ghost: 1, fog: 1, rough: 0.25, roughness: 0.5, emissive: 0.04, spin: 0.08, halo: 0.45, haloSpread: 1.1, haloRing: 1 },
-  anxious: { tremble: 1, bumps: 1, rough: 0.35, crack: 0.75, veins: 1, crackLum: 0.0, pale: 0.5, roughness: 0.75, emissive: 0.1, spin: 0.3, pulse: 3, halo: 0.6, haloFlicker: 1 },
-  angry: { spike: 1, crack: 0.8, ember: 1, crackMix: 0, roughness: 0.4, emissive: 0.5, spin: 0.35, pulse: 2.2, halo: 1.0, haloSpread: 1.12, haloRays: 1 },
+  anxious: { tremble: 1, bumps: 1, rough: 0.35, pale: 0.5, roughness: 0.75, emissive: 0.1, spin: 0.3, pulse: 3, halo: 0.6, haloFlicker: 1 },
+  angry: { spike: 1, heat: 1, roughness: 0.4, emissive: 0.5, spin: 0.35, pulse: 2.2, halo: 1.0, haloSpread: 1.12, haloRays: 1 },
   restless: { spark: 1, bands: 1, ripple: 1, shimmer: 0.35, emissive: 0.42, roughness: 0.3, spin: 0.7, pulse: 3.5, halo: 0.9, haloSpread: 1.15, haloFlicker: 0.5, haloSparks: 1 },
-  numb: { rough: 0.7, grain: 1, crack: 0.5, crackMix: 0.6, crackLum: 0.95, pale: 0.9, roughness: 0.95, clearcoat: 0, emissive: 0, spin: 0.03, pulse: 0.4, halo: 0.12, haloSpread: 0.85 },
+  numb: { rough: 0.7, grain: 1, pale: 0.9, roughness: 0.95, clearcoat: 0, emissive: 0, spin: 0.03, pulse: 0.4, halo: 0.12, haloSpread: 0.85 },
 };
 /** The halo: a camera-facing plane behind the ball, drawn as a radial glow with the mood's dials. */
 const HALO_VERT = `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
@@ -92,7 +93,7 @@ const VERT_BODY = `
   transformed.xz *= 1.0 + 0.07 * uDroop;
   vPos = nrm;
 `;
-const FRAG_HEAD = `uniform float uTime, uCrack, uSpark, uShimmer, uGhost, uPale, uSwirl, uDapple, uStain, uFog, uVeins, uEmber, uBands, uGrain, uCrackMix, uCrackLum; varying vec3 vPos; ${NOISE}`;
+const FRAG_HEAD = `uniform float uTime, uSpark, uShimmer, uGhost, uPale, uSwirl, uDapple, uStain, uFog, uHeat, uBands, uGrain; varying vec3 vPos; ${NOISE}`;
 const FRAG_BODY = `
   #include <dithering_fragment>
   {
@@ -105,12 +106,10 @@ const FRAG_BODY = `
     gl_FragColor.rgb += dp * uDapple * vec3(0.35, 0.35, 0.18);
     // darker toward the bottom, like something soaked through
     gl_FragColor.rgb *= 1.0 - uStain * 0.4 * smoothstep(0.2, -1.0, n.y);
-    // cracks: coloured (dark, or frost-light), or ember-lit
+    // heat: soft throbbing patches of glow, no lines
     float f = vnoise(n * 4.5 + 3.0);
-    float crack = smoothstep(0.045, 0.0, abs(f - 0.5)) * uCrack;
-    crack *= 1.0 - uVeins * 0.6 * (0.5 + 0.5 * sin(uTime * 13.0 + f * 60.0));
-    gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(uCrackLum), crack * uCrackMix * 0.9);
-    gl_FragColor.rgb += crack * uEmber * vec3(1.0, 0.45, 0.12) * (0.8 + 0.2 * sin(uTime * 4.0 + f * 20.0));
+    float heat = smoothstep(0.45, 0.9, vnoise(n * 3.0 + vec3(0.0, uTime * 0.25, 0.0))) * (0.75 + 0.25 * sin(uTime * 4.5 + f * 12.0));
+    gl_FragColor.rgb += heat * uHeat * vec3(0.9, 0.35, 0.08);
     // sparks, drifting up
     float sp = smoothstep(0.86, 1.0, vnoise(n * 28.0 + vec3(0.0, -uTime * 1.6, 0.0))) * uSpark;
     gl_FragColor.rgb += sp * vec3(1.0, 0.92, 0.7) * (0.6 + 0.4 * sin(uTime * 9.0 + f * 40.0));
@@ -158,8 +157,8 @@ export default function MoodOrb({ lang }: { lang: string }) {
 
     const mat = new THREE.MeshPhysicalMaterial({ color: target.current.accent, roughness: 0.25, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.15, sheen: 0.6, sheenColor: target.current.accent2, emissive: target.current.accent, emissiveIntensity: 0.18, transparent: true });
     // The mood dials, as uniforms spliced into the standard material so lighting stays right.
-    const U = { uTime: { value: 0 }, uSpike: { value: 0 }, uRough: { value: 0 }, uDroop: { value: 0 }, uTremble: { value: 0 }, uCrack: { value: 0 }, uSpark: { value: 0 }, uShimmer: { value: 0 }, uGhost: { value: 0 }, uPale: { value: 0 },
-      uDrips: { value: 0 }, uRipple: { value: 0 }, uBumps: { value: 0 }, uSwirl: { value: 0 }, uDapple: { value: 0 }, uStain: { value: 0 }, uFog: { value: 0 }, uVeins: { value: 0 }, uEmber: { value: 0 }, uBands: { value: 0 }, uGrain: { value: 0 }, uCrackMix: { value: 1 }, uCrackLum: { value: 0.12 } };
+    const U = { uTime: { value: 0 }, uSpike: { value: 0 }, uRough: { value: 0 }, uDroop: { value: 0 }, uTremble: { value: 0 }, uSpark: { value: 0 }, uShimmer: { value: 0 }, uGhost: { value: 0 }, uPale: { value: 0 },
+      uDrips: { value: 0 }, uRipple: { value: 0 }, uBumps: { value: 0 }, uSwirl: { value: 0 }, uDapple: { value: 0 }, uStain: { value: 0 }, uFog: { value: 0 }, uHeat: { value: 0 }, uBands: { value: 0 }, uGrain: { value: 0 } };
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, U);
       sh.vertexShader = sh.vertexShader.replace("#include <common>", `#include <common>\n${VERT_HEAD}`).replace("#include <begin_vertex>", VERT_BODY);
@@ -204,10 +203,10 @@ export default function MoodOrb({ lang }: { lang: string }) {
       // The skin follows the mood: every dial eases toward its target.
       const k = Math.min(1, dt * 3.2);
       for (const key of Object.keys(live) as (keyof Skin)[]) live[key] += (want[key] - live[key]) * k;
-      U.uSpike.value = live.spike; U.uRough.value = live.rough; U.uDroop.value = live.droop; U.uTremble.value = live.tremble; U.uCrack.value = live.crack;
+      U.uSpike.value = live.spike; U.uRough.value = live.rough; U.uDroop.value = live.droop; U.uTremble.value = live.tremble;
       U.uSpark.value = live.spark; U.uShimmer.value = live.shimmer; U.uGhost.value = live.ghost; U.uPale.value = live.pale;
       U.uDrips.value = live.drips; U.uRipple.value = live.ripple; U.uBumps.value = live.bumps; U.uSwirl.value = live.swirl; U.uDapple.value = live.dapple; U.uStain.value = live.stain;
-      U.uFog.value = live.fog; U.uVeins.value = live.veins; U.uEmber.value = live.ember; U.uBands.value = live.bands; U.uGrain.value = live.grain; U.uCrackMix.value = live.crackMix; U.uCrackLum.value = live.crackLum;
+      U.uFog.value = live.fog; U.uHeat.value = live.heat; U.uBands.value = live.bands; U.uGrain.value = live.grain;
       mat.roughness = live.roughness; mat.clearcoat = live.clearcoat; mat.emissiveIntensity = live.emissive;
       H.uI.value = live.halo; H.uSpread.value = live.haloSpread; H.uRays.value = live.haloRays; H.uFlicker.value = live.haloFlicker; H.uDroop.value = live.haloDroop; H.uRing.value = live.haloRing; H.uSparks.value = live.haloSparks; H.uPulse.value = live.pulse;
       tx += (px - tx) * dt * 5; ty += (py - ty) * dt * 5;
