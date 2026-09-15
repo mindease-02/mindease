@@ -3,7 +3,7 @@ import Link from "next/link";
 import Reveal from "./Reveal";
 import MemoryCards from "./MemoryCards";
 import { t } from "@/lib/i18n";
-import { PxEye, PxBrain, PxShield, PxPlay, PxRefresh, PxHand, PxArrow, PxCheck, PxHeart, PxStar, PxMoon, PxMessage } from "./pixelIcons";
+import { PxHeart, PxStar, PxMoon, PxMessage } from "./pixelIcons";
 
 type L = { lang: string };
 
