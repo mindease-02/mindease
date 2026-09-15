@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { LANGUAGES, t } from "@/lib/i18n";
-import { PxUser, PxMirror, PxSound, PxDownload, PxRefresh } from "../home/pixelIcons";
+import { PxUser, PxMirror, PxSound, PxDownload, PxRefresh, PxMic } from "../home/pixelIcons";
 
 interface Props {
   name: string;
@@ -12,11 +12,13 @@ interface Props {
   onSpeak: (v: boolean) => void;
   onLanguage: (id: string) => void;
   onMirror: () => void;
+  /** Starts hands-free voice chat (the full-screen voice overlay). */
+  onVoice: () => void;
   onLogout: () => void;
 }
 
 /** The person's corner of the header: who they are, where their results live, the switches that are theirs. */
-export default function ProfileMenu({ name, email, lang, speak, onSpeak, onLanguage, onMirror, onLogout }: Props) {
+export default function ProfileMenu({ name, email, lang, speak, onSpeak, onLanguage, onMirror, onVoice, onLogout }: Props) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -42,6 +44,7 @@ export default function ProfileMenu({ name, email, lang, speak, onSpeak, onLangu
           <Link href="/profile" className="pmenu-item" role="menuitem" onClick={() => setOpen(false)}><PxUser className="pxicon" /> {t("profileResults", lang)}</Link>
           <Link href="/summary" className="pmenu-item" role="menuitem" onClick={() => setOpen(false)}><PxDownload className="pxicon" /> {t("summary", lang)}</Link>
           <button className="pmenu-item" role="menuitem" onClick={() => { setOpen(false); onMirror(); }}><PxMirror className="pxicon" /> {t("mirror", lang)}</button>
+          <button className="pmenu-item" role="menuitem" onClick={() => { setOpen(false); onVoice(); }}><PxMic className="pxicon" /> {t("voiceChat", lang)}</button>
           <button className="pmenu-item" role="menuitemcheckbox" aria-checked={speak} onClick={() => onSpeak(!speak)}><PxSound className="pxicon" /> {speak ? t("voiceOn", lang) : t("voiceOff", lang)}</button>
           <label className="pmenu-lang">
             <span>{t("language", lang)}</span>

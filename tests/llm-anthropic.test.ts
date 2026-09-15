@@ -105,3 +105,15 @@ test("when Anthropic refuses for a reason other than rate limits, the Groq fallb
     } finally { f.restore(); console.warn = warn; }
   });
 });
+
+test("on Groq, a spent daily budget for the chat model falls back to a second model with its own budget", async () => {
+  await withEnv({ ...ENV, ANTHROPIC_API_KEY: undefined, LLM_CHAT_FALLBACK: undefined }, async () => {
+    const f = stubFetch([{ status: 429, body: { error: { message: "Rate limit reached for model openai/gpt-oss-120b: Limit 200000 tokens per day, Used 199990" } } }, { status: 200, body: { choices: [{ message: { content: "still here" } }] } }]);
+    const warn = console.warn; console.warn = () => {};
+    try {
+      assert.equal(await complete([{ role: "user", content: "hi" }], { tier: "chat" }), "still here");
+      assert.equal(f.calls.length, 2);
+      assert.equal(JSON.parse(String(f.calls[1].init.body)).model, "qwen/qwen3.8-27b");
+    } finally { f.restore(); console.warn = warn; }
+  });
+});

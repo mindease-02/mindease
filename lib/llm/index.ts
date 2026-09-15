@@ -162,6 +162,15 @@ export async function complete(messages: ChatMessage[], opts: CompletionOptions 
   const primary = opts.tier === "fast" ? cfg.fastModel : opts.tier === "safety" ? cfg.safetyModel : cfg.chatModel;
 
   let res = await post(cfg, primary, messages, opts);
+  // Groq's free tier also has a per-model daily budget. When the chat model's day is spent,
+  // a second model with its own budget carries the conversation rather than a stock apology.
+  if (res.status === 429 && cfg.provider === "groq" && (opts.tier === "chat" || !opts.tier)) {
+    const text = await res.clone().text();
+    if (/per day|daily|TPD/i.test(text)) {
+      const fallback = process.env.LLM_CHAT_FALLBACK ?? "qwen/qwen3.8-27b";
+      if (fallback !== primary) { console.warn(`LLM ${primary} daily budget spent, using ${fallback}`); res = await post(cfg, fallback, messages, opts); }
+    }
+  }
   if (res.status === 529) {
     // Anthropic is briefly overloaded: one short wait, then try again.
     await res.text(); await sleep(1500);

@@ -1,0 +1,91 @@
+/* chat-ui: chat page styles, layered after home.css. */
+
+/* ---- Header: menu, orb + title, Help now, avatar ------------------------ */
+.world.chat-world .chat-head h1 { margin: 0; }
+.world.chat-world .help-pill { min-height: 44px; padding: 0 14px; gap: 6px; font-size: .88rem; white-space: nowrap; }
+@media (max-width: 639px) { .world.chat-world .help-pill { width: 44px; padding: 0; } }
+
+/* ---- Focus-mode list ------------------------------------------------------ */
+.world.chat-world .bubble-ai, .world.chat-world .bubble-user, .world.chat-world .bubble-proactive { font-size: 16px; line-height: 1.6; }
+.world.chat-world .bubble-user {
+  background: rgba(var(--accent-rgb), .18) !important; color: var(--ink) !important;
+  border: 1px solid rgba(var(--accent-rgb), .38) !important;
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 16px 40px -24px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+.world.chat-world .bubble-eyebrow { display: block; margin-bottom: 4px; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+.world.chat-world .bubble-proactive .not-useful { display: block; margin-top: 8px; min-height: 32px; font-size: .78rem; color: var(--ink-2); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+
+/* The day changes: a quiet line with the date. */
+.world.chat-world .day-div { display: flex; align-items: center; gap: 12px; margin: 6px 0; color: var(--ink-3); font-size: .74rem; letter-spacing: .04em; }
+.world.chat-world .day-div::before, .world.chat-world .day-div::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+/* How the chat began: the arrival mood and the date, not interactive. */
+.world.chat-world .arrive-card { align-self: center; max-width: 100%; display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 2px 10px; margin: 0 0 4px; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); font-size: .8rem; color: var(--ink-2); text-align: center; }
+.world.chat-world .arrive-card b { font-weight: 500; color: var(--ink); }
+.world.chat-world .arrive-note { font-style: italic; }
+.world.chat-world .arrive-date { color: var(--ink-3); }
+
+/* Empty state: three ways to start, and the one thing that matters. */
+.world.chat-world .starter { display: grid; gap: 10px; margin: 2px 0 0 4px; }
+.world.chat-world .starter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.world.chat-world .starter-chip { min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--glass); color: var(--ink); font: inherit; font-size: .92rem; cursor: pointer; transition: background .3s var(--ease), border-color .3s, transform .3s var(--ease); }
+.world.chat-world .starter-chip:hover { background: rgba(var(--accent-rgb), .14); border-color: rgba(var(--accent-rgb), .4); transform: translateY(-1px); }
+.world.chat-world .starter-hint { margin: 0; font-size: .82rem; color: var(--ink-2); }
+
+/* ---- Composer ------------------------------------------------------------- */
+.world.chat-world .chat-foot { position: relative; }
+.world.chat-world .composer textarea { overflow-y: auto; }
+.world.chat-world .mic-btn[aria-disabled="true"] { opacity: .4; cursor: not-allowed; filter: saturate(.3); }
+.world.chat-world .send-halo { position: relative; box-shadow: 0 0 0 4px rgba(var(--accent2-rgb), .18), 0 14px 34px -12px rgba(var(--accent-rgb), .9), inset 0 1px 0 rgba(255,255,255,.35) !important; }
+.world.chat-world .send-halo::before { content: ""; position: absolute; inset: -6px; border-radius: 999px; border: 1.5px solid rgba(var(--accent2-rgb), .55); animation: send-halo 2.4s var(--ease) infinite; pointer-events: none; }
+@keyframes send-halo { 0% { transform: scale(.92); opacity: 0; } 30% { opacity: .8; } 100% { transform: scale(1.18); opacity: 0; } }
+.world.chat-world footer p.chat-trust { font-size: .74rem; color: var(--ink-2); line-height: 1.5; }
+@media (max-width: 720px) { .world.chat-world footer p.chat-trust { font-size: .7rem; margin-top: 6px; } }
+
+/* "Jump to latest": only when the person has scrolled up and something new arrived. */
+.world.chat-world .jump-pill { position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%); z-index: 3; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line-2); background: color-mix(in srgb, var(--bg-2) 82%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: var(--ink); font: inherit; font-size: .84rem; box-shadow: 0 14px 34px -18px rgba(0,0,0,.9); cursor: pointer; animation: sheet-up .2s var(--ease) both; white-space: nowrap; }
+.world.chat-world .jump-pill:hover { background: color-mix(in srgb, var(--bg-2) 92%, white 4%); }
+
+/* ---- Offers as bottom sheets --------------------------------------------- */
+.world.chat-world .offer-sheet { position: absolute; left: 16px; right: 16px; bottom: calc(100% + 8px); z-index: 4; margin: 0 auto; max-width: 42rem; outline: none; animation: sheet-up .2s var(--ease) both; }
+@media (min-width: 640px) { .world.chat-world .offer-sheet { left: 24px; right: 24px; } }
+.world.chat-world .offer-sheet .offer { max-width: none; max-height: calc(100dvh - 180px); overflow-y: auto; margin: 0; padding: 16px 18px; opacity: 1; animation: none; outline: none; box-shadow: 0 30px 80px -30px rgba(0,0,0,.95), inset 0 1px 0 rgba(255,255,255,.07); }
+.world.chat-world .offer-sheet .offer-opt { min-height: 44px; }
+/* The sheet lives in the footer, whose <p> rule is meant for the one-line trust note: give the card its own type. */
+.world.chat-world .offer-sheet p { font-size: 1rem; line-height: 1.55; color: var(--ink); white-space: normal; overflow: visible; text-overflow: clip; margin-top: 0; }
+.world.chat-world .offer-sheet p.muted { color: var(--ink-2); }
+@keyframes sheet-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* ---- Session close: one quiet card under the last reply ------------------ */
+.world.chat-world .close-card { max-width: 92%; margin: 4px 0 0; padding: 14px 16px; display: grid; gap: 10px; opacity: 0; }
+.world.chat-world .close-card .offer-q { margin: 0; }
+.world.chat-world .close-note { width: 100%; min-height: 44px; padding: 10px 12px; font: inherit; font-size: .95rem; }
+.world.chat-world .close-card .offer-opt { min-height: 44px; }
+.world.chat-world .close-card .offer-opt:disabled { opacity: .6; cursor: default; transform: none; }
+
+/* ---- Voice mode as a full-screen overlay --------------------------------- */
+.world.chat-world .voice-overlay { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 24px; background: color-mix(in srgb, var(--bg) 74%, transparent); backdrop-filter: blur(22px) saturate(120%); -webkit-backdrop-filter: blur(22px) saturate(120%); animation: overlay-in .25s both; outline: none; }
+.world.chat-world .voice-stage { display: grid; justify-items: center; gap: 22px; text-align: center; }
+.world.chat-world .voice-title { margin: 0; font-family: var(--font-display), "Iowan Old Style", Georgia, serif; font-weight: 500; font-size: 1.5rem; letter-spacing: -.01em; color: var(--ink); }
+.world.chat-world .voice-orb.big { width: 208px; height: 208px; padding: 0; border: 0; background: none; cursor: pointer; }
+.world.chat-world .voice-orb.big::before { inset: -14px; border-width: 3px; }
+.world.chat-world .voice-orb.big:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 12px; }
+.world.chat-world .voice-status { margin: 0; min-height: 1.6em; font-size: 1.02rem; color: var(--ink-2); }
+.world.chat-world .voice-end { min-height: 48px; padding: 0 22px; }
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* The closed chats drawer is aria-hidden; keep its buttons out of the Tab order too (hidden once the slide-out ends). */
+.world.chat-world .drawer { visibility: hidden; transition: transform .38s var(--ease), visibility 0s .38s; }
+.world.chat-world .drawer.on { visibility: visible; transition: transform .38s var(--ease), visibility 0s; }
+
+/* ---- Toast above sheets and the voice overlay ---------------------------- */
+.world.chat-world .chat-toast { z-index: 56; }
+
+/* ---- Reduced motion ------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .world.chat-world .offer-sheet, .world.chat-world .jump-pill, .world.chat-world .voice-overlay, .world.chat-world .send-halo::before, .world.chat-world .voice-orb::before { animation: none !important; }
+  .world.chat-world .send-halo::before { opacity: .5; transform: none; }
+  .world.chat-world .starter-chip, .world.chat-world .jump-pill, .world.chat-world .offer-opt { transition: none; }
+  .world.chat-world .close-card { opacity: 1; }
+}

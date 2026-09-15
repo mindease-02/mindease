@@ -27,7 +27,7 @@ export const REGISTER: Record<IntensityBand, { guidance: string; examples: strin
     ],
   },
   moderate: {
-    guidance: "Unhurried. Two to four sentences. Reflect the specific thing back, check you have it right, then one question or one observation - not both.",
+    guidance: "Unhurried. One to three sentences. Reflect the specific thing back, check you have it right, then one question or one observation - not both.",
     examples: [
       "So it's less the deadline and more that nobody's asked how you're doing with it. Have I got that right?",
       "That's the third time this week the evenings have been the hard part. What tends to happen around seven?",

@@ -1,4 +1,6 @@
 import "../home.css";
+import "../chat-ui.css";
+import "../chat-caption.css";
 import { redirect } from "next/navigation";
 import { currentSession } from "@/lib/auth";
 import { body, display, heading } from "@/components/home/fonts";

@@ -1,0 +1,129 @@
+/* chat-caption: chat page styles, layered after home.css.
+   The Mirror caption, memory cards and the crisis card. Quiet by default,
+   clear when asked; warm, never alarm-red. */
+
+/* Mirror caption: one line under the reply ----------------------------------- */
+.world .caption { margin: 2px 0 0 8px; max-width: 92%; font-size: .78rem; line-height: 1.5; color: var(--ink-3); }
+.world .caption-line { display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px; min-height: 34px; }
+.world .caption-read { display: inline; color: var(--ink-3); }
+.world .caption-label { text-transform: lowercase; }
+.world .caption-axis { color: var(--ax); }
+.world .caption-conf { display: inline; margin: 0; padding: 0; border: 0; border-radius: 0; font-size: inherit; line-height: inherit; color: var(--ink-3); }
+.world .caption-conf.confHigh { color: var(--ink-3); }
+.world .caption-conf.confLow { color: var(--color-accent); }
+.world .caption-dot { color: var(--ink-3); }
+.world .caption-why { background: none; border: 0; margin: 0; padding: 4px 2px; min-height: 0; font: inherit; color: var(--ink-2); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; cursor: pointer; border-radius: 6px; transition: color .25s; }
+.world .caption-why:hover, .world .caption-why[aria-expanded="true"] { color: var(--ink); }
+
+.world .caption-acts { display: inline-flex; align-items: center; gap: 0; }
+.world .caption-ib { width: 32px; height: 34px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; border: 0; background: none; color: var(--ink-3); text-decoration: none; cursor: pointer; transition: color .25s, background .25s; }
+.world .caption-ib .pxicon { font-size: 14px; }
+.world .caption-ib:hover, .world .caption-ib[aria-expanded="true"] { color: var(--ink); background: var(--glass-2); }
+.world .caption-live { color: var(--ink-2); }
+.world .caption-live:not(:empty) { animation: cap-in .4s var(--ease) both; }
+
+/* the pick rows (which axis, what was off) keep their chips; the box is softer */
+.world .caption-pick { margin-top: 4px; border-radius: 14px; background: color-mix(in srgb, var(--surface) 60%, transparent); }
+.world .caption-pick > span { color: var(--ink-2); }
+.world .caption-pick button { min-height: 34px; font-size: .78rem; }
+
+/* the detail: three soft bars, the read, the need, the why */
+.world .caption-detail { margin-top: 6px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 72%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); display: grid; gap: 10px; animation: cap-in .4s var(--ease) both; }
+.world .caption-bars { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 6px; max-width: 380px; }
+.world .caption-bar { display: grid; grid-template-columns: 6.4em 1fr 2.6em; align-items: center; gap: 10px; font-size: .76rem; }
+.world .caption-bar span { color: var(--ax); }
+.world .caption-bar i { display: block; height: 6px; border-radius: 999px; background: rgba(255,255,255,.07); overflow: hidden; }
+.world .caption-bar b { display: block; height: 100%; border-radius: 999px; background: var(--ax); opacity: .85; animation: cap-bar .6s var(--ease) both; }
+.world .caption-bar em { font-style: normal; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
+.world .caption-detail .reason-body { margin: 0; padding: 0; border: 0; background: none; gap: 4px; font-size: .8rem; }
+.world .caption-detail .reason-body > div { grid-template-columns: 6.4em 1fr; gap: 10px; }
+.world .caption-detail .reason-body dt { color: var(--ink-3); }
+.world .caption-detail .reason-body dd { color: var(--ink-2); line-height: 1.5; }
+.world .caption-mem { display: grid; gap: 2px; }
+.world .caption-mem > span { color: var(--ink-3); font-size: .74rem; }
+.world .caption-mem .memline { margin-left: 0; }
+.world .caption-foot { margin: 0; font-size: .72rem; color: var(--ink-3); line-height: 1.45; }
+@keyframes cap-in { from { opacity: 0; transform: translateY(-3px); } }
+@keyframes cap-bar { from { width: 0; } }
+
+/* Memory: a whisper when brought up, a small card when proposed, a check when kept */
+.world .memline { margin: 4px 0 0 10px; display: inline-flex; align-items: flex-start; gap: 7px; max-width: 92%; font-size: .78rem; line-height: 1.45; color: var(--ink-3); }
+.world .memline .pxicon { color: var(--kind); font-size: 12px; flex-shrink: 0; margin-top: .2em; }
+
+.world .memcard { margin: 6px 0 0 8px; max-width: 92%; display: grid; grid-template-columns: auto 1fr auto; gap: 6px 10px; align-items: center; padding: 6px 8px 6px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--glass); font-size: .84rem; box-shadow: none; }
+.world .memcard-check { color: var(--kind); font-size: 14px; flex-shrink: 0; }
+.world .memcard-text { background: none; border: 0; padding: 4px 0; min-height: 0; font: inherit; color: var(--ink); text-align: left; line-height: 1.45; cursor: text; border-radius: 6px; }
+.world .memcard-text:hover { color: var(--ink); }
+.world .memcard-edit { width: 100%; resize: vertical; min-height: 44px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line-2); background: rgba(255,255,255,.04); color: var(--ink); font: inherit; font-size: 16px; line-height: 1.45; }
+.world .memcard-actions { display: inline-flex; gap: 8px; align-items: center; justify-self: end; }
+.world .memcard-btn { min-height: 44px; padding: 0 18px; border-radius: 999px; font: inherit; font-size: .86rem; font-weight: 500; text-decoration: none; cursor: pointer; transition: background .25s, border-color .25s, color .25s; }
+.world .memcard-btn.keep { background: rgba(var(--accent-rgb), .16); border: 1px solid rgba(var(--accent-rgb), .5); color: #ffd6c8; }
+.world .memcard-btn.keep:hover { background: rgba(var(--accent-rgb), .26); border-color: rgba(var(--accent-rgb), .7); }
+.world .memcard-btn.quiet { background: transparent; border: 1px solid var(--line-2); color: var(--ink-2); }
+.world .memcard-btn.quiet:hover { color: var(--ink); border-color: rgba(255,255,255,.3); }
+.world .memcard-btn.small { min-height: 36px; padding: 0 12px; font-size: .78rem; }
+.world .memcard-btn.quiet.small { border-color: transparent; color: var(--ink-3); }
+.world .memcard-btn.quiet.small:hover { color: var(--ink); border-color: var(--line-2); }
+.world .memcard-btn:disabled { opacity: .5; cursor: default; }
+
+.world .memcard.proposed { width: min(560px, 92%); grid-template-columns: 1fr; gap: 8px; padding: 12px 14px 12px; border-radius: 16px; border: 1px solid var(--line-2); border-style: solid; background: color-mix(in srgb, var(--surface) 78%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.world .memcard.proposed .memcard-kind { color: var(--ink-2); font-size: .76rem; display: inline-flex; align-items: center; gap: 6px; }
+.world .memcard.proposed .memcard-kind .pxicon { color: var(--kind); font-size: 13px; }
+.world .memcard.proposed .memcard-text { font-size: .92rem; padding: 0; }
+.world .memcard.proposed .memcard-actions { justify-self: start; margin-top: 2px; }
+
+.world .memcard.fresh { animation: cap-in .4s var(--ease) both; }
+.world .memcard.leaving, .world .memline.leaving { animation: mem-out .3s var(--ease) both; pointer-events: none; }
+@keyframes mem-out { to { opacity: 0; transform: scale(.96); } }
+
+/* Crisis: a warm card, calm on purpose ------------------------------------- */
+.world .crisis { margin: 10px 0; padding: 18px; border-radius: 18px; border: 1px solid rgba(var(--accent-rgb), .35); background: color-mix(in srgb, var(--surface) 92%, transparent); box-shadow: 0 24px 60px -36px rgba(var(--accent-rgb), .35); display: grid; gap: 12px; }
+.world .crisis-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.world .crisis h2, .world .crisis h3 { margin: 0; font-family: var(--font-display), "Iowan Old Style", Georgia, serif; font-weight: 400; font-size: 1.25rem; line-height: 1.25; letter-spacing: -.01em; color: var(--ink); }
+.world .crisis-p { margin: 0; font-size: .92rem; line-height: 1.55; color: var(--ink-2); }
+.world .crisis-lines li { padding: 10px 10px 10px 14px; border-radius: 14px; background: rgba(255,255,255,.03); border: 1px solid var(--line); }
+.world .crisis-lines b { color: var(--ink); }
+.world .crisis-call { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 16px; border-radius: 999px; background: rgba(var(--accent-rgb), .18); border: 1px solid rgba(var(--accent-rgb), .55); color: #ffd6c8; font-weight: 600; font-size: .9rem; text-decoration: none; white-space: nowrap; transition: background .25s, border-color .25s; }
+.world .crisis-call:hover { background: rgba(var(--accent-rgb), .28); border-color: rgba(var(--accent-rgb), .75); }
+.world .crisis-emergency { border-color: rgba(var(--accent-rgb), .35) !important; }
+.world .crisis-close { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; min-height: 44px; padding: 0 14px 0 10px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--glass); color: var(--ink); font: inherit; font-size: .86rem; cursor: pointer; transition: background .25s; }
+.world .crisis-close:hover { background: var(--glass-2); }
+.world .crisis-close .pxicon { font-size: 15px; }
+.world .crisis-btn { min-height: 44px; }
+.world .crisis-link { min-height: 44px; }
+.world .crisis-small { color: var(--ink-3); }
+.world .crisis-sub { margin-top: 2px; }
+
+/* "More lines": a native disclosure, styled to match */
+.world .crisis-more { display: block; }
+.world .crisis-more summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px 0 6px; border-radius: 999px; color: var(--ink-2); font-size: .88rem; transition: color .25s; }
+.world .crisis-more summary::-webkit-details-marker { display: none; }
+.world .crisis-more summary::before { content: ""; width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform .3s var(--ease); margin-left: 4px; }
+.world .crisis-more[open] > summary::before { transform: translateY(2px) rotate(-135deg); }
+.world .crisis-more summary:hover { color: var(--ink); }
+.world .crisis-more-body { display: grid; gap: 10px; padding-top: 8px; animation: cap-in .4s var(--ease) both; }
+
+/* the sheet: the heading and Close stay put while the lines scroll */
+.world .crisis-sheet .crisis { padding-top: 0; }
+.world .crisis-sheet .crisis-head { position: sticky; top: 0; z-index: 1; margin: 0 -18px; padding: 18px 18px 10px; background: var(--surface); border-radius: 18px 18px 0 0; }
+
+@media (max-width: 720px) {
+  .world .caption, .world .memline, .world .memcard { max-width: 100%; }
+  .world .caption-bars { max-width: 100%; }
+  .world .caption-detail .reason-body > div { grid-template-columns: 1fr; gap: 0; }
+  .world .memcard { grid-template-columns: auto 1fr; }
+  .world .memcard.kept .memcard-actions { grid-column: 2; justify-self: start; }
+  .world .memcard.proposed { grid-template-columns: 1fr; width: 100%; }
+  .world .memcard.proposed .memcard-actions { grid-column: 1; }
+  .world .memcard.proposed .memcard-btn { flex: 1 1 0; justify-content: center; display: inline-flex; align-items: center; }
+  .world .memcard.proposed .memcard-actions { width: 100%; }
+  .world .crisis { padding: 16px; }
+  .world .crisis-sheet .crisis { padding-top: 0; }
+  .world .crisis-sheet .crisis-head { margin: 0 -16px; padding: 16px 16px 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world .caption-bar b, .world .caption-detail, .world .caption-live, .world .crisis-more-body, .world .memcard.leaving, .world .memline.leaving { animation: none !important; }
+  .world .memcard.leaving, .world .memline.leaving { opacity: 0; }
+  .world .crisis-more summary::before { transition: none; }
+}

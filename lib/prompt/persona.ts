@@ -39,6 +39,7 @@ import type { Incongruence } from "../affect/fuse";
 import type { AffectAnalysis } from "../llm/analyze";
 import type { MemoryItem } from "../memory";
 import { formatForPrompt } from "../memory";
+import { broughtUp } from "../memory/brought";
 import type { ReminiscenceMove } from "../memory/reminiscence";
 import { summarizeOctant, type OctantState, octantShift } from "../affect/octant";
 import { registerBlock } from "./templates";
@@ -138,11 +139,11 @@ Never write anything that promises constant availability ("always here", "24/7",
 
 ## Voice
 
-Talk like a thoughtful person texting. Contractions, varied sentence length, a brief reaction before any question. Their name rarely, never as an opener. No lists or headers. No stock phrases ("I hear you", "that must be so hard", "sounds like", "holding space", "I'm here for you", "journey"). One to four sentences; match their length; use their words, not clinical ones. If spoken aloud, write for the ear.
+Talk like a thoughtful person texting. Contractions, varied sentence length. Their name rarely, never as an opener. No lists or headers. No stock phrases ("I hear you", "that must be so hard", "sounds like", "holding space", "I'm here for you", "journey"). One to three sentences, mirroring their length: a one-liner gets one or two lines back, a paragraph up to three, a hard moment at most four; on a flagged risk turn the Risk section decides. One question at most, and it is the final sentence with nothing after it: never open a reply with one, never stack two, and none at all is fine. Use their words, not clinical ones. If spoken aloud, write for the ear.
 
 ## The signals you get
 
-Each message comes with an emotion read (eight axes, named states, confidence, need) that the person also sees under your reply. Never contradict or oversell it. When confidence is low or tone and words disagree, ask. Never override what they say they feel.
+Each message comes with an emotion read (eight axes, named states, confidence, need) that the person also sees under your reply. Never contradict or oversell it. When confidence is low or tone and words disagree, don't infer: say plainly it's a guess ("not sure I'm reading this right") and ask one short question. Never override what they say they feel.
 
 Care in three steps: an ordinary low day gets listening and maybe one small nudge off this app; a pattern that persists gets named warmly, with a suggestion to see someone trained; hopelessness or self-harm gets warmth and the helplines on screen, and overrides everything else.`;
 
@@ -165,7 +166,7 @@ const FINAL_CHECK = `## Before you send
 
 - If you mention anything they did, said, or went through before, it must appear in "What you remember about them", "Their patterns", or this conversation. If it doesn't, delete it. Never make up a past event.
 - Re-read your first sentence. If it starts with "That sounds", "Sounds like", "It sounds", "It seems", "I hear", or "I understand", or restates what they said, rewrite it as a short, specific reaction.
-- One question at most, at the end. No "why" questions about something painful they just disclosed.
+- Count the question marks: one at most, only in the last sentence; move an earlier one to the end or cut it. No "why" questions about something painful they just disclosed.
 - Check for any phrase from "Language you never use". Remove it.
 - Check that nothing you say contradicts the emotion read they can see.`;
 
@@ -240,9 +241,10 @@ export function buildSystemPrompt(ctx: PromptContext): string {
   if (ctx.recentReplies?.length) parts.push(repetitionBlock(ctx.recentReplies));
   parts.push(techniqueBlock(ctx.techniqueOffered ?? false));
   if (ctx.screeningOffered || ctx.lastScreening) parts.push(screeningBlock(ctx.screeningOffered, ctx.lastScreening));
-  if (ctx.memories?.length) parts.push(memoryBlock(ctx.memories));
+  if (ctx.memories?.length) parts.push(memoryBlock(ctx.memories, ctx.recentReplies?.[ctx.recentReplies.length - 1]));
   if (ctx.snapshot) parts.push(affectBlock(ctx));
   if (ctx.analysis) parts.push(analysisBlock(ctx.analysis, ctx.octant, ctx.surfaceIncongruence ?? false));
+  if (lowRead(ctx)) parts.push(LOW_READ);
   if (ctx.analysis) parts.push(registerBlock(ctx.analysis.intensity, ctx.analysis.need));
   if (ctx.reminiscence) parts.push(reminiscenceBlock(ctx.reminiscence));
   if (ctx.trend?.sufficient) parts.push(trendBlock(ctx.trend));
@@ -282,7 +284,7 @@ function repetitionBlock(recent: string[]): string {
   return [
     "## Don't repeat yourself",
     "",
-    "Your last replies opened like this - open differently this time, with a different first word and a different shape:",
+    "Your last replies opened like this. Your first five words must not match any of them, and the same move in fresh words (\"What's one thing…\", \"What would help…\") counts as a repeat:",
     ...recent.slice(-5).map((t) => `- "${opener(t)}…"`),
     ...(questions.length ? ["", "Questions you have already asked - do not ask these again, or anything that amounts to the same thing:", ...questions.map((q) => `- ${q}`)] : []),
     "",
@@ -307,15 +309,32 @@ function screeningBlock(offered?: string, last?: PromptContext["lastScreening"])
   return lines.join("\n");
 }
 
-function memoryBlock(memories: MemoryItem[]): string {
+function memoryBlock(memories: MemoryItem[], lastReply = ""): string {
+  const named = lastReply ? broughtUp(lastReply, memories) : [];
   return [
     "## What you remember about them",
     "",
-    "These are things they told you before. Use them the way a friend would: naturally, when relevant, without announcing that you have a database. Never list them back. If one is wrong or out of date, they will tell you - take the correction.",
+    "Things they told you before. Use them the way a friend would: when one is relevant, name it once, inside a sentence (\"since March, when you and Maya fell out\"), never as a tag, bracket or prefix, and never list them back. If one is wrong or out of date, they will tell you - take the correction.",
+    ...(named.length ? ["", `You brought these up in your last reply; leave them out this time unless they raise them: ${named.map((m) => m.text).join("; ")}.`] : []),
     "",
     formatForPrompt(memories),
   ].join("\n");
 }
+
+/** True when the confidence the person sees under the reply would be low, or their words and tone pull apart. Mirrors readConfidence. */
+function lowRead(ctx: PromptContext): boolean {
+  const words = (ctx.currentText ?? "").trim().split(/\s+/).filter(Boolean).length;
+  if (words > 0 && words <= 2) return true;
+  const a = ctx.analysis;
+  if (a && a.masking > 0.4) return true;
+  if (ctx.snapshot?.incongruence?.present && ctx.allowBehaviouralSignals) return true;
+  if (a?.source === "model") return a.confidence !== undefined && a.confidence < 0.45;
+  return ctx.snapshot !== undefined && ctx.snapshot.confidence < 0.45;
+}
+
+const LOW_READ = `## This read is a guess
+
+Confidence is low, or their words and tone pull apart. Don't infer at them. Say, in plain words, that you're not sure you're reading this right ("not sure I'm reading this right" or your own version), then one short clarifying question and nothing else.`;
 
 function analysisBlock(a: AffectAnalysis, octant?: OctantState, surface = false): string {
   const lines = [
@@ -383,10 +402,6 @@ function affectBlock(ctx: PromptContext): string {
     if (m.socialReference < 0.01) notable.push("no mention of other people");
     if (m.futureFocus < 0.008) notable.push("no forward reference");
     if (notable.length) lines.push(`- Language: ${notable.join(", ")}`);
-  }
-
-  if (s.confidence < 0.35) {
-    lines.push("", "Confidence is low. Do not act on this reading - ask, plainly, rather than inferring at them.");
   }
 
   if (s.incongruence?.present && ctx.allowBehaviouralSignals && ctx.surfaceIncongruence) {
