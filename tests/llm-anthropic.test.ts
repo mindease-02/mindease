@@ -117,3 +117,18 @@ test("on Groq, a spent daily budget for the chat model falls back to a second mo
     } finally { f.restore(); console.warn = warn; }
   });
 });
+
+test("after the daily fallback, a short per-minute limit retries the fallback model, not the spent one", async () => {
+  await withEnv({ ...ENV, ANTHROPIC_API_KEY: undefined, LLM_CHAT_FALLBACK: undefined }, async () => {
+    const f = stubFetch([
+      { status: 429, body: { error: { message: "Rate limit reached on tokens per day (TPD): Limit 200000, Used 199990" } } },
+      { status: 429, body: { error: { message: "Rate limit reached on tokens per minute (TPM). Please try again in 1s" } }, headers: { "retry-after": "1" } },
+      { status: 200, body: { choices: [{ message: { content: "carried on" } }] } },
+    ]);
+    const warn = console.warn; console.warn = () => {};
+    try {
+      assert.equal(await complete([{ role: "user", content: "hi" }], { tier: "chat" }), "carried on");
+      assert.deepEqual(f.calls.map((c) => JSON.parse(String(c.init.body)).model), ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "qwen/qwen3.8-27b"]);
+    } finally { f.restore(); console.warn = warn; }
+  });
+});

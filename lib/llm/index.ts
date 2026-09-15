@@ -161,14 +161,15 @@ export async function complete(messages: ChatMessage[], opts: CompletionOptions 
   if (!cfg) throw new Error("No LLM configured. Set ANTHROPIC_API_KEY (or GROQ_API_KEY / OPENROUTER_API_KEY).");
   const primary = opts.tier === "fast" ? cfg.fastModel : opts.tier === "safety" ? cfg.safetyModel : cfg.chatModel;
 
-  let res = await post(cfg, primary, messages, opts);
+  let model = primary;
+  let res = await post(cfg, model, messages, opts);
   // Groq's free tier also has a per-model daily budget. When the chat model's day is spent,
   // a second model with its own budget carries the conversation rather than a stock apology.
   if (res.status === 429 && cfg.provider === "groq" && (opts.tier === "chat" || !opts.tier)) {
     const text = await res.clone().text();
     if (/per day|daily|TPD/i.test(text)) {
       const fallback = process.env.LLM_CHAT_FALLBACK ?? "qwen/qwen3.8-27b";
-      if (fallback !== primary) { console.warn(`LLM ${primary} daily budget spent, using ${fallback}`); res = await post(cfg, fallback, messages, opts); }
+      if (fallback !== model) { console.warn(`LLM ${model} daily budget spent, using ${fallback}`); model = fallback; res = await post(cfg, model, messages, opts); }
     }
   }
   if (res.status === 529) {
@@ -181,7 +182,7 @@ export async function complete(messages: ChatMessage[], opts: CompletionOptions 
     const wait = retryAfterSeconds(res, text);
     if (wait !== null && wait <= MAX_WAIT_S[opts.tier === "chat" || !opts.tier ? "chat" : "fast"]) {
       await sleep(Math.ceil(wait * 1000) + 150);
-      res = await post(cfg, primary, messages, opts);
+      res = await post(cfg, model, messages, opts);
     } else if (opts.tier === "safety" && cfg.safetyModel !== cfg.fastModel) {
       // The safety model is out of budget: the fast model takes the triage rather than skipping it.
       res = await post(cfg, cfg.fastModel, messages, opts);
