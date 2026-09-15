@@ -33,7 +33,7 @@ export default function Nav({ chatHref, signedIn, name, lang }: { chatHref: stri
             <span className="display" style={{ fontSize: ".95rem" }}>MindEase</span>
           </Link>
           <nav className="rail" aria-label="Sections">
-            {LINKS.map(([h, l], i) => { const idx = LINKS.findIndex(([x]) => x === active); return <a key={h} href={h} aria-current={active === h ? "true" : undefined} className={active === h ? "on" : idx > i ? "done" : ""}><i aria-hidden />{l}</a>; })}
+            {LINKS.map(([h, l], i) => { const idx = LINKS.findIndex(([x]) => x === active); return <a key={h} href={h} aria-current={active === h ? "true" : undefined} className={active === h ? "on" : idx > i ? "done" : ""} aria-label={l}><i aria-hidden /><span>{l}</span></a>; })}
           </nav>
           <div className="nav-cta">
             <LanguageSwitch lang={lang} signedIn={signedIn} compact />

@@ -21,7 +21,7 @@ export default async function Home() {
   return (
     <div className={`world ${display.variable} ${heading.variable} ${body.variable}`}>
       <ThemeInit />
-      <div className="atmos" aria-hidden /><SceneMount /><div className="vignette" aria-hidden /><div className="grain" aria-hidden />
+      <div className="atmos" aria-hidden /><SceneMount /><div className="vignette" aria-hidden /><div className="grain" aria-hidden /><div className="bars" aria-hidden />
       <a href="#main" className="skip">Skip to content</a>
       <Nav chatHref={chatHref} signedIn={!!session} name={session?.name} lang={lang} />
       <main id="main" tabIndex={-1}>

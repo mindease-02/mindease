@@ -1511,3 +1511,142 @@ html { scroll-behavior: smooth; }
 .world .orb-swatches .label { display: grid; gap: 4px; text-transform: none; letter-spacing: 0; margin-top: 6px; }
 .world .orb-swatches .label .emotion { font-family: var(--font-display), "Iowan Old Style", Georgia, serif; font-size: clamp(1.5rem, 2.6vw, 2.1rem); line-height: 1.05; color: var(--coral-2); }
 .world .orb-swatches .label .muted { font-size: .85rem; }
+
+/* =====================================================================
+   The landing as a film: pinned chapters scrubbed by the scroll, the
+   particle field centre stage, one line at a time in the lower third,
+   letterbox bars on the title and the close, a slim nav.
+   ===================================================================== */
+.world { --navh: 92px; }
+.world .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* Chapters and beats */
+.world .ch { position: relative; z-index: 1; height: calc(var(--len, 2.6) * 100svh); }
+.world .ch .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+.world .ch .scrim { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(7,8,11,0) 38%, rgba(7,8,11,.5) 66%, rgba(7,8,11,.88) 100%); }
+.world .ch-start .scrim { background: radial-gradient(55% 48% at 50% 56%, rgba(7,8,11,.55), rgba(7,8,11,0) 72%); }
+.world .ch-demo .beat-device ~ .scrim, .world .ch-demo .scrim { background: linear-gradient(180deg, rgba(7,8,11,0) 30%, rgba(7,8,11,.45) 60%, rgba(7,8,11,.85) 100%); }
+.world .beat { position: absolute; inset: 0; display: grid; align-content: end; padding: var(--navh) 0 clamp(44px, 8vh, 88px); will-change: opacity, transform; }
+.world .beat-device, .world .beat-orb, .world .beat-cta { align-content: center; padding-bottom: clamp(20px, 4vh, 40px); }
+.world .ch .container { position: relative; }
+
+/* Title card */
+.world .ch-hero .hero-inner { max-width: 56rem; }
+.world .ch-hero .hero-title { font-size: clamp(2.9rem, 7.6vw, 6.8rem); line-height: .96; text-shadow: 0 30px 80px rgba(0,0,0,.7); }
+.world .ch-hero .hero-sub { max-width: 32rem; margin-top: 20px; }
+.world .ch-hero .hero-ctas { margin-top: 28px; }
+.world .ch-hero .hero-note { margin-top: 20px; }
+.world .ch-hero .scroll-hint { position: absolute; left: 50%; bottom: calc(18px + var(--bar, 0px)); z-index: 2; }
+
+/* One line at a time */
+.world .beat-line .eyebrow { margin: 0 0 14px; }
+.world .beat-line .line { margin: 0; max-width: 20ch; font-size: clamp(2.2rem, 6.2vw, 5.4rem); line-height: 1.02; letter-spacing: -0.02em; text-wrap: balance; text-shadow: 0 30px 80px rgba(0,0,0,.7); }
+.world .beat-line .line em { color: var(--coral-2); font-style: normal; }
+.world .beat-line .line.strong { color: var(--ink); }
+.world .beat-line .line-cap { margin: 18px 0 0; max-width: 34rem; color: var(--ink-2); font-size: clamp(.95rem, 1.3vw, 1.1rem); line-height: 1.55; font-weight: 300; }
+.world .ch-why .beat-line .container { text-align: center; display: grid; justify-items: center; }
+
+/* Labels riding on the ribbons */
+.world .why-labels { position: absolute; inset: 0; pointer-events: none; }
+.world .why-labels .wl { position: absolute; transform: translate(-50%, -140%); font-size: clamp(.78rem, 1.1vw, .95rem); white-space: nowrap; letter-spacing: .02em; padding: 4px 10px; border-radius: 999px; background: rgba(7,8,11,.55); backdrop-filter: blur(6px); }
+.world .why-labels .ppl { color: var(--color-secondary); transform: translate(-100%, -160%); }
+.world .why-labels .app { color: var(--coral-2); transform: translate(-100%, 60%); }
+.world .why-labels .wk { color: var(--ink-3); transform: translate(-50%, 40%); background: none; backdrop-filter: none; }
+
+/* The ball, closing the chapter */
+.world .beat-orb .container { display: grid; justify-items: center; gap: 10px; }
+.world .beat-orb .eyebrow { font-family: var(--font-display), "Iowan Old Style", Georgia, serif; text-transform: none; letter-spacing: -0.01em; font-size: clamp(1.5rem, 3vw, 2.4rem); color: var(--ink); margin: 0; }
+.world .beat-orb .orb-band { margin-top: 0; max-width: 880px; width: 100%; grid-template-columns: 300px 1fr; gap: 24px; }
+.world .beat-orb .orb-stage, .world .beat-orb .orb-canvas { width: 300px; height: 300px; }
+
+/* The conversation */
+.world .demo-points { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 26px; max-width: 900px; }
+.world .demo-points > div { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; }
+.world .demo-points b { display: block; font-weight: 500; margin-bottom: 2px; font-size: .95rem; }
+.world .demo-points p { margin: 0; font-size: .84rem; line-height: 1.45; color: var(--ink-2); }
+.world .demo-points svg { width: 34px; height: 34px; padding: 7px; border-radius: 10px; background: var(--surface); border: 1px solid var(--color-border); color: var(--color-accent); }
+.world .demo-stage { display: grid; grid-template-columns: 1fr minmax(0, 560px); gap: 40px; align-items: end; }
+.world .demo-side { align-self: end; max-width: 26rem; padding-bottom: 8px; }
+.world .demo-side h3 { font-family: var(--font-display), "Iowan Old Style", Georgia, serif; font-weight: 400; font-size: clamp(1.4rem, 2.4vw, 2rem); line-height: 1.15; margin: 0 0 10px; }
+.world .demo-side p { margin: 0; color: var(--ink-2); font-weight: 300; line-height: 1.55; }
+.world .ch-demo .device { max-height: calc(100svh - var(--navh) - 56px); min-height: 0; }
+.world .ch-demo .device-body { overflow: auto; min-height: 200px; }
+.world .ch-demo .demo-gauge { flex: none; }
+
+/* The call to action, inside the rings */
+.world .ch-start .cta-stage { display: grid; justify-items: center; }
+.world .cta { max-width: 720px; width: 100%; padding: clamp(40px, 6vw, 68px) 28px; border-radius: 32px; border: 1px solid rgba(255,255,255,.12); background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02)); box-shadow: 0 50px 140px -40px rgba(var(--accent-rgb), .45), inset 0 1px 0 rgba(255,255,255,.12); backdrop-filter: blur(16px) saturate(130%); -webkit-backdrop-filter: blur(16px) saturate(130%); }
+.world .cta .planet, .world .cta .light { display: none; }
+.world .cta h2 { font-size: clamp(2.2rem, 5.4vw, 4.6rem); }
+.world .cta p { color: var(--ink-2); }
+
+/* Letterbox */
+.world .bars { --bar: 0px; pointer-events: none; }
+.world .bars::before, .world .bars::after { content: ""; position: fixed; left: 0; right: 0; height: var(--bar); background: #000; z-index: 45; transition: height 1.1s var(--ease); }
+.world .bars::before { top: 0; animation: curtain 1.8s var(--ease) both; }
+.world .bars::after { bottom: 0; animation: curtain 1.8s var(--ease) both; }
+@keyframes curtain { from { height: 50vh; } }
+html[data-ch="top"] .world .bars, html[data-ch="start"] .world .bars { --bar: 5vh; }
+html[data-ch="why"] .world .bars, html[data-ch="demo"] .world .bars, html[data-ch="details"] .world .bars { --bar: 0px; }
+
+/* A slimmer nav, a film-strip rail */
+.world .nav { padding: 8px 0; }
+.world .nav.scrolled { background: color-mix(in srgb, var(--bg) 72%, transparent); }
+.world .rail { width: min(420px, 100%); gap: 8px; }
+.world .rail a { font-size: .74rem; gap: 7px; }
+.world .rail a i { height: 2px; }
+.world .rail a.on i { transform: scaleY(1.5); }
+.world .nav .trust-strip.in-nav { margin-top: 6px; padding: 6px 12px 0; font-size: .76rem; }
+.world .nav .display { font-size: 1.15rem; }
+
+/* Still: no pinning, everything visible, in order */
+.world .ch.still { height: auto; }
+.world .ch.still .stage { position: static; height: auto; overflow: visible; }
+.world .ch.still .scrim, .world .ch.still .why-labels { display: none; }
+.world .ch.still .beat { position: relative; inset: auto; padding: 48px 0; opacity: 1 !important; transform: none !important; filter: none !important; }
+.world .ch.still .scroll-hint { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .world .bars::before, .world .bars::after { animation: none; height: 0; }
+}
+
+@media (max-width: 1024px) {
+  .world .demo-stage { grid-template-columns: 1fr; }
+  .world .demo-side { display: none; }
+  .world .beat-orb .orb-band { grid-template-columns: 260px 1fr; }
+  .world .beat-orb .orb-stage, .world .beat-orb .orb-canvas { width: 260px; height: 260px; }
+}
+@media (max-width: 720px) {
+  .world { --navh: 108px; }
+  .world .bars::before, .world .bars::after { display: none; }
+  .world .nav { padding: 6px 0 4px; }
+  .world .rail a span { display: none; }
+  .world .rail a { padding: 6px 0 2px; gap: 0; }
+  .world .rail a i { height: 3px; }
+  .world .nav .trust-strip.in-nav { margin-top: 2px; padding: 4px 2px 0; font-size: .66rem; line-height: 1.3; }
+  .world .beat { padding-bottom: 92px; }
+  .world .ch-hero .hero-title { font-size: clamp(2.5rem, 12vw, 3.4rem); }
+  .world .ch-hero .hero-sub { font-size: 1rem; margin-top: 14px; }
+  .world .ch-hero .hero-ctas { margin-top: 18px; }
+  .world .ch-hero .hero-ctas .btn { flex: 1 1 auto; justify-content: center; }
+  .world .ch-hero .hero-note { font-size: .8rem; margin-top: 14px; }
+  .world .beat-line .line { font-size: clamp(1.8rem, 8.4vw, 2.6rem); max-width: none; }
+  .world .beat-line .line-cap { font-size: .9rem; margin-top: 12px; }
+  .world .why-labels .wl { font-size: .7rem; padding: 3px 8px; }
+  .world .beat-orb { padding-bottom: 76px; }
+  .world .beat-orb .eyebrow { font-size: 1.3rem; }
+  .world .beat-orb .orb-band { grid-template-columns: 1fr; gap: 8px; }
+  .world .beat-orb .orb-stage, .world .beat-orb .orb-canvas { width: 180px; height: 180px; }
+  .world .beat-orb .orb-swatches { padding: 10px; }
+  .world .beat-orb .orb-swatches .label .emotion { font-size: 1.25rem; }
+  .world .demo-points { grid-template-columns: 1fr; gap: 8px; margin-top: 14px; }
+  .world .demo-points > div { grid-template-columns: 28px 1fr; gap: 8px; }
+  .world .demo-points p { font-size: .78rem; }
+  .world .demo-points svg { width: 28px; height: 28px; padding: 5px; }
+  .world .beat-device { padding-bottom: 70px; }
+  .world .ch-demo .device { max-height: calc(100svh - var(--navh) - 84px); padding: 12px; }
+  .world .ch-demo .device-body { min-height: 120px; }
+  .world .cta { padding: 28px 18px; border-radius: 24px; }
+  .world .cta h2 { font-size: 1.9rem; }
+  .world .cta p { font-size: .95rem; margin-top: 10px; }
+  .world .cta .ctas { margin-top: 20px; }
+}

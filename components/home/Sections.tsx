@@ -2,7 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { popIn } from "@/lib/motion";
-import Reveal, { Words } from "./Reveal";
+import Reveal from "./Reveal";
+import Chapter from "./Chapter";
 import DemoGauge from "./DemoGauge";
 import { sentences, t } from "@/lib/i18n";
 import { PxEye, PxBrain, PxShield, PxPlay, PxRefresh, PxHand, PxArrow, PxCheck, PxHeart, PxStar, PxMoon, PxMessage } from "./pixelIcons";
@@ -70,14 +71,25 @@ export function Demo({ lang }: L) {
   const gaugeTarget = current ? current.axes : ZERO_READ;
 
   return (
-    <Reveal as="section" id="demo" className="block" aria-labelledby="demo-title">
-      <div className="container">
-        <div className="sec-head">
-          <div className="eyebrow" data-reveal>{t("seeIt", lang)}</div>
-          <h2 id="demo-title" className="display" data-reveal style={{ ["--d" as string]: "80ms" }}><Words text={t("demoTitle", lang)} step={45} /></h2>
+    <Chapter id="demo" length={2.6} className="ch-demo" label={t("seeIt", lang)}>
+      <div className="beat beat-line" data-beat data-in="0" data-out="0.4">
+        <div className="container">
+          <p className="eyebrow">{t("seeIt", lang)}</p>
+          <h2 id="demo-title" className="display line">{t("demoTitle", lang)}</h2>
+          <div className="demo-points">
+            <div>{I.eye}<div><b>{t("readT", lang)}</b><p>{t("readP", lang)}</p></div></div>
+            <div>{I.shield}<div><b>{t("gapT", lang)}</b><p>{t("gapP", lang)}</p></div></div>
+            <div>{I.memory}<div><b>{t("rememberT", lang)}</b><p>{t("rememberP", lang)}</p></div></div>
+          </div>
         </div>
-        <div className="demo">
-          <div ref={host} className="device" data-reveal role="region" aria-label={t("demoLabel", lang)}>
+      </div>
+      <div className="beat beat-device" data-beat data-in="0.4" data-out="1" data-fx="-3.6" data-fy="0.3" data-dim="0.85">
+        <div className="container demo-stage">
+          <div className="demo-side">
+            <h3>{t("demoH3", lang)}</h3>
+            <p>{t("demoP", lang)}</p>
+          </div>
+          <div ref={host} className="device" role="region" aria-label={t("demoLabel", lang)}>
             <div className="device-head"><span className="dot" aria-hidden />MindEase <span className="muted">{t("demoLabel", lang)}</span></div>
             {!started && (
               <button type="button" className="demo-play" onClick={() => { setStarted(true); setPlaying(true); }} aria-label={t("playSub", lang)}>
@@ -104,22 +116,12 @@ export function Demo({ lang }: L) {
               </div>
             </div>
           </div>
-          <div className="demo-copy" data-reveal style={{ ["--d" as string]: "120ms" }}>
-            <h3>{t("demoH3", lang)}</h3>
-            <p>{t("demoP", lang)}</p>
-            <div className="list" data-stagger>
-              <div>{I.eye}<div><b>{t("readT", lang)}</b><p>{t("readP", lang)}</p></div></div>
-              <div>{I.shield}<div><b>{t("gapT", lang)}</b><p>{t("gapP", lang)}</p></div></div>
-              <div>{I.memory}<div><b>{t("rememberT", lang)}</b><p>{t("rememberP", lang)}</p></div></div>
-            </div>
-          </div>
         </div>
       </div>
-    </Reveal>
+    </Chapter>
   );
 }
 
-/* ------------------------------------------------------ Memory, in detail */
 export function FeatMemory({ lang, embedded = false }: L & { embedded?: boolean }) {
   const chips = [["f2c1k", "f2c1"], ["f2c2k", "f2c2"], ["f2c3k", "f2c3"], ["f2c4k", "f2c4"]];
   return (
@@ -203,24 +205,25 @@ export function Cta({ chatHref, lang }: { chatHref: string } & L) {
   };
   const rest = () => { const el = card.current; if (el) { el.style.setProperty("--rx", "0deg"); el.style.setProperty("--ry", "0deg"); } };
   return (
-    <Reveal as="section" id="start" className="block">
-      <div className="container cta-stage">
-        <div ref={card} className="cta" data-reveal onPointerMove={tilt} onPointerLeave={rest}>
-          <div className="light" /><div className="planet" /><div className="glint" aria-hidden />
-          <div className="orbit o1" aria-hidden><i /></div><div className="orbit o2" aria-hidden><i /></div><div className="orbit o3" aria-hidden><i /></div>
-          <h2 className="display"><Words text={t("ctaTitle", lang)} step={50} /></h2>
-          <p>{t("ctaP", lang)}</p>
-          <div className="ctas">
-            <a href={chatHref} className="btn btn-primary btn-halo">{t("startTalking", lang)} {I.arrow}</a>
+    <Chapter id="start" length={2} className="ch-start" label={t("navStart", lang)}>
+      <div className="beat beat-cta" data-beat data-in="0" data-out="1">
+        <div className="container cta-stage">
+          <div ref={card} className="cta" onPointerMove={tilt} onPointerLeave={rest}>
+            <div className="glint" aria-hidden />
+            <div className="orbit o1" aria-hidden><i /></div><div className="orbit o2" aria-hidden><i /></div><div className="orbit o3" aria-hidden><i /></div>
+            <h2 className="display">{t("ctaTitle", lang)}</h2>
+            <p>{t("ctaP", lang)}</p>
+            <div className="ctas">
+              <a href={chatHref} className="btn btn-primary btn-halo">{t("startTalking", lang)} {I.arrow}</a>
+            </div>
+            <p className="cta-note">{sentences(t("footNot", lang), t("priceLine", lang))}</p>
           </div>
-          <p className="cta-note">{sentences(t("footNot", lang), t("priceLine", lang))}</p>
         </div>
       </div>
-    </Reveal>
+    </Chapter>
   );
 }
 
-/* ------------------------------------------------------------------ Footer */
 export function Footer({ lang }: L) {
   return (
     <footer>

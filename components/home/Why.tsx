@@ -1,48 +1,49 @@
 import { t } from "@/lib/i18n";
-import Reveal, { Words } from "./Reveal";
+import Chapter from "./Chapter";
 import MoodOrb from "./MoodOrbMount";
 
 /**
- * The reason MindEase exists, drawn: over eight weeks the people in someone's
- * life rise while leaning on MindEase falls, and the check-ins thin out. The
- * same two colours the app uses for the same two things in the Mirror, so the
- * promise on the landing page and the reflection inside it read as one thing.
- * Static on purpose; the demo's gauge is the page's one moving moment.
+ * Why MindEase exists, told over the two particle ribbons: people in your
+ * life rising, leaning on MindEase falling, check-ins thinning out. The
+ * quote plays one line at a time; the chart's labels sit on the ribbons
+ * themselves (the scene projects their ends to the screen each frame). The
+ * chapter ends on the colour-changing ball: pick how you are arriving.
  */
+const splitSentences = (s: string) => s.trim().split(/(?<=[.।!?])\s+/).filter(Boolean);
+
 export default function Why({ lang }: { lang: string }) {
-  const W = 326, H = 196, top = 24, base = 150;
-  const dots = [22, 34, 46, 58, 104, 116, 128, 186, 198, 280];
+  const rest = splitSentences(t("storyQ2", lang));
+  const last = rest.length > 1 ? rest[rest.length - 1] : null;
+  const middle = rest.length > 1 ? rest.slice(0, -1).join(" ") : rest[0] ?? "";
+  const q1 = t("storyQ1", lang), em = t("storyEm", lang);
+  // Beats: the first line, the turn, the answer (if the copy has one), then the ball.
+  const beats = last ? [[0, 0.24], [0.24, 0.46], [0.46, 0.7]] : [[0, 0.34], [0.34, 0.7]];
   return (
-    <Reveal as="section" id="why" className="block why" aria-labelledby="why-title">
-      <div className="container why-grid">
-        <div>
-          <div className="eyebrow" data-reveal>{t("whyExists", lang)}</div>
-          <h2 id="why-title" className="display" data-reveal style={{ ["--d" as string]: "80ms" }}><Words text={t("storyQ1", lang)} step={40} /><em><Words text={t("storyEm", lang)} step={40} /></em><Words text={t("storyQ2", lang)} step={40} /></h2>
+    <Chapter id="why" length={3.6} className="ch-why" label={t("navWhy", lang)}>
+      <div className="why-labels" aria-hidden data-beat data-in="0.05" data-out="0.72" data-fade="0.08">
+        <span className="wl ppl" style={{ left: "var(--why-ppl-x)", top: "var(--why-ppl-y)" }}>{t("whyPeople", lang)}</span>
+        <span className="wl app" style={{ left: "var(--why-app-x)", top: "var(--why-app-y)" }}>{t("whyApp", lang)}</span>
+        <span className="wl wk" style={{ left: "var(--why-w1-x)", top: "var(--why-w1-y)" }}>{t("whyWeek1", lang)}</span>
+        <span className="wl wk" style={{ left: "var(--why-w8-x)", top: "var(--why-w8-y)" }}>{t("whyWeek8", lang)}</span>
+      </div>
+      <div className="beat beat-line" data-beat data-in={beats[0][0]} data-out={beats[0][1]}>
+        <div className="container"><p className="eyebrow">{t("whyExists", lang)}</p><h2 className="display line">{q1}<em>{em}</em></h2></div>
+      </div>
+      <div className="beat beat-line" data-beat data-in={beats[1][0]} data-out={beats[1][1]}>
+        <div className="container"><p className="display line">{middle}</p>{!last && <p className="line-cap">{t("whyCaption", lang)}</p>}</div>
+      </div>
+      {last && (
+        <div className="beat beat-line" data-beat data-in={beats[2][0]} data-out={beats[2][1]}>
+          <div className="container"><p className="display line strong">{last}</p><p className="line-cap">{t("whyCaption", lang)}</p></div>
         </div>
-        <figure className="why-fig" data-reveal style={{ ["--d" as string]: "160ms" }}>
-          <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={t("whyAlt", lang)}>
-            <defs>
-              <linearGradient id="why-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="var(--color-secondary)" stopOpacity=".35" />
-                <stop offset="1" stopColor="var(--color-secondary)" stopOpacity=".02" />
-              </linearGradient>
-            </defs>
-            <line x1="10" y1={base} x2={W - 10} y2={base} stroke="currentColor" strokeOpacity=".12" />
-            <path d={`M10 118 C 60 112, 100 100, 140 82 S 240 48, ${W - 10} 34 L${W - 10} ${base} L10 ${base} Z`} fill="url(#why-fill)" />
-            <path d={`M10 118 C 60 112, 100 100, 140 82 S 240 48, ${W - 10} 34`} fill="none" stroke="var(--color-secondary)" strokeWidth="2" strokeLinecap="round" />
-            <path d={`M10 40 C 60 46, 110 62, 150 84 S 250 118, ${W - 10} 128`} fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" />
-            <text x={W - 20} y={top} fill="var(--color-secondary)" fontSize="11" textAnchor="end">{t("whyPeople", lang)}</text>
-            <text x={W - 10} y={base - 6} fill="var(--color-primary)" fontSize="11" textAnchor="end">{t("whyApp", lang)}</text>
-            {dots.map((x, i) => <circle key={x} cx={x} cy={172} r="3.5" fill="var(--color-primary)" fillOpacity=".85" style={{ ["--i" as string]: i }} />)}
-            <text x="10" y={H - 4} fill="currentColor" fillOpacity=".5" fontSize="10">{t("whyWeek1", lang)}</text>
-            <text x={W - 10} y={H - 4} fill="currentColor" fillOpacity=".5" fontSize="10" textAnchor="end">{t("whyWeek8", lang)}</text>
-          </svg>
-          <figcaption>{t("whyCaption", lang)}</figcaption>
-        </figure>
+      )}
+      <div className="beat beat-orb" data-beat data-in="0.72" data-out="1" data-fy="-0.9" data-dim="0.3">
+        <div className="container">
+          <p className="eyebrow">{t("xp6Top", lang)} {t("xp6Bottom", lang)}</p>
+          <MoodOrb lang={lang} />
+        </div>
       </div>
-      <div className="container" data-reveal style={{ ["--d" as string]: "240ms" }}>
-        <MoodOrb lang={lang} />
-      </div>
-    </Reveal>
+      <p className="sr-only">{t("whyAlt", lang)}</p>
+    </Chapter>
   );
 }
