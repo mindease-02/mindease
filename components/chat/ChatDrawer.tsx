@@ -37,7 +37,7 @@ export default function ChatDrawer({ open, lang, sessions, currentId, onClose, o
   return (
     <>
       <div className={`drawer-scrim ${open ? "on" : ""}`} onClick={onClose} aria-hidden />
-      <aside className={`drawer ${open ? "on" : ""}`} aria-label={t("chats", lang)} aria-hidden={!open}>
+      <aside className={`drawer ${open ? "on" : ""}`} aria-label={t("chats", lang)} aria-hidden={!open} inert={!open}>
         <header className="drawer-head">
           <h2 className="display">{t("chats", lang)}</h2>
           <button className="clay-btn px-3 py-2" onClick={onClose} aria-label="Close"><PxRemove className="pxicon" style={{ fontSize: 18 }} /></button>

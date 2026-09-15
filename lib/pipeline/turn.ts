@@ -61,12 +61,14 @@ export interface TurnInput {
   typing?: TypingFeatures;
   face?: FaceFeatures;
   /** Messages the client is holding but the server may not (no transcript storage). */
-  clientContext?: { role: "user" | "assistant"; content: string }[];
+  clientContext?: { role: "user" | "assistant"; content: string; fallback?: boolean }[];
 }
 
 export interface TurnResult {
   reply: string;
   at: number;
+  /** True when the model could not answer and a stock line was shown. The client keeps it out of the context it sends back. */
+  fallback?: boolean;
   risk: RiskAssessment;
   helplines: Helpline[] | null;
   emergency: string;
@@ -239,8 +241,9 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   // 3. Model analysis (wider vocabulary, ESCAPE split, theory of mind), with the
   //    lexical read as its fallback. Runs alongside memory extraction.
   ensureSession(state, now);
+  // Stock fallback lines are never fed back as the model's own voice, or it learns to sound broken.
   const context = (state.consent.storeTranscript ? sessionMessages(state) : (input.clientContext ?? []))
-    .slice(-10).map((m) => ({ role: m.role, content: m.content }));
+    .filter((m) => !m.fallback).slice(-10).map((m) => ({ role: m.role, content: m.content }));
   // Candidates for oblique references: the memories most likely to matter, newest and most important first.
   const hintMemories = [...state.memories].sort((a, b) => (b.importance + (b.kind === "person" ? 0.2 : 0)) - (a.importance + (a.kind === "person" ? 0.2 : 0)) || b.at - a.at).slice(0, 14);
   const [analysis, extracted, spotted] = await Promise.all([
@@ -271,7 +274,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     screeningOffer = decideScreening(state, now);
   }
   if (screeningOffer) state.lastScreeningOfferAt = now;
-  const recentReplies = state.messages.filter((m) => m.role === "assistant").slice(-6).map((m) => m.content);
+  const recentReplies = state.messages.filter((m) => m.role === "assistant" && !m.fallback).slice(-6).map((m) => m.content);
 
   // Incongruence calibration: was last turn's flag confirmed or denied? Then the
   // streak - the prompt only gets to mention a mismatch once it has held for two turns.
@@ -368,7 +371,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
     lastScreening: (() => { const d = (state.screenings ?? []).filter((x) => x.completedAt && now - x.completedAt! < 3 * DAY).sort((a, b) => b.completedAt! - a.completedAt!)[0]; return d ? { name: INSTRUMENTS[d.instrument].name, score: d.score!, max: INSTRUMENTS[d.instrument].max, band: d.band!, when: d.completedAt! } : undefined; })(),
   });
   const history = context.slice(-12).map((m) => ({ role: m.role, content: m.content }));
-  let reply: string;
+  let reply: string; let usedFallback = false;
   const configured = !!llmConfig();
   // Reliance shapes length: the more someone leans on this, the shorter it gets. Never during a crisis turn.
   const crisisTurn = atLeast(risk.tier, "passive");
@@ -402,10 +405,10 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
       if (budget.maxSentences) reply = capSentences(reply, budget.maxSentences);
     } catch (err) {
       console.error("[turn] LLM failed:", (err as Error).message);
-      reply = fallbackReply(risk, state.displayName);
+      reply = fallbackReply(risk, state.displayName); usedFallback = true;
     }
   } else {
-    reply = `(${AGENT_NAME} is not connected to a language model yet - add ANTHROPIC_API_KEY (or GROQ_API_KEY) to .env.local.) ` + fallbackReply(risk, state.displayName);
+    reply = `(${AGENT_NAME} is not connected to a language model yet - add ANTHROPIC_API_KEY (or GROQ_API_KEY) to .env.local.) ` + fallbackReply(risk, state.displayName); usedFallback = true;
   }
 
   // 8. Persist.
@@ -417,7 +420,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   const surface = decideCrisisSurface({ regex: regexRisk, final: risk, modelRaised: second.raised, history: state.history, valenceNow: vad.valence, lastConfirmAt: state.crisisConfirmAt, stickyTier: state.risk, now });
   if (surface === "confirm") state.crisisConfirmAt = now;
   const userMsg: StoredMessage = { role: "user", content: text, at: now };
-  const aiMsg: StoredMessage = { role: "assistant", content: reply, at: Date.now() };
+  const aiMsg: StoredMessage = { role: "assistant", content: reply, at: Date.now(), ...(usedFallback ? { fallback: true } : {}) };
   if (state.consent.storeTranscript) { noteMessages(state, [userMsg, aiMsg]); state.messages = [...state.messages, userMsg, aiMsg].slice(-MESSAGE_LIMIT); }
   state.lastUserMessageAt = now;
   // Insight milestones: at most one every few hours, and never at serious risk (that is not the moment).
@@ -429,7 +432,7 @@ export async function runTurn(input: TurnInput): Promise<TurnResult> {
   await store.put(toSave);
 
   return {
-    reply, at: aiMsg.at, risk,
+    reply, at: aiMsg.at, risk, ...(usedFallback ? { fallback: true } : {}),
     helplines: surface ? helplinesFor(state.region, state.language && state.language !== "auto" ? state.language : scriptOf(text)) : null,
     crisis: surface,
     proposedMemories: proposedMemories.map((m) => ({ id: m.id, text: m.text, kind: m.kind, importance: m.importance, era: m.era })),

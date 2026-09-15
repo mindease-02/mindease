@@ -66,6 +66,8 @@ export interface StoredMessage {
   proactive?: boolean;
   /** Which check-in style produced it, for the "not useful" feedback button. */
   kind?: string;
+  /** Set when the model could not answer and a stock line was shown instead. Never fed back to the model as its own voice. */
+  fallback?: boolean;
 }
 
 export interface UserState {

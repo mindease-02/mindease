@@ -45,3 +45,17 @@ test("repetition guard catches the same opener and re-asked questions", () => {
   assert.ok(!isRepetitive("Okay. What would make tonight one notch easier?", recent), "fresh reply");
   assert.ok(!isRepetitive("Hm.", recent), "short reply, no question");
 });
+
+test("stock fallback replies are tagged and kept out of the model's context and recent replies", async () => {
+  const { sessionMessages } = await import("../lib/sessions");
+  const state = { messages: [
+    { role: "user", content: "hi", at: 1, sessionId: "s1" },
+    { role: "assistant", content: "I'm here. I'm having trouble forming a proper reply at the moment.", at: 2, sessionId: "s1", fallback: true },
+    { role: "user", content: "ok", at: 3, sessionId: "s1" },
+    { role: "assistant", content: "Rough day, then. What happened?", at: 4, sessionId: "s1" },
+  ], currentSessionId: "s1" } as unknown as Parameters<typeof sessionMessages>[0];
+  const context = sessionMessages(state).filter((m) => !m.fallback).map((m) => m.content);
+  assert.deepEqual(context, ["hi", "ok", "Rough day, then. What happened?"]);
+  const recent = state.messages.filter((m) => m.role === "assistant" && !m.fallback).map((m) => m.content);
+  assert.deepEqual(recent, ["Rough day, then. What happened?"]);
+});

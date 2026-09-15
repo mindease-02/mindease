@@ -32,7 +32,7 @@ import type { ChatSession } from "@/lib/store/types";
 import { greetingFor, languageMeta, moodText, scriptOf, t, uiLang } from "@/lib/i18n";
 import { tx } from "@/lib/i18n/tx";
 
-interface Msg { role: "user" | "assistant"; content: string; at: number; proactive?: boolean; kind?: string; pending?: boolean; caption?: Caption; brought?: MemoryLite[]; proposed?: MemoryLite[]; insight?: string }
+interface Msg { role: "user" | "assistant"; content: string; at: number; proactive?: boolean; kind?: string; pending?: boolean; caption?: Caption; brought?: MemoryLite[]; proposed?: MemoryLite[]; insight?: string; fallback?: boolean }
 type CrisisMode = "show" | "confirm" | "open";
 type VoiceStatus = "idle" | "listening" | "thinking" | "speaking";
 
@@ -249,7 +249,7 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
       setCrisis({ helplines: helplinesFor(region, langRef.current), emergency: emergencyFor(region), mode: "show" });
     }
     try {
-      const clientContext = messages.slice(-10).map((m) => ({ role: m.role, content: m.content }));
+      const clientContext = messages.filter((m) => !m.fallback).slice(-10).map((m) => ({ role: m.role, content: m.content }));
       const r = await fetch("/api/chat", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, timeZone: tz.current, prosody: prosody ?? voiceNote ?? undefined, typing: typingFeatures, face: faceFeatures, clientContext }),
@@ -259,7 +259,7 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
       if (!r.ok) throw new Error(j.error ?? "something went wrong");
       // Session-only: the caption and the memory cards come from this turn's result and are never re-fetched.
       const caption: Caption = { axes: j.analysis.axes, confidence: j.confidence, states: j.analysis.states.slice(0, 3).map((s) => s.name), need: j.analysis.need, why: j.analysis.why, source: j.analysis.source, used: j.memoriesUsed ?? [], raised: !!j.riskRaised };
-      setMessages((m) => m.map((x) => x.pending ? { role: "assistant", content: j.reply, at: j.at, caption, brought: j.broughtUp ?? [], proposed: [...(j.proposedMemories ?? []), ...(j.newMemories ?? []).map((n) => ({ ...n, kept: true }))], insight: j.insight?.kind } : x));
+      setMessages((m) => m.map((x) => x.pending ? { role: "assistant", content: j.reply, at: j.at, caption, fallback: j.fallback, brought: j.broughtUp ?? [], proposed: [...(j.proposedMemories ?? []), ...(j.newMemories ?? []).map((n) => ({ ...n, kept: true }))], insight: j.insight?.kind } : x));
       setPulse((p) => p + 1); buzz(12);
       typing.onPromptShown();
       if (j.helplines && j.crisis === "show") setCrisis({ helplines: j.helplines, emergency: j.emergency, mode: "show" });
