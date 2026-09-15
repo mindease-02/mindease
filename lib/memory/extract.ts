@@ -12,8 +12,8 @@ const SYSTEM = `You extract durable memories for a companion app from ONE messag
 
 Rules:
 - At most 3. Often 0. Only things worth remembering in a week: named people and the relationship, events with a time, preferences, ongoing struggles, goals, stories from their past (kind "past", with "era" like "childhood", "university", "last year" when stated), and routines / lifestyle (kind "routine": sleep and wake times, work or study hours, exercise, meals, commute, substances, how weekends usually go).
-- Write each as one plain third-person sentence about the person ("Their brother Sam calls every Sunday").
-- Refer to the person only as "they/them/their". Never guess their gender from a name or anything else; never write he, she, his, her, him for the person.
+- Write each as a short note the person could read back about themselves, with no subject pronoun: "Brother Sam calls every Sunday", "Wants the promotion, scared of the interview", "Usually up past midnight on work nights". Never start with "They" or "The user".
+- If a pronoun for the person is unavoidable use "they/them/their". Never guess their gender from a name or anything else; never write he, she, his, her, him for the person.
 - Never store passing moods ("feels tired today") - those are tracked elsewhere. Never store anything about self-harm methods.
 - importance: 0.9 for bereavements, diagnoses, relationships, big life changes; 0.5 for routines and preferences; 0.3 for small details.`;
 

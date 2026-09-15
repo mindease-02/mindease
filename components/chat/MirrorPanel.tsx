@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { UserView } from "@/lib/pipeline/userView";
 import AxisWheel from "./AxisWheel";
 import Sparkline from "./Sparkline";
@@ -38,6 +38,12 @@ function Section({ title, children, hint }: { title: string; hint?: string; chil
  * a thing a person needs in front of them while talking.
  */
 export default function MirrorPanel({ mirror, onClose, onSettings, onLogout, busy, push, lang = "en" }: Props) {
+  // Escape closes the panel, like any other sheet.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
   const [tab, setTab] = useState<"you" | "memory">("you");
   if (!mirror) return null;
   const m = mirror;

@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 import type { ChatSession } from "@/lib/store/types";
 import { t } from "@/lib/i18n";
 import { PxRemove, PxBin, PxMessage } from "../home/pixelIcons";
@@ -26,6 +27,13 @@ function when(at: number, lang: string): string {
 
 /** Recent chats. Slides in from the left; the current one is marked. */
 export default function ChatDrawer({ open, lang, sessions, currentId, onClose, onNew, onPick, onDelete }: Props) {
+  // Escape closes the drawer, like any other sheet.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
   return (
     <>
       <div className={`drawer-scrim ${open ? "on" : ""}`} onClick={onClose} aria-hidden />

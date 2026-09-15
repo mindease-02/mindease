@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LANGUAGES, t } from "@/lib/i18n";
+import { LANGUAGES, t, countLabel } from "@/lib/i18n";
 import { PxArrow, PxDownload, PxBin, PxCheck } from "../home/pixelIcons";
 import type { WeeklyReflection } from "@/lib/reflection";
 import WeekCard from "../reflection/WeekCard";
@@ -68,7 +68,7 @@ export default function ProfileClient(p: Props) {
       </div>
 
       <div className="pstats">
-        {[[p.stats.days, t("daysTalking", lang)], [p.stats.memories, t("memoriesKept", lang)], [p.stats.sessions, t("chats", lang)]].map(([n, l]) => (
+        {[[p.stats.days, countLabel(p.stats.days, t("daysTalking", lang), lang)], [p.stats.memories, countLabel(p.stats.memories, t("memoriesKept", lang), lang)], [p.stats.sessions, countLabel(p.stats.sessions, t("chats", lang), lang)]].map(([n, l]) => (
           <div key={String(l)} className="pstat"><b>{n}</b><span>{l}</span></div>
         ))}
       </div>

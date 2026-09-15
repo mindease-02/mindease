@@ -170,6 +170,7 @@ export default function ChatApp({ name, email, initialLanguage, initialUi }: { n
   }
 
   async function send(textOverride?: string, prosody?: ProsodyFeatures): Promise<boolean> {
+    setOffer(null); // a new message answers or moves past the offer; it must not linger under the typing dots
     const text = (textOverride ?? input).trim();
     if (!text || sending) return false;
     const typingFeatures = typing.finish(text.length);

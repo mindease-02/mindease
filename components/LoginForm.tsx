@@ -54,7 +54,7 @@ export default function LoginForm({ lang = "en" }: { lang?: string }) {
 
   return (
     <form onSubmit={submit} className="glass w-full" style={{ maxWidth: 520, padding: 32 }} aria-labelledby="login-title">
-      <div className="steps-ind" aria-label={t("step1", lang)}><i className="on" /><i /><span>{t("step1", lang)}</span></div>
+      {(mode === "signup" || !ACCOUNTS) && <div className="steps-ind" aria-label={t("step1", lang)}><i className="on" /><i /><span>{t("step1", lang)}</span></div>}
       <h1 id="login-title" className="display" style={{ fontSize: "clamp(2rem, 4vw, 2.8rem)", margin: "12px 0 18px" }}>{title}</h1>
 
       {!ACCOUNTS ? (

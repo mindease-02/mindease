@@ -74,6 +74,15 @@ export function t(key: string, lang: string | undefined, vars: Record<string, st
   for (const [k, v] of Object.entries(vars)) s = s.split(`{${k}}`).join(v);
   return s;
 }
+/** "1 days" reads wrong in English; the other languages' labels do not change with the count. */
+const SINGULAR: Record<string, string> = { days: "day", memories: "memory", chats: "chat", mentions: "mention", conversations: "conversation", times: "time", tools: "tool", screenings: "screening" };
+export function countLabel(n: number, label: string, lang: string | undefined): string {
+  if (uiLang(lang) !== "en" || n !== 1) return label;
+  const [first, ...rest] = label.split(" ");
+  const one = SINGULAR[first.toLowerCase()];
+  return one ? [first === first.toUpperCase() && first.length > 1 ? one.toUpperCase() : first[0] === first[0].toUpperCase() ? one[0].toUpperCase() + one.slice(1) : one, ...rest].join(" ") : label;
+}
+
 /** The ticker line, split into items. */
 export function tickerItems(lang: string | undefined): string[] { return t("ticker", lang).split("|"); }
 
@@ -196,6 +205,8 @@ export function greetingFor(name: string, arrival: { label: string; note?: strin
   };
   const g = G[ui] ?? G.en!;
   if (!arrival) return g.base;
+  // No tile, only their own words: quote the words, not the placeholder label.
+  if (arrival.label === "In their own words") return arrival.note ? g.other.replace("{label}", arrival.note) : g.base;
   const line = g.by[arrival.label] ?? g.other.replace("{label}", arrival.label);
   return arrival.note ? line + g.note.replace("{note}", arrival.note) : line;
 }

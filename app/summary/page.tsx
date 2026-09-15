@@ -60,7 +60,7 @@ export default async function SummaryPage() {
         {life.sufficient && <><h2 className="display sheet-h">{t("sumRhythm", lang)}</h2><ul className="sheet-list">{life.lines.map((l) => <li key={l}>{l}</li>)}</ul></>}
 
         <h2 className="display sheet-h">{t("sumWhere", lang)}</h2>
-        <ul className="sheet-list">{helplinesFor(state.region).map((h) => <li key={h.name}><b>{h.name}</b> — {h.contact}{h.note ? ` (${h.note})` : ""}</li>)}</ul>
+        <ul className="sheet-list sheet-lines">{helplinesFor(state.region).map((h) => <li key={h.name}><b>{h.name}</b> — {h.contact}{h.note ? ` (${h.note})` : ""}</li>)}</ul>
         <p className="muted" style={{ marginTop: 24, fontSize: ".8rem" }}>MindEase is software, not a clinician. Screening instruments: PHQ-9 and GAD-7 (Pfizer, free for use), ISI (items paraphrased). Scores are self-reported answers; patterns are estimates from language and timing and can be wrong.</p>
       </main>
     </div>
