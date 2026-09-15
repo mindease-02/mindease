@@ -21,18 +21,47 @@ import { moodText } from "@/lib/i18n";
  * tap or a pointer move, then rests.
  */
 /** Surface dials per mood, 0..1 unless noted. Lerped, so a change of mood is a change of skin, not a cut. */
-type Skin = { spike: number; rough: number; droop: number; crack: number; tremble: number; spark: number; shimmer: number; ghost: number; pale: number; roughness: number; clearcoat: number; emissive: number; halo: number; spin: number; pulse: number };
-const BASE: Skin = { spike: 0, rough: 0, droop: 0, crack: 0, tremble: 0, spark: 0, shimmer: 0, ghost: 0, pale: 0, roughness: 0.25, clearcoat: 1, emissive: 0.18, halo: 0.12, spin: 0.15, pulse: 1.3 };
+type Skin = { spike: number; rough: number; droop: number; crack: number; tremble: number; spark: number; shimmer: number; ghost: number; pale: number; roughness: number; clearcoat: number; emissive: number; spin: number; pulse: number;
+  /** The halo: how bright, how wide, and what it does: flare in rays, flicker, sag, thin to a far ring, throw sparks. */
+  halo: number; haloSpread: number; haloRays: number; haloFlicker: number; haloDroop: number; haloRing: number; haloSparks: number };
+const BASE: Skin = { spike: 0, rough: 0, droop: 0, crack: 0, tremble: 0, spark: 0, shimmer: 0, ghost: 0, pale: 0, roughness: 0.25, clearcoat: 1, emissive: 0.18, spin: 0.15, pulse: 1.3, halo: 0.55, haloSpread: 1, haloRays: 0, haloFlicker: 0, haloDroop: 0, haloRing: 0, haloSparks: 0 };
 const SKINS: Record<string, Partial<Skin>> = {
   okay: { shimmer: 0.15 },
-  hopeful: { shimmer: 1, spark: 0.35, emissive: 0.34, roughness: 0.18, halo: 0.2, spin: 0.25 },
-  heavy: { droop: 1, crack: 0.7, roughness: 0.06, emissive: 0.06, halo: 0.06, spin: 0.05, pulse: 0.6 },
-  lonely: { ghost: 1, roughness: 0.5, emissive: 0.04, halo: 0.05, spin: 0.08 },
-  anxious: { rough: 0.8, tremble: 1, crack: 0.45, pale: 0.55, roughness: 0.7, emissive: 0.1, halo: 0.08, spin: 0.3, pulse: 3 },
-  angry: { spike: 1, roughness: 0.4, emissive: 0.5, halo: 0.22, spin: 0.35, pulse: 2.2 },
-  restless: { spark: 1, shimmer: 0.4, emissive: 0.42, roughness: 0.3, halo: 0.18, spin: 0.7, pulse: 3.5 },
-  numb: { rough: 0.35, pale: 0.85, roughness: 0.95, clearcoat: 0, emissive: 0, halo: 0, spin: 0.03, pulse: 0.4 },
+  hopeful: { shimmer: 1, spark: 0.35, emissive: 0.34, roughness: 0.18, spin: 0.25, halo: 0.85, haloSpread: 1.12 },
+  heavy: { droop: 1, crack: 0.7, roughness: 0.06, emissive: 0.06, spin: 0.05, pulse: 0.6, halo: 0.5, haloSpread: 1.0, haloDroop: 1 },
+  lonely: { ghost: 1, roughness: 0.5, emissive: 0.04, spin: 0.08, halo: 0.45, haloSpread: 1.1, haloRing: 1 },
+  anxious: { rough: 0.8, tremble: 1, crack: 0.45, pale: 0.55, roughness: 0.7, emissive: 0.1, spin: 0.3, pulse: 3, halo: 0.6, haloFlicker: 1 },
+  angry: { spike: 1, roughness: 0.4, emissive: 0.5, spin: 0.35, pulse: 2.2, halo: 1.0, haloSpread: 1.12, haloRays: 1 },
+  restless: { spark: 1, shimmer: 0.4, emissive: 0.42, roughness: 0.3, spin: 0.7, pulse: 3.5, halo: 0.9, haloSpread: 1.15, haloFlicker: 0.5, haloSparks: 1 },
+  numb: { rough: 0.35, pale: 0.85, roughness: 0.95, clearcoat: 0, emissive: 0, spin: 0.03, pulse: 0.4, halo: 0.12, haloSpread: 0.85 },
 };
+
+/** The halo: a camera-facing plane behind the ball, drawn as a radial glow with the mood's dials. */
+const HALO_VERT = `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
+const HALO_FRAG = `
+uniform vec3 uColor, uColor2; uniform float uTime, uI, uSpread, uRays, uFlicker, uDroop, uRing, uSparks, uPulse;
+varying vec2 vUv;
+float h2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float n2(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(h2(i), h2(i + vec2(1, 0)), f.x), mix(h2(i + vec2(0, 1)), h2(i + vec2(1, 1)), f.x), f.y); }
+void main() {
+  vec2 c = (vUv - 0.5) * 2.0;
+  // heavy: the glow hangs below the ball
+  c.y = c.y > 0.0 ? c.y * (1.0 + 0.45 * uDroop) : c.y * (1.0 - 0.28 * uDroop);
+  float d = length(c) / uSpread;
+  float ang = atan(c.y, c.x);
+  float breath = 1.0 + 0.06 * sin(uTime * uPulse);
+  float rays = 1.0 + uRays * 1.1 * pow(abs(sin(ang * 7.0 + uTime * 1.1)), 14.0) * smoothstep(0.45, 0.9, d);
+  float flick = 1.0 - uFlicker * 0.55 * n2(vec2(uTime * 11.0, ang * 1.5));
+  float glow = pow(max(0.0, 1.0 - d / (breath * rays)), 1.25) * 1.7;
+  float ring = uRing * smoothstep(0.06, 0.0, abs(d - 0.74)) * 1.4 * (0.7 + 0.3 * sin(uTime * 0.8 + ang * 2.0));
+  float sp = n2(vec2(ang * 24.0, d * 10.0 - uTime * 1.5));
+  float sparks = uSparks * smoothstep(0.9, 1.0, sp) * 2.0 * smoothstep(0.55, 0.75, d) * smoothstep(1.1, 0.95, d);
+  // Fade before the plane's edge so nothing is ever cut square.
+  float edge = smoothstep(1.0, 0.72, length(c));
+  float a = clamp((glow * flick + ring + sparks) * uI * edge, 0.0, 1.0);
+  vec3 col = mix(uColor, uColor2, smoothstep(0.3, 1.0, d));
+  gl_FragColor = vec4(col * a, a);
+}`;
 const skinFor = (id: string): Skin => ({ ...BASE, ...(SKINS[id] ?? {}) });
 
 const NOISE = `
@@ -95,7 +124,7 @@ export default function MoodOrb({ lang }: { lang: string }) {
     const size = () => Math.min(el.clientWidth, 340);
     renderer.setSize(size(), size()); el.appendChild(renderer.domElement);
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 20); camera.position.set(0, 0, 6);
+    const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 20); camera.position.set(0, 0, 7.3);
 
     const mat = new THREE.MeshPhysicalMaterial({ color: target.current.accent, roughness: 0.25, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.15, sheen: 0.6, sheenColor: target.current.accent2, emissive: target.current.accent, emissiveIntensity: 0.18, transparent: true });
     // The mood dials, as uniforms spliced into the standard material so lighting stays right.
@@ -109,7 +138,9 @@ export default function MoodOrb({ lang }: { lang: string }) {
     const live: Skin = { ...skinFor(currentPalette().id) };
     const seg = phone ? 64 : 96;
     const ball = new THREE.Mesh(new THREE.SphereGeometry(1.15, seg, seg), mat); scene.add(ball);
-    const halo = new THREE.Mesh(new THREE.SphereGeometry(1.42, seg / 2, seg / 2), new THREE.MeshBasicMaterial({ color: target.current.accent2, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, side: THREE.BackSide, depthWrite: false })); scene.add(halo);
+    const H = { uColor: { value: target.current.accent2.clone() }, uColor2: { value: target.current.cool.clone() }, uTime: { value: 0 }, uI: { value: 0.45 }, uSpread: { value: 1 }, uRays: { value: 0 }, uFlicker: { value: 0 }, uDroop: { value: 0 }, uRing: { value: 0 }, uSparks: { value: 0 }, uPulse: { value: 1.3 } };
+    const haloMat = new THREE.ShaderMaterial({ vertexShader: HALO_VERT, fragmentShader: HALO_FRAG, uniforms: H, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending });
+    const halo = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 4.2), haloMat); halo.position.z = -0.4; halo.renderOrder = -1; scene.add(halo);
     const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(3, 4, 5); scene.add(key);
     const rim = new THREE.DirectionalLight(target.current.cool, 1.6); rim.position.set(-4, -2, -3); scene.add(rim);
     scene.add(new THREE.HemisphereLight(0xffffff, 0x101018, 0.9));
@@ -138,21 +169,22 @@ export default function MoodOrb({ lang }: { lang: string }) {
       govern(dt);
       const t = target.current, want = skin.current;
       (mat.color as THREE.Color).lerp(t.accent, dt * 4); (mat.emissive as THREE.Color).lerp(t.accent, dt * 4); (mat.sheenColor as THREE.Color).lerp(t.accent2, dt * 4);
-      (halo.material as THREE.MeshBasicMaterial).color.lerp(t.accent2, dt * 4); rim.color.lerp(t.cool, dt * 4);
+      (H.uColor.value as THREE.Color).lerp(t.accent2, dt * 4); (H.uColor2.value as THREE.Color).lerp(t.cool, dt * 4); rim.color.lerp(t.cool, dt * 4);
       // The skin follows the mood: every dial eases toward its target.
       const k = Math.min(1, dt * 3.2);
       for (const key of Object.keys(live) as (keyof Skin)[]) live[key] += (want[key] - live[key]) * k;
       U.uSpike.value = live.spike; U.uRough.value = live.rough; U.uDroop.value = live.droop; U.uTremble.value = live.tremble; U.uCrack.value = live.crack;
       U.uSpark.value = live.spark; U.uShimmer.value = live.shimmer; U.uGhost.value = live.ghost; U.uPale.value = live.pale;
       mat.roughness = live.roughness; mat.clearcoat = live.clearcoat; mat.emissiveIntensity = live.emissive;
-      (halo.material as THREE.MeshBasicMaterial).opacity = live.halo;
+      H.uI.value = live.halo; H.uSpread.value = live.haloSpread; H.uRays.value = live.haloRays; H.uFlicker.value = live.haloFlicker; H.uDroop.value = live.haloDroop; H.uRing.value = live.haloRing; H.uSparks.value = live.haloSparks; H.uPulse.value = live.pulse;
       tx += (px - tx) * dt * 5; ty += (py - ty) * dt * 5;
       const s = reduced ? 0 : now / 1000;
-      U.uTime.value = s;
+      U.uTime.value = s; H.uTime.value = s;
       const jitter = reduced ? 0 : live.tremble * 0.02;
       ball.position.set((Math.random() - 0.5) * jitter, Math.sin(s * 0.9) * 0.08 * (1 - live.droop * 0.7) - live.droop * 0.12 + (Math.random() - 0.5) * jitter, 0);
       ball.rotation.set(ty * 0.6, tx * 0.8 + s * live.spin, 0);
-      pulse = Math.max(0, pulse - dt * 1.6); const sc = 1 + Math.sin(pulse * Math.PI) * 0.12 + Math.sin(s * live.pulse) * 0.012 * live.pulse; ball.scale.setScalar(sc); halo.scale.setScalar(sc * (1 + Math.sin(s * 1.3) * 0.03));
+      pulse = Math.max(0, pulse - dt * 1.6); const sc = 1 + Math.sin(pulse * Math.PI) * 0.12 + Math.sin(s * live.pulse) * 0.012 * live.pulse; ball.scale.setScalar(sc); halo.scale.setScalar(sc);
+      halo.position.set(ball.position.x, ball.position.y, -0.4);
       renderer.render(scene, camera);
       if (rest && now > awakeUntil) { running = false; return; }
       raf = requestAnimationFrame(tick);
@@ -160,7 +192,7 @@ export default function MoodOrb({ lang }: { lang: string }) {
     raf = requestAnimationFrame(tick);
     const onResize = () => { renderer.setSize(size(), size()); };
     window.addEventListener("resize", onResize);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", onResize); el.removeEventListener("pointermove", onMove); el.removeEventListener("pointerleave", onLeave); el.removeEventListener("me:orb-pulse", onPulse); ball.geometry.dispose(); mat.dispose(); renderer.dispose(); el.removeChild(renderer.domElement); };
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", onResize); el.removeEventListener("pointermove", onMove); el.removeEventListener("pointerleave", onLeave); el.removeEventListener("me:orb-pulse", onPulse); ball.geometry.dispose(); mat.dispose(); halo.geometry.dispose(); haloMat.dispose(); renderer.dispose(); el.removeChild(renderer.domElement); };
   }, []);
 
   const pick = (x: Palette, el?: HTMLElement) => {
